@@ -41,6 +41,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
@@ -97,14 +98,8 @@ fun HomeScreen() {
         Spacer(modifier = Modifier.size(32.dp))
 
         StatisticsSection()
-
     }
-
-
-
-
 }
-
 
 @Composable
 fun SubjectSection(subjects: List<Subject>) {
@@ -119,14 +114,14 @@ fun SubjectSection(subjects: List<Subject>) {
     ) {
         Text(
             "Deine Fächer",
-            fontWeight = FontWeight.Bold,
-            fontSize = 22.sp,
+            style = Typography.titleMedium
         )
 
         Text(
             text = "mehr anzeigen",
             modifier = Modifier
-                .clickable {  }
+                .clickable {  },
+            style = Typography.titleSmall
         )
     }
 
@@ -137,36 +132,44 @@ fun SubjectSection(subjects: List<Subject>) {
         contentPadding = PaddingValues(8.dp)
     ) {
         itemsIndexed(subjects) { index, subject ->
-            SubjectCard(subject = subject)
+            SubjectCard(subject = subject, 250.dp)
+            Spacer(modifier = Modifier.width(16.dp))
         }
     }
 }
 
 @Composable
-fun SubjectCard(subject: Subject) {
+fun SubjectCard(subject: Subject, width: Dp) {
 
     Card(
         modifier = Modifier
-            .width(250.dp)
-            .padding(end = 16.dp),
+            .then(
+                if (width == 0.dp) {
+                    Modifier.fillMaxWidth()
+                } else {
+                    Modifier.width(width)
+                }
+            ),
 
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFeaf2ff)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondary),
 
     ) {
         AsyncImage(
             model = subject.subjectImageAddress ,
             contentDescription = "Subject Image",
             modifier = Modifier
-                .width(250.dp)
+                .fillMaxWidth()
                 .height(150.dp)
                 .padding(bottom = 8.dp),
             contentScale = ContentScale.FillBounds
         )
 
+        Spacer(modifier = Modifier.size(4.dp))
+
         Text(
             text = subject.subjectName,
-            fontWeight = FontWeight.Bold,
-            fontSize = 14.sp,
+            style = Typography.bodyMedium,
+            color = Color.Black,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .padding(start = 4.dp)
@@ -182,10 +185,10 @@ fun SubjectCard(subject: Subject) {
                 .height(48.dp)
                 .padding(8.dp),
 
-            border = BorderStroke(1.dp, color = Color(0xFF007aff)),
+            border = BorderStroke(1.dp, color = MaterialTheme.colorScheme.tertiary),
             shape = RoundedCornerShape(8.dp)
         ) {
-            Text(text = "Fortschritt", color = Color(0xFF007aff))
+            Text(text = "Fortschritt", style= Typography.bodyMedium, color = MaterialTheme.colorScheme.tertiary)
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -203,15 +206,15 @@ fun StatisticsSection() {
     ) {
         Text(
             "Deine Statistiken",
-            fontWeight = FontWeight.Bold,
-            fontSize = 22.sp,
+            style = Typography.titleMedium
 
         )
 
         Text(
             text = "mehr anzeigen",
             modifier = Modifier
-                .clickable {  }
+                .clickable {  },
+            style = Typography.titleSmall
         )
     }
 }
