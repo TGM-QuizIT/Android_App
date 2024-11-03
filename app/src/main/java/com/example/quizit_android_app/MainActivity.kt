@@ -18,7 +18,7 @@ import com.example.quizit_android_app.ui.theme.QuizIT_Android_AppTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        //enableEdgeToEdge()
         setContent {
             QuizIT_Android_AppTheme {
                 MainScreen()

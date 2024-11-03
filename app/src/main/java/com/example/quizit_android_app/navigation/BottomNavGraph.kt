@@ -7,8 +7,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.quizit_android_app.ui.friends.FriendsScreen
 import com.example.quizit_android_app.ui.home.HomeScreen
-import com.example.quizit_android_app.ui.quiz.QuizScreen
+import com.example.quizit_android_app.ui.quiz.SubjectScreen
 import com.example.quizit_android_app.ui.settings.SettingsScreen
+
+
 
 @Composable
 fun BottomNavGraph(navController: NavHostController) {
@@ -20,7 +22,7 @@ fun BottomNavGraph(navController: NavHostController) {
         }
 
         composable(route = BottomBarScreen.Quiz.route) {
-            QuizScreen()
+            SubjectScreen()
         }
 
         composable(route = BottomBarScreen.Friends.route) {
@@ -30,6 +32,5 @@ fun BottomNavGraph(navController: NavHostController) {
         composable(route = BottomBarScreen.Settings.route) {
             SettingsScreen()
         }
-
     }
 }
