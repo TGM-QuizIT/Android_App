@@ -1,4 +1,4 @@
-package com.example.quizit_android_app.ui.quiz
+package com.example.quizit_android_app.ui.play_quiz.focus
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
