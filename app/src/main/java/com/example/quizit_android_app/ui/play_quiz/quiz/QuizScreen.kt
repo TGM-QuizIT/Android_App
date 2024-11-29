@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -65,6 +66,7 @@ fun QuizScreen(
 
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0.dp),
         topBar = {
             if (currentQuestionIndex < questions.size) {
                 QuizTopBar(currentQuestionIndex + 1, questions.size, focus, onClick = {
@@ -99,11 +101,12 @@ fun QuizScreen(
 
 @Composable
 fun QuizTopBar(currentQuestion: Int, totalQuestions: Int, focus: String, onClick: () -> Unit) {
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
-            .padding(top = 32.dp)
+            .padding(top = 16.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -304,13 +307,14 @@ fun OptionItem(
 fun QuizResult(focus: String,score: Float, results: List<ResultItem>, onCloseResult: () -> Unit) {
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0.dp),
         topBar = {
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
-                    .padding(top = 32.dp)
+                    .padding(top = 16.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
