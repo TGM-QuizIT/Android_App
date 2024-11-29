@@ -17,6 +17,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -27,36 +30,46 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.quizit_android_app.ui.theme.Typography
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun QuizScreen() {
-    val quizViewModel: QuizViewModel = viewModel()
+fun QuizScreen(
+    focusId: Int,
+    navigateBack: () -> Unit,
+    quizViewModel: QuizViewModel = hiltViewModel()
+) {
 
     val currentQuestionIndex = quizViewModel.currentQuestionIndex.value
     val selectedAnswers = quizViewModel.selectedAnswers.value
     val questions = quizViewModel.questions.value
     val focus = quizViewModel.focus.value
-    val showSelectionError = quizViewModel.showSelectionError.value
+
 
     Scaffold(
         topBar = {
             if (currentQuestionIndex < questions.size) {
-                QuizTopBar(currentQuestionIndex + 1, questions.size, focus)
+                QuizTopBar(currentQuestionIndex + 1, questions.size, focus, onClick = {
+                    navigateBack()
+                })
             }
         },
         content = { paddingValues ->
@@ -68,12 +81,14 @@ fun QuizScreen() {
                         quizViewModel.toggleAnswer(optionId)
                     },
                     onNext = { quizViewModel.nextQuestion() },
-                    showError = showSelectionError,
                     modifier = Modifier.padding(paddingValues)
                 )
             } else {
-                val score = quizViewModel.calculateScore()
-                //QuizResult(score = score, totalQuestions = questions.size, onRestart = { quizViewModel.nextQuestion()  } )
+
+
+                val userScore = quizViewModel.calculateScore()
+                val userResults = quizViewModel.getResult()
+                QuizResult(focus = focus,score = userScore, results = userResults, onCloseResult = { navigateBack()  } )
             }
         }
     )
@@ -83,7 +98,7 @@ fun QuizScreen() {
 }
 
 @Composable
-fun QuizTopBar(currentQuestion: Int, totalQuestions: Int, focus: String) {
+fun QuizTopBar(currentQuestion: Int, totalQuestions: Int, focus: String, onClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -114,7 +129,7 @@ fun QuizTopBar(currentQuestion: Int, totalQuestions: Int, focus: String) {
             }
 
             Button(
-                onClick = {  },
+                onClick = { onClick() },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                 shape = CircleShape,
                 contentPadding = PaddingValues(0.dp),
@@ -155,7 +170,6 @@ fun QuizQuestion(
     selectedAnswers: List<Int>,
     onSelected: (Int) -> Unit,
     onNext: () -> Unit,
-    showError: Boolean,
     modifier: Modifier
 ) {
     Column(
@@ -209,16 +223,6 @@ fun QuizQuestion(
             modifier = Modifier
                 .align(Alignment.End)
         ) {
-            if (showError) {
-                Text(
-                    text = "Bitte wählen Sie mindestens eine Antwort aus.",
-                    color = MaterialTheme.colorScheme.error,
-                    style = Typography.bodySmall,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-            } else {
-                Spacer(modifier = Modifier.height(32.dp))
-            }
 
             Button(
                 onClick = onNext,
@@ -297,39 +301,245 @@ fun OptionItem(
 }
 
 @Composable
-fun QuizResult(score: Int, totalQuestions: Int, onRestart: () -> Unit) {
+fun QuizResult(focus: String,score: Float, results: List<ResultItem>, onCloseResult: () -> Unit) {
+
+    Scaffold(
+        topBar = {
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .padding(top = 32.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Spacer(modifier = Modifier.size(32.dp))
+
+                    Box(
+
+                    ) {
+                        Text(
+                            text = focus,
+                            style = Typography.titleMedium,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+
+                    Button(
+                        onClick = {
+                            onCloseResult()
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                        shape = CircleShape,
+                        contentPadding = PaddingValues(0.dp),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
+                        modifier = Modifier
+                            .size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close",
+
+                            modifier = Modifier
+                                .size(16.dp),
+                            tint = Color.Black
+                        )
+
+                    }
+
+
+                }
+            }
+        },
+        content = { paddingValues ->
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+                    .padding(paddingValues),
+            ) {
+                val correctAnswers = results.count { it.isCorrect }
+                val incorrectAnswers = results.count { !it.isCorrect }
+                val percentage = (score * 100).toInt()
+
+                Text(
+                    modifier = Modifier.padding(start=16.dp),
+                    text = "Dein Resultat",
+                    style = MaterialTheme.typography.titleMedium,
+                )
+
+                Spacer(modifier = Modifier.size(12.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Spacer(modifier = Modifier.size(40.dp))
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(100.dp)
+                        //.padding(8.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            progress = { score },
+                            modifier = Modifier.fillMaxSize(),
+                            color = Color(0xFF006FFD),
+                            strokeWidth = 13.dp,
+                            trackColor = Color.LightGray,
+
+                            )
+                        Text(
+                            text = "$percentage%",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = Color.Black
+                        )
+                    }
+
+
+                    Spacer(modifier = Modifier.size(32.dp))
+
+                    // Buttons
+                    Column {
+                        Button(
+                            onClick = { /* Freund herausfordern */ },
+                            colors = ButtonDefaults.buttonColors(
+                                MaterialTheme.colorScheme.secondary
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp),
+
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(text = "Freund herausfordern", color = Color.Black, style= MaterialTheme.typography.titleSmall)
+                        }
+
+                        Spacer(modifier = Modifier.size(8.dp))
+
+
+                        Button(
+                            onClick = { /* Historie anzeigen */ },
+                            colors = ButtonDefaults.buttonColors(
+                                MaterialTheme.colorScheme.secondary
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp),
+
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(text = "Historie", color = Color.Black, style = MaterialTheme.typography.titleSmall)
+                        }
+                    }
+
+                }
+
+                Spacer(modifier = Modifier.size(16.dp))
+
+                LazyColumn {
+                    itemsIndexed(results) { index,result ->
+                        ResultCard(result = result, questionIndex=index)
+                    }
+                }
+
+
+
+            }
+
+
+        }
+    )
+
+}
+
+@Composable
+fun ResultCard(result: ResultItem, questionIndex: Int) {
+
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .fillMaxWidth()
+            .padding(8.dp)
+            .border(1.5.dp, Color.Gray, shape = RoundedCornerShape(10.dp))
+            .background(Color.White)
+            .padding(16.dp)
     ) {
-        Text(
-            text = "Glückwunsch!",
-            style = Typography.titleLarge,
-            color = MaterialTheme.colorScheme.primary
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "Du hast $score von $totalQuestions Fragen richtig beantwortet.",
-            style = Typography.bodyLarge,
-            color = Color.Gray
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = onRestart,
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            shape = RoundedCornerShape(8.dp)
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = "Nochmal versuchen",
-                style = Typography.bodyMedium,
-                color = Color.White
+                modifier = Modifier.weight(1f),
+                text = result.question.questionText,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold
             )
+
+            Text(
+                text = "#${questionIndex + 1}",
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold,
+
+                )
+
+        }
+                    
+
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        result.question.options.forEach { option ->
+            var backgroundColor = Color.White
+            var icon: ImageVector? = null
+
+            // Bedingungen prüfen und Werte entsprechend setzen
+            if (option.optionId in result.userAnswer && option.optionCorrect) {
+                backgroundColor = Color(0xFF6FFD89)
+                icon = Icons.Default.Check
+
+            } else if (option.optionId in result.userAnswer && !option.optionCorrect) {
+                backgroundColor = Color(0xFFFB6E5C)
+                icon = Icons.Default.Close
+
+            } else if (option.optionId !in result.userAnswer && option.optionCorrect) {
+                backgroundColor = Color(0xFFE1E1E1)
+                icon = Icons.Default.Check
+
+            }
+
+            // Option anzeigen
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+                    .background(backgroundColor, shape = RoundedCornerShape(8.dp))
+                    .padding(12.dp)
+            ) {
+                // Text der Option
+                Text(
+                    text = option.optionText,
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.weight(1f)
+                )
+
+                if (icon != null) {
+                    Icon(
+                        modifier = Modifier.size(20.dp),
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = Color.Black
+                    )
+                }
+            }
         }
     }
+
 }

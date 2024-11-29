@@ -1,17 +1,26 @@
 package com.example.quizit_android_app.ui.quiz
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class QuizViewModel: ViewModel() {
+@HiltViewModel
+class QuizViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle
+): ViewModel() {
     private val _currentQuestionIndex = mutableStateOf(0)
     val currentQuestionIndex: State<Int> = _currentQuestionIndex
 
     private val _selectedAnswers = mutableStateOf(listOf<Int>())
     val selectedAnswers: State<List<Int>> = _selectedAnswers
 
+    private val _userAnswers = mutableStateOf(mutableMapOf<Int, List<Int>>())
+    val userAnswers: State<Map<Int, List<Int>>> = _userAnswers
 
 
     private val _questions = mutableStateOf(listOf<Question>())
@@ -20,17 +29,17 @@ class QuizViewModel: ViewModel() {
     private val _focus = mutableStateOf("")
     val focus: State<String> = _focus
 
-    private val _showSelectionError = mutableStateOf(false)
-    val showSelectionError: State<Boolean> = _showSelectionError
+
 
 
     init {
-        setQuestions()
-        setFocusName(0)
+        val focusId: Int = savedStateHandle.get<String>("focusId")?.toIntOrNull() ?: 0
+        setQuestions(focusId)
+        setFocusName(focusId)
     }
 
 
-    private fun setQuestions() {
+    private fun setQuestions(id: Int) {
         _questions.value = listOf(
             Question(
                 questionId = 1,
@@ -92,7 +101,7 @@ class QuizViewModel: ViewModel() {
     }
 
     private fun setFocusName(id: Int) {
-        _focus.value = "2. Weltkrieg"
+        _focus.value = "2. Weltkrieg, ID: "+id
     }
 
     fun toggleAnswer(optionId: Int) {
@@ -103,13 +112,12 @@ class QuizViewModel: ViewModel() {
                  _selectedAnswers.value = _selectedAnswers.value - optionId
             } else {
                 _selectedAnswers.value = _selectedAnswers.value + optionId
-                 _showSelectionError.value = false
+
             }
         } else {
             _selectedAnswers.value = if (_selectedAnswers.value.contains(optionId)) {
                 emptyList()
             } else {
-                _showSelectionError.value = false
                 listOf(optionId)
             }
         }
@@ -117,27 +125,71 @@ class QuizViewModel: ViewModel() {
 
     fun nextQuestion() {
 
-        if(_selectedAnswers.value.isEmpty()) {
-            _showSelectionError.value = true
-        }
-        else {
-            _showSelectionError.value = false
-            _currentQuestionIndex.value += 1
-            _selectedAnswers.value = emptyList()
-        }
+        val currentQuestionId = questions.value[currentQuestionIndex.value].questionId
+        _userAnswers.value[currentQuestionId] = _selectedAnswers.value
+        _currentQuestionIndex.value += 1
+        _selectedAnswers.value = emptyList()
 
+        calculateScore()
     }
 
-    fun calculateScore(): Int {
-        var correctAnswers = 0
-        questions.value.forEachIndexed { index, question ->
-            val userAnswer = selectedAnswers.value.contains(question.options.find { it.optionCorrect }?.optionId)
-            if (userAnswer) {
-                correctAnswers++
+    fun calculateScore(): Float {
+        val totalQuestions = questions.value.size
+        if (totalQuestions == 0) return 0f
+
+
+        var score = 0f
+        val maxScore = questions.value.sumOf { it.options.size } * 0.25f
+        Log.d("", "Max Score: $maxScore")
+
+        questions.value.forEach { question ->
+            val userAnswer = userAnswers.value[question.questionId] ?: emptyList()
+
+            if (userAnswer.isEmpty()) {
+                return@forEach
+            }
+
+            question.options.forEach { option ->
+
+                Log.d("Score", "Score: $score")
+                if (option.optionCorrect) {
+                    score += if (userAnswer.contains(option.optionId)) {
+                        0.25f
+                    } else {
+                        -0.25f
+                    }
+                } else {
+                    score += if (userAnswer.contains(option.optionId)) {
+                        -0.25f
+                    } else {
+                        0.25f
+                    }
+                }
+
+
             }
         }
-        return correctAnswers
+
+
+        // Score als Prozentsatz (0 bis 1)
+        //return (score / maxScore).coerceIn(0f, 1f)
+        return score/totalQuestions;
     }
+
+
+    fun getResult(): List<ResultItem> {
+        return questions.value.map { question ->
+            val userAnswer = userAnswers.value[question.questionId] ?: emptyList()
+            val correctAnswers = question.options.filter { it.optionCorrect }.map { it.optionId }
+            ResultItem(
+                question = question,
+                userAnswer = userAnswer,
+                correctAnswers = correctAnswers,
+                isCorrect = userAnswer.containsAll(correctAnswers) && correctAnswers.containsAll(userAnswer)
+            )
+        }
+    }
+
 
 
 
@@ -155,3 +207,11 @@ data class Option(
     val optionText: String,
     val optionCorrect: Boolean
 )
+
+data class ResultItem(
+    val question: Question,
+    val userAnswer: List<Int>,
+    val correctAnswers: List<Int>,
+    val isCorrect: Boolean
+)
+

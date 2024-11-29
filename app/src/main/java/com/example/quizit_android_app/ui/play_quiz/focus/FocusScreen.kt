@@ -34,18 +34,31 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
-import com.example.quizit_android_app.ui.home.Subject
+import com.example.quizit_android_app.models.Focus
+import com.example.quizit_android_app.models.Subject
 import com.example.quizit_android_app.ui.theme.Typography
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FocusScreen() {
+fun FocusScreen(
+    subjectId: Int,
+    navigateToQuiz: (Int) -> Unit,
+    navigateBack: () -> Unit,
+    focusViewModel: FocusViewModel = hiltViewModel()
+) {
+
+    val focusList = focusViewModel.focusList
+    val subject = focusViewModel.subject
+
+
 
     Scaffold(
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = { navigateBack() }) {
                         Icon(
                             imageVector = Icons.Outlined.ArrowBackIosNew,
                             contentDescription = "Back"
@@ -63,7 +76,7 @@ fun FocusScreen() {
                                 style = Typography.titleLarge
                             )
                             Text(
-                                text = "GGP",
+                                text = subject!!.subjectName,
                                 style = Typography.titleLarge
                             )
                         }
@@ -87,22 +100,15 @@ fun FocusScreen() {
                     .padding(paddingValues)
                     .padding(horizontal = 16.dp, vertical = 16.dp)
             ) {
-
-                val subject = Subject("GGP", "https://thumbs.dreamstime.com/b/stellen-sie-von-den-geografiesymbolen-ein-ausr%C3%BCstungen-f%C3%BCr-netzfahnen-weinleseentwurfsskizze-kritzeln-art-ausbildung-136641038.jpg")
-
                 SubjectCard(subject = subject )
 
-                val focusList = listOf(
-                    Focus("2. Weltkrieg", 20,"https://thumbs.dreamstime.com/b/stellen-sie-von-den-geografiesymbolen-ein-ausr%C3%BCstungen-f%C3%BCr-netzfahnen-weinleseentwurfsskizze-kritzeln-art-ausbildung-136641038.jpg"),
-                    Focus("Mittelalter", 24,"https://thumbs.dreamstime.com/b/stellen-sie-von-den-geografiesymbolen-ein-ausr%C3%BCstungen-f%C3%BCr-netzfahnen-weinleseentwurfsskizze-kritzeln-art-ausbildung-136641038.jpg"  ),
-                    Focus("Zwischenkriegszeit", 30,"https://thumbs.dreamstime.com/b/stellen-sie-von-den-geografiesymbolen-ein-ausr%C3%BCstungen-f%C3%BCr-netzfahnen-weinleseentwurfsskizze-kritzeln-art-ausbildung-136641038.jpg"  ),
-                    Focus("Ideologien", 32,"https://thumbs.dreamstime.com/b/stellen-sie-von-den-geografiesymbolen-ein-ausr%C3%BCstungen-f%C3%BCr-netzfahnen-weinleseentwurfsskizze-kritzeln-art-ausbildung-136641038.jpg"  ),
-                    Focus("Kalter Krieg", 41,"https://thumbs.dreamstime.com/b/stellen-sie-von-den-geografiesymbolen-ein-ausr%C3%BCstungen-f%C3%BCr-netzfahnen-weinleseentwurfsskizze-kritzeln-art-ausbildung-136641038.jpg"  )
-                )
+
 
                 LazyColumn {
                     items(focusList) {
-                        FocusCard(focus = it)
+                        FocusCard(focus = it,onClick = {
+                            navigateToQuiz(it)
+                        })
                     }
                 }
             }
@@ -111,7 +117,7 @@ fun FocusScreen() {
 }
 
 @Composable
-fun SubjectCard(subject: Subject) {
+fun SubjectCard(subject: Subject?) {
     Card(
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier
@@ -128,7 +134,7 @@ fun SubjectCard(subject: Subject) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
-                model = subject.subjectImageAddress,
+                model = subject!!.subjectImageAddress,
                 contentDescription = "Focus Image",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -166,14 +172,14 @@ fun SubjectCard(subject: Subject) {
 }
 
 @Composable
-fun FocusCard(focus: Focus) {
+fun FocusCard(focus: Focus, onClick: (Int) -> Unit) {
 
     Card(
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp, horizontal = 16.dp)
-            .clickable(onClick = { }),
+            .clickable(onClick = { onClick(focus.focusId) }),
         //elevation = CardDefaults.cardElevation(4.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFFF4F3F6)
@@ -186,7 +192,7 @@ fun FocusCard(focus: Focus) {
         ) {
 
             AsyncImage(
-                model = focus.imageAddress,
+                model = focus.focusImageAddress,
                 contentDescription = "Focus Image",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -200,7 +206,7 @@ fun FocusCard(focus: Focus) {
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = focus.title,
+                    text = focus.focusName,
                     style = Typography.titleMedium
                 )
                 Text(
@@ -212,7 +218,7 @@ fun FocusCard(focus: Focus) {
 
 
             IconButton(
-                onClick = {},
+                onClick = { onClick(focus.focusId) },
                 modifier = Modifier.size(24.dp)
             ) {
                 Icon(
@@ -223,10 +229,4 @@ fun FocusCard(focus: Focus) {
         }
     }
 }
-
-data class Focus(
-    val title: String,
-    val questionCount: Int,
-    val imageAddress: String
-)
 

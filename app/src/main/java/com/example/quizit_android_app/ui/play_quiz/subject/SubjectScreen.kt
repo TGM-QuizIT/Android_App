@@ -21,27 +21,27 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
-import com.example.quizit_android_app.ui.home.Subject
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.quizit_android_app.ui.home.SubjectCard
 import com.example.quizit_android_app.ui.theme.Typography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SubjectScreen() {
-    val subjects = remember {
-        listOf(
-            Subject("Angewandte Mathematik", "https://schoolizer.com/img/articles_photos/17062655360.jpg"),
-            Subject("GGP", "https://thumbs.dreamstime.com/b/stellen-sie-von-den-geografiesymbolen-ein-ausr%C3%BCstungen-f%C3%BCr-netzfahnen-weinleseentwurfsskizze-kritzeln-art-ausbildung-136641038.jpg"),
-            Subject("SEW", "https://blog.planview.com/de/wp-content/uploads/2020/01/Top-6-Software-Development-Methodologies.jpg") ,
-            Subject("SEW", "https://blog.planview.com/de/wp-content/uploads/2020/01/Top-6-Software-Development-Methodologies.jpg")
-        )
-    }
+fun SubjectScreen(
+    navigateToFocus: (Int) -> Unit,
+    navigateBack: () -> Unit,
+    subjectViewModel: SubjectViewModel = hiltViewModel()
+) {
+
+
+    val subjectList = subjectViewModel.subjectList
+
 
     val scrollState = rememberScrollState()
 
@@ -50,7 +50,7 @@ fun SubjectScreen() {
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = { navigateBack() }) {
                         Icon(
                             imageVector = Icons.Outlined.ArrowBackIosNew,
                             contentDescription = "Back"
@@ -93,8 +93,10 @@ fun SubjectScreen() {
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                items(subjects) { subject ->
-                    SubjectCard(subject = subject, width = 0.dp)
+                items(subjectList) { subject ->
+                    SubjectCard(subject = subject, width = 0.dp, navigateToFocus = {
+                        navigateToFocus(it)
+                    })
 
                     Spacer(modifier = Modifier.height(16.dp))
                 }
