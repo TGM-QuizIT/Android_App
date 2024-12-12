@@ -44,16 +44,16 @@ import com.example.quizit_android_app.ui.theme.Typography
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FocusScreen(
-    subjectId: Int,
     navigateToQuiz: (Int) -> Unit,
     navigateBack: () -> Unit,
     focusViewModel: FocusViewModel = hiltViewModel()
 ) {
 
+
+    //val viewModel = FocusViewModel(SavedStateHandle(/* ... */))
+
     val focusList = focusViewModel.focusList
     val subject = focusViewModel.subject
-
-
 
     Scaffold(
         contentWindowInsets = WindowInsets(0.dp),

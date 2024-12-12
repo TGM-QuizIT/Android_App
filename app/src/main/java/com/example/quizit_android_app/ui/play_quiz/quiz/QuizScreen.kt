@@ -54,7 +54,6 @@ import com.example.quizit_android_app.ui.theme.Typography
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun QuizScreen(
-    focusId: Int,
     navigateBack: () -> Unit,
     quizViewModel: QuizViewModel = hiltViewModel()
 ) {

@@ -48,9 +48,7 @@ class FocusViewModel @Inject constructor(
             "GGP",
             "https://thumbs.dreamstime.com/b/stellen-sie-von-den-geografiesymbolen-ein-ausr%C3%BCstungen-f%C3%BCr-netzfahnen-weinleseentwurfsskizze-kritzeln-art-ausbildung-136641038.jpg"
         )
-
     }
-
 
 }
 
