@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
+import com.example.quizit_android_app.model.fetchSubjects
 import com.example.quizit_android_app.navigation.AppNavGraph
 import com.example.quizit_android_app.ui.MainScreen
 import com.example.quizit_android_app.ui.theme.QuizIT_Android_AppTheme
@@ -24,6 +25,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             QuizIT_Android_AppTheme {
+                fetchSubjects(this@MainActivity)
                 MainScreen()
             }
         }

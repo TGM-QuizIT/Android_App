@@ -1,15 +1,21 @@
 package com.example.quizit_android_app.ui.play_quiz.subject
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.quizit_android_app.model.SubjectsRepository
 import com.example.quizit_android_app.models.Subject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SubjectViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    //private val subjectsRepository: SubjectsRepository
+
 ): ViewModel() {
     private var _subjectList = mutableStateOf(listOf<Subject>())
     val subjectList: List<Subject> get() = _subjectList.value
@@ -17,6 +23,18 @@ class SubjectViewModel @Inject constructor(
 
     init {
         setSubjects()
+        //fetchSubjects()
+    }
+
+    private fun fetchSubjects() {
+        viewModelScope.launch {
+            try {
+                //val response = subjectsRepository.getSubjects()
+                //_subjectList = response.subjects
+            } catch (e: Exception) {
+                Log.e("Retrofit Test", "Failed to fetch subjects", e)
+            }
+        }
     }
 
     private fun setSubjects() {
