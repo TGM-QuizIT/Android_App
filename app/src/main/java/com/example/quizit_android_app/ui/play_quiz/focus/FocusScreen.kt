@@ -2,13 +2,17 @@ package com.example.quizit_android_app.ui.play_quiz.focus
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -19,11 +23,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForwardIos
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -34,6 +41,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -48,52 +57,43 @@ fun FocusScreen(
     navigateBack: () -> Unit,
     focusViewModel: FocusViewModel = hiltViewModel()
 ) {
-
-
-    //val viewModel = FocusViewModel(SavedStateHandle(/* ... */))
-
     val focusList = focusViewModel.focusList
     val subject = focusViewModel.subject
 
     Scaffold(
         contentWindowInsets = WindowInsets(0.dp),
         topBar = {
-            TopAppBar(
-                windowInsets = WindowInsets(0.dp),
-                navigationIcon = {
-                    IconButton(onClick = { navigateBack() }) {
-                        Icon(
-                            imageVector = Icons.Outlined.ArrowBackIosNew,
-                            contentDescription = "Back"
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                IconButton(
+                    onClick = { navigateBack() },
+                    modifier = Modifier.align(Alignment.CenterStart)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.ArrowBackIosNew,
+                        contentDescription = "Back",
+                        tint = Color(0xFF8F9098)
+                    )
+                }
+
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Schwerpunkte",
+                            style = Typography.titleLarge
+                        )
+                        Text(
+                            text = subject!!.subjectName,
+                            style = Typography.titleLarge
                         )
                     }
-                },
-                title = {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = "Schwerpunkte",
-                                style = Typography.titleLarge
-                            )
-                            Text(
-                                text = subject!!.subjectName,
-                                style = Typography.titleLarge
-                            )
-                        }
-                    }
-                },
-                actions = {
-                    Spacer(modifier = Modifier.width(48.dp))
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
-                ),
-                modifier = Modifier.padding(top = 16.dp)
-            )
-
+                }
+            }
         },
 
         content = { paddingValues ->
@@ -103,15 +103,28 @@ fun FocusScreen(
                     .padding(paddingValues)
                     .padding(horizontal = 16.dp, vertical = 16.dp)
             ) {
-                SubjectCard(subject = subject )
 
 
 
                 LazyColumn {
+
+                    item {
+                        FocusCard(
+                            type = CardType.Subject,
+                            subject = subject,
+                            onQuizStart = {
+                                navigateToQuiz(it)
+                            }
+                        )
+                    }
                     items(focusList) {
-                        FocusCard(focus = it,onClick = {
-                            navigateToQuiz(it)
-                        })
+                        FocusCard(
+                            type = CardType.Focus,
+                            focus = it,
+                            onQuizStart = {
+                                navigateToQuiz(it)
+                            }
+                        )
                     }
                 }
             }
@@ -120,116 +133,99 @@ fun FocusScreen(
 }
 
 @Composable
-fun SubjectCard(subject: Subject?) {
+fun FocusCard(
+    type: CardType,
+    subject: Subject? = null,
+    focus: Focus? = null,
+    onQuizStart: (Int) -> Unit
+) {
     Card(
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp, horizontal = 16.dp)
             .clickable(onClick = { }),
-        //elevation = CardDefaults.cardElevation(4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF4F3F6)
+            containerColor = if (type == CardType.Subject) Color(0xFFEAF2FF) else Color(0xFFF8F9FE),
+            contentColor = Color.Black
         )
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            AsyncImage(
-                model = subject!!.subjectImageAddress,
-                contentDescription = "Focus Image",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(Color.Gray)
-            )
+
+            Column(
+                Modifier
+                    .fillMaxWidth(0.5f)
+                    .padding(16.dp)
+            ) {
+                when (type) {
+                    CardType.Subject -> {
+                        Text(
+                            text = subject?.subjectName ?: "",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "147 Fragen im Pool", // Hier kann eine dynamische Zahl verwendet werden, wenn gewünscht
+                            style = Typography.labelLarge
+                        )
+                    }
+                    CardType.Focus -> {
+                        Text(
+                            text = focus?.focusName ?: "",
+                            style = MaterialTheme.typography.titleMedium,
+                            softWrap = false,
+                            overflow = TextOverflow.Ellipsis
+
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "${focus?.questionCount ?: 0} Fragen im Pool",
+                            style = Typography.labelLarge
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Button(
+                    onClick = {
+                        when (type) {
+                            CardType.Subject -> subject?.subjectId?.let { onQuizStart(it) }
+                            CardType.Focus -> focus?.focusId?.let { onQuizStart(it) }
+                        }
+                    },
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = Color.Black
+                    ),
+                ) {
+                    Text("Quiz starten", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                }
+
+            }
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = subject.subjectName,
-                    style = Typography.titleMedium
-                )
-                Text(
-                    text = "147 Fragen insgesamt im Pool",
-                    style = Typography.labelLarge
-                )
-            }
-
-
-
-            IconButton(
-                onClick = {},
-                modifier = Modifier.size(24.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.ArrowForwardIos,
-                    contentDescription = null
-                )
-            }
+            AsyncImage(
+                model = "https://placehold.co/1600x600.png",
+                contentDescription = "Image",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth()
+                    .align(Alignment.CenterVertically)
+                    .clip(RoundedCornerShape(8.dp))
+            )
         }
     }
 }
 
-@Composable
-fun FocusCard(focus: Focus, onClick: (Int) -> Unit) {
-
-    Card(
-        shape = RoundedCornerShape(8.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 16.dp)
-            .clickable(onClick = { onClick(focus.focusId) }),
-        //elevation = CardDefaults.cardElevation(4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF4F3F6)
-        )
-
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            AsyncImage(
-                model = focus.focusImageAddress,
-                contentDescription = "Focus Image",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(Color.Gray)
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = focus.focusName,
-                    style = Typography.titleMedium
-                )
-                Text(
-                    text = "${focus.questionCount} Fragen im Pool",
-                    style = Typography.labelLarge
-                )
-            }
-
-
-
-            IconButton(
-                onClick = { onClick(focus.focusId) },
-                modifier = Modifier.size(24.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.ArrowForwardIos,
-                    contentDescription = null
-                )
-            }
-        }
-    }
+enum class CardType {
+    Subject,
+    Focus
 }
-

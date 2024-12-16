@@ -16,6 +16,7 @@ import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -44,42 +45,31 @@ fun SubjectScreen(
     val subjectList = subjectViewModel.subjectList
 
 
-    val scrollState = rememberScrollState()
-
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     Scaffold(
         contentWindowInsets = WindowInsets(0.dp),
         topBar = {
-            TopAppBar(
-                windowInsets = WindowInsets(0.dp),
-                navigationIcon = {
-                    IconButton(onClick = { navigateBack() }) {
-                        Icon(
-                            imageVector = Icons.Outlined.ArrowBackIosNew,
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                scrollBehavior = scrollBehavior,
-                title = {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("Fach auswählen", style = Typography.titleLarge)
-                    }
-                },
-                actions = {
-                    Spacer(modifier = Modifier.width(48.dp))
-                },
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                IconButton(
+                    onClick = { navigateBack() },
+                    modifier = Modifier.align(Alignment.CenterStart)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.ArrowBackIosNew,
+                        contentDescription = "Back",
+                        tint = Color(0xFF8F9098)
+                    )
+                }
 
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
-                ),
-                modifier = Modifier.padding(top = 16.dp)
-            )
+                Text(
+                    text = "Fach auswählen",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
         },
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
 
         content = { paddingValues ->
             LazyColumn(
@@ -88,13 +78,6 @@ fun SubjectScreen(
                     .padding(paddingValues)
                     .padding(horizontal = 16.dp, vertical = 16.dp),
             ) {
-                item {
-                    Text(
-                        text = "Fach auswählen",
-                        style = Typography.titleLarge
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
 
                 items(subjectList) { subject ->
                     SubjectCard(subject = subject, width = 0.dp, navigateToFocus = {

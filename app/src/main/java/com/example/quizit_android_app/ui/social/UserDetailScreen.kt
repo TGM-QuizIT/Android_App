@@ -35,16 +35,20 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role.Companion.Button
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.quizit_android_app.ui.theme.Typography
@@ -59,45 +63,19 @@ fun UserDetailScreen(
 ) {
 
     val userResults = viewModel.userResults.value
+
+
     Scaffold(
         contentWindowInsets = WindowInsets(0.dp),
         topBar = {
-            TopAppBar(
-                windowInsets = WindowInsets(0.dp),
-                navigationIcon = {
-                    IconButton(onClick = { onGoBack()}) {
-                        Icon(
-                            imageVector = Icons.Outlined.ArrowBackIosNew,
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                title = {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = "Social",
-                                style = Typography.titleLarge
-                            )
-                        }
-                    }
-                },
-                actions = {
-                    Spacer(modifier = Modifier.width(52.dp))
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
-                ),
-                modifier = Modifier.padding(top = 16.dp)
-            )
+            SocialTopBar(onGoBack = {onGoBack()})
         },
         content = { paddingValues->
 
             Column(
-                Modifier.verticalScroll(rememberScrollState()).padding(paddingValues)
+                Modifier
+                    .verticalScroll(rememberScrollState())
+                    .padding(paddingValues)
             ) {
                 Column(
                     modifier = Modifier
@@ -258,4 +236,30 @@ fun UserDetailScreen(
             }
         }
     )
+}
+
+@Composable
+fun SocialTopBar(onGoBack: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        IconButton(
+            onClick = { onGoBack() },
+            modifier = Modifier.align(Alignment.CenterStart)
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.ArrowBackIosNew,
+                contentDescription = "Back",
+                tint = Color(0xFF8F9098)
+            )
+        }
+
+        Text(
+            text = "Social",
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.align(Alignment.Center)
+        )
+    }
+
 }

@@ -3,16 +3,18 @@ package com.example.quizit_android_app.navigation
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavArgument
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.quizit_android_app.ui.home.HomeScreen
 import com.example.quizit_android_app.ui.play_quiz.focus.FocusScreen
 import com.example.quizit_android_app.ui.play_quiz.subject.SubjectScreen
 import com.example.quizit_android_app.ui.quiz.QuizScreen
 import com.example.quizit_android_app.ui.settings.SettingsScreen
-import com.example.quizit_android_app.ui.social.AddFriendScreen
 import com.example.quizit_android_app.ui.social.SocialScreen
 import com.example.quizit_android_app.ui.social.UserDetailScreen
 
@@ -28,6 +30,9 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
                 navigateToFocus = { id->
                     navController.navigate("focus/$id")
                 },
+                navigateToStatistics = {
+                    navController.navigate("social/true")
+                }
             )
         }
         composable("quiz") {
@@ -64,24 +69,33 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
             )
         }
 
-        composable("social") {
+        composable(
+            "social/{showStatistics}",
+            arguments = listOf(
+                navArgument("showStatistics") {
+                    type = NavType.BoolType
+                    defaultValue = false
+                }
+            )
+
+        ) {
             SocialScreen(
-                onAdd = {
-                    navController.navigate("social/add")
-                },
                 navigateToUserDetail = { userId ->
                     navController.navigate("social/$userId")
                 }
             )
         }
-        composable("social/add") {
-            AddFriendScreen(
-                navigateBack = {
-                    navController.popBackStack()
+
+        composable(
+            "social",
+        ) {
+            SocialScreen(
+                navigateToUserDetail = { userId ->
+                    navController.navigate("social/$userId")
                 }
             )
-
         }
+
 
         composable("social/{userId}") {
             UserDetailScreen(

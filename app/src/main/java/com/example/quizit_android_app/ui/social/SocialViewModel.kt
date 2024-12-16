@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -11,7 +12,7 @@ import javax.inject.Inject
 
 @RequiresApi(Build.VERSION_CODES.O)
 class SocialViewModel @Inject constructor(
-
+    val savedStateHandle: SavedStateHandle
 ): ViewModel() {
     private val _selectedTabIndex = mutableStateOf(0)
     val selectedTabIndex: State<Int> = _selectedTabIndex
@@ -27,7 +28,21 @@ class SocialViewModel @Inject constructor(
     private val _userResults = mutableStateOf(listOf<Result>())
     val userResults: State<List<Result>> = _userResults
 
+    private val _users = mutableStateOf(listOf<User>())
+    val users : State<List<User>> = _users
+
+    private val _filteredUsers = mutableStateOf(listOf<User>())
+    val filteredUsers : State<List<User>> = _filteredUsers
+
+    private val _searchText = mutableStateOf("")
+    val searchText : State<String> = _searchText
+
     init {
+        val showStatistics: Boolean = savedStateHandle.get<Boolean>("showStatistics") ?: false
+
+        if(showStatistics) {
+            updateTabIndex(1)
+        }
         setFriendships()
         setPendingFriendships()
         setUserResults()
@@ -64,8 +79,45 @@ class SocialViewModel @Inject constructor(
             LocalDate.parse(result.resultDate, DateTimeFormatter.ofPattern("dd.MM.yyyy"))
         }
     }
+
     fun updateTabIndex(index: Int) {
         _selectedTabIndex.value = index
+    }
+
+
+    public fun setUsers() {
+        _users.value = listOf(
+            User(1, "jdoe", "John Doe", 1, "1AHIT", "schueler", "jdoe@student.tgm.ac.at"),
+            User(2, "asmith", "Anna Smith", 2, "2BHIT", "schueler", "asmith@student.tgm.ac.at"),
+            User(3, "mbrown", "Michael Brown", 3, "3CHIT", "schueler", "mbrown@student.tgm.ac.at"),
+            User(4, "jwhite", "Jessica White", 4, "4DHIT", "schueler", "jwhite@student.tgm.ac.at"),
+            User(5, "pdavis", "Paul Davis", 1, "1AHIT", "schueler", "pdavis@student.tgm.ac.at"),
+            User(6, "lwilson", "Laura Wilson", 2, "2BHIT", "schueler", "lwilson@student.tgm.ac.at"),
+            User(7, "cmiller", "Chris Miller", 3, "3CHIT", "schueler", "cmiller@student.tgm.ac.at"),
+            User(8, "akelly", "Alex Kelly", 4, "4DHIT", "schueler", "akelly@student.tgm.ac.at"),
+            User(9, "bturner", "Barbara Turner", 1, "1AHIT", "schueler", "bturner@student.tgm.ac.at"),
+            User(10, "nroberts", "Nathan Roberts", 2, "2BHIT", "schueler", "nroberts@student.tgm.ac.at")
+        )
+        filterUsers()
+    }
+
+    private fun filterUsers() {
+        val query = _searchText.value.trim().lowercase()
+        _filteredUsers.value = if (query.isEmpty()) {
+            _users.value
+        } else {
+            _users.value.filter { user ->
+                user.userName.lowercase().contains(query) ||
+                user.userFullname.lowercase().contains(query) ||
+                user.userMail.lowercase().contains(query)
+            }
+        }
+
+    }
+
+    public fun updateSearchText(text: String) {
+        _searchText.value = text
+        filterUsers()
     }
 }
 
@@ -91,4 +143,14 @@ data class Result(
     val userId: Int,
     val focusId: Int,
     val resultDate: String
+)
+
+data class User(
+    val userId: Int,
+    val userName: String,
+    val userFullname: String,
+    val userYear: Int,
+    val userClass: String,
+    val userType: String,
+    val userMail: String
 )

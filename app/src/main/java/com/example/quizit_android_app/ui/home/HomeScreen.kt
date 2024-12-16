@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -47,6 +49,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import com.example.quizit_android_app.R
 import com.example.quizit_android_app.models.Subject
+import com.example.quizit_android_app.ui.social.StatisticsCard
 import com.example.quizit_android_app.ui.theme.Typography
 
 
@@ -56,6 +59,7 @@ import com.example.quizit_android_app.ui.theme.Typography
 fun HomeScreen(
     navigateToSubject: () -> Unit,
     navigateToFocus: (Int) -> Unit,
+    navigateToStatistics: () -> Unit,
     homeViewModel: HomeViewModel = hiltViewModel()
 
 ) {
@@ -71,7 +75,7 @@ fun HomeScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding( horizontal = 16.dp),
+                        .padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
 
@@ -81,23 +85,17 @@ fun HomeScreen(
                         contentDescription = "QuizIT Logo",
                         modifier = Modifier
                             .width(125.dp)
-                            .height(42.dp),
+                            .aspectRatio(975f/337f),
                         contentScale = ContentScale.FillBounds
 
                     )
 
-                    Icon(
-                        imageVector = Icons.Outlined.Notifications,
-                        contentDescription = "Notifications",
-                        modifier = Modifier.size(24.dp)
-                    )
 
                 }
             },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.White
                 ),
-                modifier = Modifier.padding(top = 16.dp)
 
             )
         },
@@ -106,7 +104,7 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .padding(horizontal = 8.dp, vertical = 16.dp)
+                    .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)
             ) {
 
                 SubjectSection(subjects = subjectList, onClick = {
@@ -115,9 +113,15 @@ fun HomeScreen(
                     navigateToFocus(it)
                 })
 
-                Spacer(modifier = Modifier.size(32.dp))
+                Spacer(modifier = Modifier.size(16.dp))
 
-                StatisticsSection()
+                ChallengeSection()
+
+                StatisticsSection(
+                    navigateToStatistics = {
+                        navigateToStatistics()
+                    }
+                )
             }
         },
     )
@@ -125,39 +129,47 @@ fun HomeScreen(
 
 }
 
+
+
+
 @Composable
 fun SubjectSection(subjects: List<Subject>, onClick: () -> Unit, navigateToFocus: (Int) -> Unit) {
 
-
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            //.padding(top = 8.dp)
-    ) {
-        Text(
-            "Deine Fächer",
-            style = Typography.titleMedium
-        )
-
-        Text(
-            text = "mehr anzeigen",
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ){
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .clickable { onClick() },
-            style = Typography.titleSmall
-        )
+                .fillMaxWidth()
+                .padding(end = 16.dp)
+        ) {
+            Text(
+                "Deine Fächer",
+                style = Typography.titleMedium
+            )
+
+            Text(
+                text = "mehr anzeigen",
+                modifier = Modifier
+                    .clickable { onClick() },
+                style = Typography.titleSmall
+            )
+        }
+
+        Spacer(modifier = Modifier.size(16.dp))
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            itemsIndexed(subjects) { index, subject ->
+                SubjectCard(subject = subject, 250.dp, navigateToFocus = navigateToFocus)
+                Spacer(modifier = Modifier.width(16.dp))
+            }
+        }
+
     }
 
-    LazyRow(
-        modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(8.dp)
-    ) {
-        itemsIndexed(subjects) { index, subject ->
-            SubjectCard(subject = subject, 250.dp, navigateToFocus = navigateToFocus)
-            Spacer(modifier = Modifier.width(16.dp))
-        }
-    }
 }
 
 
@@ -175,16 +187,17 @@ fun SubjectCard(subject: Subject, width: Dp, navigateToFocus: (Int) -> Unit) {
                 }
             ),
 
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondary),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFf8f9fe)),
 
     ) {
         AsyncImage(
-            model = subject.subjectImageAddress ,
+            model = "https://placehold.co/1600x600.png",
             contentDescription = "Subject Image",
             modifier = Modifier
+                .padding(bottom = 8.dp)
                 .fillMaxWidth()
-                .height(150.dp)
-                .padding(bottom = 8.dp),
+                .aspectRatio(8f / 3f),
+
             contentScale = ContentScale.FillBounds
         )
 
@@ -192,27 +205,28 @@ fun SubjectCard(subject: Subject, width: Dp, navigateToFocus: (Int) -> Unit) {
 
         Text(
             text = subject.subjectName,
-            style = Typography.bodyMedium,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
             color = Color.Black,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .padding(start = 4.dp)
+                .align(Alignment.CenterHorizontally)
         )
 
         Spacer(modifier = Modifier.size(4.dp))
 
         Button(
             onClick = { navigateToFocus(subject.subjectId) },
-            colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(48.dp)
                 .padding(8.dp),
 
-            border = BorderStroke(1.dp, color = MaterialTheme.colorScheme.tertiary),
+            border = BorderStroke(1.5.dp, color = Color(0xFF006FFD)),
             shape = RoundedCornerShape(8.dp)
         ) {
-            Text(text = "Schwerpunkte", style= Typography.bodyMedium, color = MaterialTheme.colorScheme.tertiary)
+            Text(text = "Schwerpunkte", style= Typography.bodyLarge, fontWeight = FontWeight.Bold, color = Color(0xFF006FFD))
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -220,26 +234,70 @@ fun SubjectCard(subject: Subject, width: Dp, navigateToFocus: (Int) -> Unit) {
 }
 
 @Composable
-fun StatisticsSection() {
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp)
+fun ChallengeSection() {
+
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(end = 16.dp)
     ) {
-        Text(
-            "Deine Statistiken",
-            style = Typography.titleMedium
-
-        )
-
-        Text(
-            text = "mehr anzeigen",
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .clickable {  },
-            style = Typography.titleSmall
-        )
+                .fillMaxWidth()
+
+        ) {
+
+            Text(
+                "Herausforderungen",
+                style = Typography.titleMedium
+
+            )
+
+            Text(
+                text = "mehr anzeigen",
+                modifier = Modifier
+                    .clickable {  },
+                style = Typography.titleSmall
+            )
+
+
+        }
+        Spacer(modifier = Modifier.size(16.dp))
+    }
+
+
+}
+@Composable
+fun StatisticsSection(navigateToStatistics: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(end = 16.dp)
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+
+        ) {
+
+            Text(
+                "Statistiken",
+                style = Typography.titleMedium
+
+            )
+
+            Text(
+                text = "mehr anzeigen",
+                modifier = Modifier
+                    .clickable { navigateToStatistics() },
+                style = Typography.titleSmall
+            )
+
+
+        }
+
+        Spacer(modifier = Modifier.size(16.dp))
+        StatisticsCard()
     }
 }
 

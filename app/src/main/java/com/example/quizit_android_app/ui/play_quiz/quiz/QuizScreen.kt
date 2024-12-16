@@ -91,7 +91,8 @@ fun QuizScreen(
                 val userResults = quizViewModel.getResult()
                 QuizResult(focus = focus,score = userScore, results = userResults, onCloseResult = { navigateBack()  } )
             }
-        }
+        },
+        modifier = Modifier.padding(top = 16.dp)
     )
 
 
@@ -104,8 +105,7 @@ fun QuizTopBar(currentQuestion: Int, totalQuestions: Int, focus: String, onClick
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
-            .padding(top = 16.dp)
+            .padding(horizontal = 16.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -312,8 +312,8 @@ fun QuizResult(focus: String,score: Float, results: List<ResultItem>, onCloseRes
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
-                    .padding(top = 16.dp)
+                    .padding(horizontal = 16.dp)
+
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
