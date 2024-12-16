@@ -23,7 +23,7 @@ sealed class BottomBarScreen(
         icon = Icons.Outlined.Settings
     )
     object Friends: BottomBarScreen(
-        route = "friends",
+        route = "social",
         title = "Friends",
         icon = Icons.Outlined.Group
     )

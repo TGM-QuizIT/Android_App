@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.example.quizit_android_app"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.quizit_android_app"
@@ -79,6 +79,11 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
 
+    implementation(libs.androidx.material)
+    implementation(libs.ui)
+    implementation(libs.ui.tooling.preview)
+    implementation(libs.androidx.runtime)
+    implementation(libs.androidx.material.v180alpha04)
 
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.lifecycle.runtime.compose)
