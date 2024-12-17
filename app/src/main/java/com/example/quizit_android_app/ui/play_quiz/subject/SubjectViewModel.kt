@@ -5,40 +5,32 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.quizit_android_app.model.SubjectsRepository
-import com.example.quizit_android_app.models.Subject
+import com.example.quizit_android_app.model.Subject
+import com.example.quizit_android_app.usecases.GetAllSubjectsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SubjectViewModel @Inject constructor(
+    private val getAllSubjectsUseCase: GetAllSubjectsUseCase,
     private val savedStateHandle: SavedStateHandle,
-    //private val subjectsRepository: SubjectsRepository
 
-): ViewModel() {
+    ): ViewModel() {
     private var _subjectList = mutableStateOf(listOf<Subject>())
     val subjectList: List<Subject> get() = _subjectList.value
 
 
     init {
         setSubjects()
-        //fetchSubjects()
-    }
-
-    private fun fetchSubjects() {
-        viewModelScope.launch {
-            try {
-                //val response = subjectsRepository.getSubjects()
-                //_subjectList = response.subjects
-            } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to fetch subjects", e)
-            }
-        }
     }
 
     private fun setSubjects() {
-        _subjectList.value = listOf(
+        viewModelScope.launch {
+            _subjectList.value = getAllSubjectsUseCase(1)
+            Log.d("SubjectViewModel", "setSubjects: ${_subjectList.value}")
+        }
+        /*_subjectList.value = listOf(
             Subject(
                 subjectId = 1,
                 "Angewandte Mathematik",
@@ -59,7 +51,7 @@ class SubjectViewModel @Inject constructor(
                 "SEW",
                 "https://blog.planview.com/de/wp-content/uploads/2020/01/Top-6-Software-Development-Methodologies.jpg"
             )
-        )
+        )*/
     }
 
 }

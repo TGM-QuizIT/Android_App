@@ -47,8 +47,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
+import com.example.quizit_android_app.model.Subject
 import com.example.quizit_android_app.models.Focus
-import com.example.quizit_android_app.models.Subject
 import com.example.quizit_android_app.ui.theme.Typography
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

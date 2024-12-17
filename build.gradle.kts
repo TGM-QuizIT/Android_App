@@ -7,7 +7,9 @@ plugins {
 }
 
 buildscript {
+    val kotlin_version by extra("1.8.0") // Use the latest stable version
     dependencies {
-        classpath(libs.hilt.android.gradle.plugin)
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+        classpath("com.google.dagger:hilt-android-gradle-plugin:2.48") // Use the latest stable version
     }
 }

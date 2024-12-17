@@ -7,8 +7,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import com.example.quizit_android_app.model.Subject
 import com.example.quizit_android_app.models.Focus
-import com.example.quizit_android_app.models.Subject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

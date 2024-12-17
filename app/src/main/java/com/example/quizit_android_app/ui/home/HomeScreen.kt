@@ -48,7 +48,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import com.example.quizit_android_app.R
-import com.example.quizit_android_app.models.Subject
+import com.example.quizit_android_app.model.Subject
 import com.example.quizit_android_app.ui.social.StatisticsCard
 import com.example.quizit_android_app.ui.theme.Typography
 
@@ -191,7 +191,7 @@ fun SubjectCard(subject: Subject, width: Dp, navigateToFocus: (Int) -> Unit) {
 
     ) {
         AsyncImage(
-            model = "https://placehold.co/1600x600.png",
+            model = subject.subjectImageAddress,
             contentDescription = "Subject Image",
             modifier = Modifier
                 .padding(bottom = 8.dp)
