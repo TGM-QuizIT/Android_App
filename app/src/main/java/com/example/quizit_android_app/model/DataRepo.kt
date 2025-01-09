@@ -5,9 +5,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import android.content.Context
 import com.example.quizit_android_app.R
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -50,7 +48,7 @@ class DataRepo @Inject constructor(private val context: Context) {
                 }
                 response.subjects
             } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to fetch subjects", e)
+                Log.e("Retrofit Test Fail", "Failed to fetch subjects", e)
                 emptyList()
             }
         }
