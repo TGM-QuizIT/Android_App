@@ -21,6 +21,8 @@ class HomeViewModel @Inject constructor(
         setSubjects()
     }
 
+
+
     private fun setSubjects() {
         _subjectList = listOf(
             Subject(

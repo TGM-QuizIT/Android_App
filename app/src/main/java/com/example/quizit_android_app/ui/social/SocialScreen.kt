@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -186,23 +187,31 @@ fun BottomSheetLayoutContent(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight(0.9f)
+            .fillMaxHeight()
     ) {
 
-        IconButton(
-            onClick = {onHide()},
-            modifier = Modifier
-                .align(Alignment.End)
-                .padding(16.dp)
-
+        Box(
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = "Close",
-                tint = Color.Black,
+            Text("Social", style = MaterialTheme.typography.titleLarge, modifier = Modifier.align(Alignment.Center))
+            IconButton(
+                onClick = {onHide()},
+                modifier = Modifier
+                    .padding(8.dp)
+                    .align(Alignment.CenterEnd)
 
-            )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Close",
+                    tint = Color.Black,
+
+                    )
+            }
+
         }
+
+
 
         TextField(
             modifier = Modifier
@@ -266,15 +275,14 @@ fun UserCard(user: User, navigateToUserDetail: (Int) -> Unit) {
 
             Box(
                 modifier = Modifier
-                    .size(40.dp)
-                    .background(Color(0xFFEAF2FF), shape = CircleShape),
+                    .background(Color(0xFFEAF2FF), shape = RoundedCornerShape(16.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Person,
                     contentDescription = "User Icon",
                     tint = Color(0xFFB4DBFF),
-                    modifier = Modifier.size(30.dp)
+                    modifier = Modifier.size(40.dp).offset(0.dp, 1.dp)
                 )
             }
 
@@ -285,6 +293,7 @@ fun UserCard(user: User, navigateToUserDetail: (Int) -> Unit) {
                     text = user.userFullname,
                     style = MaterialTheme.typography.titleSmall,
                 )
+                Spacer(modifier = Modifier.size(4.dp))
                 Text(
                     text = user.userClass,
                     style = MaterialTheme.typography.labelLarge,
@@ -396,15 +405,14 @@ fun FriendshipCard(friendship: Friendship, navigateToUserDetail: (Int) -> Unit) 
 
             Box(
                 modifier = Modifier
-                    .size(40.dp)
-                    .background(Color(0xFFEAF2FF), shape = CircleShape),
+                    .background(Color(0xFFEAF2FF), shape = RoundedCornerShape(16.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Person,
                     contentDescription = "User Icon",
                     tint = Color(0xFFB4DBFF),
-                    modifier = Modifier.size(30.dp)
+                    modifier = Modifier.size(40.dp).offset(0.dp, 1.dp)
                 )
             }
 
@@ -415,6 +423,7 @@ fun FriendshipCard(friendship: Friendship, navigateToUserDetail: (Int) -> Unit) 
                     text = friendship.friendName,
                     style = MaterialTheme.typography.titleSmall,
                 )
+                Spacer(modifier = Modifier.size(4.dp))
                 Text(
                     text = friendship.friendYear.toString(),
                     style = MaterialTheme.typography.labelLarge,
@@ -448,15 +457,14 @@ fun PendingFriendshipCard(pendingFriendship: PendingFriendship, navigateToUserDe
 
             Box(
                 modifier = Modifier
-                    .size(40.dp)
-                    .background(Color(0xFFEAF2FF), shape = CircleShape),
+                    .background(Color(0xFFEAF2FF), shape = RoundedCornerShape(16.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Person,
                     contentDescription = "User Icon",
                     tint = Color(0xFFB4DBFF),
-                    modifier = Modifier.size(30.dp)
+                    modifier = Modifier.size(40.dp).offset(0.dp, 1.dp)
                 )
             }
 
@@ -467,6 +475,7 @@ fun PendingFriendshipCard(pendingFriendship: PendingFriendship, navigateToUserDe
                     text = pendingFriendship.friendName,
                     style = MaterialTheme.typography.titleSmall,
                 )
+                Spacer(modifier = Modifier.size(4.dp))
                 Text(
                     text = pendingFriendship.friendYear.toString(),
                     style = MaterialTheme.typography.labelLarge,
@@ -600,7 +609,7 @@ fun StatisticsCard() {
                 )
 
                 Text(
-                    "Punkte",
+                    "TGM-Level",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White.copy(alpha = 0.5f)
                 )
@@ -639,7 +648,7 @@ fun StatisticsCard() {
                 )
 
                 Text(
-                    "Punkte",
+                    "Score",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White.copy(alpha = 0.5f)
                 )
