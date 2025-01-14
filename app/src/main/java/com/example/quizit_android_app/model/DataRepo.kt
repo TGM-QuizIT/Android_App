@@ -35,9 +35,9 @@ class DataRepo @Inject constructor(private val context: Context) {
             try {
                 val response = service.login(LoginRequestBody(username, password))
                 withContext(Dispatchers.Main) {
-                    Log.d("Retrofit Test", response.user?.userName + " " + response.user?.userId)
                     response.user?.let {
-                        sessionManager.saveSession(it.userName, it.userId.toString())
+                        // Save the session with login
+                        sessionManager.saveSession(it)
                         Log.d("Retrofit Test", "${it.userName} ${it.userId}")
                     }
                 }

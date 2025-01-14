@@ -4,35 +4,32 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.google.gson.Gson
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
 private val Context.dataStore by preferencesDataStore(name = "session_prefs")
 
-class SessionManager(private val context: Context) {
+class SessionManager @Inject constructor(private val context: Context) {
 
     private val dataStore = context.dataStore
+    private val gson = Gson()
+
 
     companion object {
-        val USERNAME_KEY = stringPreferencesKey("username")
-        val TOKEN_KEY = stringPreferencesKey("token")
+        val USER_KEY = stringPreferencesKey("user")
     }
 
-    val username: Flow<String?> = dataStore.data
+    val user: Flow<User?> = dataStore.data
         .map { preferences ->
-            preferences[USERNAME_KEY]
+            preferences[USER_KEY]?.let { gson.fromJson(it, User::class.java) }
         }
 
-    val token: Flow<String?> = dataStore.data
-        .map { preferences ->
-            preferences[TOKEN_KEY]
-        }
-
-    suspend fun saveSession(username: String?, token: String) {
+    suspend fun saveSession(user: User) {
         dataStore.edit { preferences ->
-            preferences[USERNAME_KEY] = username?: ""
-            preferences[TOKEN_KEY] = token
+            preferences[USER_KEY] = gson.toJson(user)
         }
     }
 
@@ -43,6 +40,10 @@ class SessionManager(private val context: Context) {
     }
 
     suspend fun isUserLoggedIn(): Boolean {
-        return username.map { it != null }.first()
+        return user.map { it != null }.first()
+    }
+
+    suspend fun getUser(): User? {
+        return user.first()
     }
 }
