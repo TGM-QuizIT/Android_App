@@ -47,13 +47,14 @@ import com.example.quizit_android_app.ui.MainScreen
 
 @Composable
 fun LoginScreen(
-    viewModel: LoginViewModel = hiltViewModel()
+    viewModel: LoginViewModel = hiltViewModel(),
+    onLoginSuccess: () -> Unit
 ) {
 
     var isLogInSuccess = viewModel.isLogInSuccess.value
 
     if(isLogInSuccess){
-        MainScreen()
+        onLoginSuccess()
     }
 
     else {

@@ -3,6 +3,7 @@ package com.example.quizit_android_app.navigation
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavArgument
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -10,7 +11,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.quizit_android_app.ui.MainViewModel
 import com.example.quizit_android_app.ui.home.HomeScreen
+import com.example.quizit_android_app.ui.login.LoginScreen
 import com.example.quizit_android_app.ui.play_quiz.focus.FocusScreen
 import com.example.quizit_android_app.ui.play_quiz.subject.SubjectScreen
 import com.example.quizit_android_app.ui.quiz.QuizScreen
@@ -20,8 +23,12 @@ import com.example.quizit_android_app.ui.social.UserDetailScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun AppNavGraph(navController: NavHostController = rememberNavController()) {
-    NavHost(navController = navController, startDestination = "home") {
+fun AppNavGraph(navController: NavHostController = rememberNavController(), viewModel: MainViewModel = hiltViewModel()) {
+
+    val isLoggedIn = viewModel.isLoggedIn.value
+
+
+    NavHost(navController = navController, startDestination = if (isLoggedIn) "home" else "login") {
         composable("home") {
             HomeScreen(
                 navigateToSubject ={
@@ -105,5 +112,11 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
             )
 
         }
+
+        composable("login") {
+            LoginScreen(onLoginSuccess = { navController.navigate("home")   })
+        }
+
+
     }
 }
