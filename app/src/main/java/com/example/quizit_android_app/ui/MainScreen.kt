@@ -17,37 +17,22 @@ fun MainScreen(
 ) {
 
 
+    var isLoggedIn = viewModel.isLoggedIn.value
 
-
-    val navController = rememberNavController()
-
-    //var isLoggedIn = viewModel.isLoggedIn.value
-    //viewModel.checkLogin()
-
-
-
-    Scaffold(
-        bottomBar = { BottomBar(navController=navController)}
-    ) {
-
-        Box(modifier = Modifier.padding(it)) {
-            AppNavGraph(navController = navController)
-        }
-    }
-
-    /*if(isLoggedIn) {
+    if (isLoggedIn) {
+        val navController = rememberNavController()
         Scaffold(
-            bottomBar = { BottomBar(navController=navController)}
+            bottomBar = { BottomBar(navController = navController) }
         ) {
+
             Box(modifier = Modifier.padding(it)) {
                 AppNavGraph(navController = navController)
             }
         }
 
+    } else {
+        LoginScreen()
     }
 
-    else {
-        LoginScreen()
-    }*/
 
 }

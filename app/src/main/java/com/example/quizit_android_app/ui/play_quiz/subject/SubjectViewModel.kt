@@ -15,7 +15,6 @@ import javax.inject.Inject
 @HiltViewModel
 class SubjectViewModel @Inject constructor(
     private val getAllSubjectsUseCase: GetAllSubjectsUseCase,
-    private val loginUseCase: LoginUseCase,
     private val savedStateHandle: SavedStateHandle,
 
     ): ViewModel() {
@@ -29,7 +28,6 @@ class SubjectViewModel @Inject constructor(
 
     private fun setSubjects() {
         viewModelScope.launch {
-            val user = loginUseCase("mturetschek", "awda")
             _subjectList.value = getAllSubjectsUseCase(1)
             Log.d("SubjectViewModel", "setSubjects: ${_subjectList.value}")
         }

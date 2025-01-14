@@ -3,13 +3,17 @@ package com.example.quizit_android_app.ui.login
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.quizit_android_app.usecases.LoginUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
+    private val loginUseCase: LoginUseCase,
 
-): ViewModel() {
+    ): ViewModel() {
 
     private var _username = mutableStateOf("")
     val username: State<String> = _username
@@ -36,10 +40,14 @@ class LoginViewModel @Inject constructor(
         _password.value = password
     }
     public fun login() {
+        viewModelScope.launch {
+            val user  = loginUseCase(_username.value, _password.value)
+            if(user != null) {
+                _isLogInSuccess.value = true
 
-        // TODO Handle Login, set isLogInSuccess to true if login is successful and save user data
+            }
+
+        }
 
     }
-
-
 }
