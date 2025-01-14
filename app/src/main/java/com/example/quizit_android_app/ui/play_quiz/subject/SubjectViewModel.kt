@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.quizit_android_app.model.Subject
 import com.example.quizit_android_app.usecases.GetAllSubjectsUseCase
+import com.example.quizit_android_app.usecases.LoginUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -14,6 +15,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SubjectViewModel @Inject constructor(
     private val getAllSubjectsUseCase: GetAllSubjectsUseCase,
+    private val loginUseCase: LoginUseCase,
     private val savedStateHandle: SavedStateHandle,
 
     ): ViewModel() {
@@ -27,6 +29,7 @@ class SubjectViewModel @Inject constructor(
 
     private fun setSubjects() {
         viewModelScope.launch {
+            val user = loginUseCase("mturetschek", "awda")
             _subjectList.value = getAllSubjectsUseCase(1)
             Log.d("SubjectViewModel", "setSubjects: ${_subjectList.value}")
         }
