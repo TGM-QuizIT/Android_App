@@ -53,7 +53,8 @@ import com.example.quizit_android_app.R
 
 @Composable
 fun SettingsScreen(
-    viewModel: SettingsViewModel = hiltViewModel()
+    viewModel: SettingsViewModel = hiltViewModel(),
+    onLogout: () -> Unit
 ) {
 
     Scaffold(
@@ -105,7 +106,10 @@ fun SettingsScreen(
                 SettingsListItem(
                     title = "Abmelden",
                     imageVector = Icons.Default.Logout,
-                    onClick = { viewModel.logOut() }
+                    onClick = {
+                        viewModel.logOut()
+                        onLogout()
+                    }
                 )
 
 

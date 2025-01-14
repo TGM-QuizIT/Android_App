@@ -27,7 +27,10 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoggedIn.value = isUserLoggedInUseCase()
         }
+    }
 
+    fun setLoggedIn(value: Boolean) {
+        _isLoggedIn.value = value
     }
 
 }

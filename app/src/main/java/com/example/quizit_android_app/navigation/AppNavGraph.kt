@@ -3,6 +3,7 @@ package com.example.quizit_android_app.navigation
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavArgument
 import androidx.navigation.NavHostController
@@ -27,6 +28,17 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
 
     val isLoggedIn = viewModel.isLoggedIn.value
 
+    LaunchedEffect(isLoggedIn) {
+        if (isLoggedIn) {
+            navController.navigate("home") {
+                popUpTo("login") { inclusive = true }
+            }
+        } else {
+            navController.navigate("login") {
+                popUpTo("home") { inclusive = true }
+            }
+        }
+    }
 
     NavHost(navController = navController, startDestination = if (isLoggedIn) "home" else "login") {
         composable("home") {
@@ -54,7 +66,11 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
         }
 
         composable("settings") {
-            SettingsScreen()
+            SettingsScreen(
+                onLogout = {
+                    viewModel.setLoggedIn(false)
+                }
+            )
         }
         composable("focus/{subjectId}") { backStackEntry ->
             FocusScreen(
@@ -93,9 +109,7 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
             )
         }
 
-        composable(
-            "social",
-        ) {
+        composable("social",) {
             SocialScreen(
                 navigateToUserDetail = { userId ->
                     navController.navigate("social/$userId")
@@ -114,7 +128,7 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
         }
 
         composable("login") {
-            LoginScreen(onLoginSuccess = { navController.navigate("home")   })
+            LoginScreen(onLoginSuccess = { viewModel.setLoggedIn(true) })
         }
 
 
