@@ -1,11 +1,10 @@
 package com.example.quizit_android_app.model
 
-import okhttp3.RequestBody
 import retrofit2.http.Body
 import retrofit2.http.GET
-import retrofit2.http.Header
 import retrofit2.http.Headers
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Query
 
 
@@ -17,7 +16,10 @@ interface Requests {
 
     @Headers("Content-Type: application/json")
     @POST("user/login")
-    suspend fun login(@Body loginRequest: LoginRequestBody): LoginResponse
+    suspend fun login(@Body loginRequest: LoginRequestBody): UserResponse
+
+    @PUT("user")
+    suspend fun changeUserYear(@Body changeUserYearRequestBody: ChangeUserYearRequestBody): UserResponse
 
 
 
@@ -30,4 +32,9 @@ interface Requests {
 
     @POST("subject")
     suspend fun createSubject(@Body newSubject: NewSubjectRequest): SubjectsResponse
+
+
+    // ------------------- Focus Calls -------------------
+    @GET("focus")
+    suspend fun getFocusOfUser(@Query("id") id: Int?, @Query("year") year: Int?, @Query("active") active: Int?): FocusResponse
 }

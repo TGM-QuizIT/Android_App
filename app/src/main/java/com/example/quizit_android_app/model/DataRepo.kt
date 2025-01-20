@@ -56,12 +56,16 @@ class DataRepo @Inject constructor(private val context: Context) {
         }
     }
 
-    suspend fun changeUserYear(userId: Int): Boolean  {
+    suspend fun changeUserYear(newUserYear: Int): Boolean  {
         return withContext(Dispatchers.IO) {
             try {
                 val id = sessionManager.getUserId()
-                //val response = service.changeUserYear(id)
+                val response = service.changeUserYear(ChangeUserYearRequestBody(id, newUserYear))
                 withContext(Dispatchers.Main) {
+                    response.user?.let {
+                        sessionManager.saveSession(it)
+                        Log.d("Retrofit Test", "${it.userName} ${it.userId}")
+                    }
                     Log.d("Retrofit Test", "Year changed")
                 }
                 true
@@ -77,8 +81,7 @@ class DataRepo @Inject constructor(private val context: Context) {
     suspend fun fetchSubjects(): List<Subject> {
         return withContext(Dispatchers.IO) {
             try {
-                val repository = DataRepo(context)
-                val response = repository.service.getSubjects()
+                val response = service.getSubjects()
                 withContext(Dispatchers.Main) {
                     for (subject in response.subjects) {
                         Log.d("Retrofit Test", subject.subjectName + " " + subject.subjectId)
@@ -95,9 +98,8 @@ class DataRepo @Inject constructor(private val context: Context) {
     suspend fun fetchSubjectsOfUser(): List<Subject> {
         return withContext(Dispatchers.IO) {
             try {
-                val repository = DataRepo(context)
                 val id = sessionManager.getUserId()
-                val response = repository.service.getSubjectOfUser(id)
+                val response = service.getSubjectOfUser(id)
                 withContext(Dispatchers.Main) {
                     for (subject in response.subjects) {
                         Log.d("Retrofit Test", subject.subjectName + " " + subject.subjectId)
@@ -106,6 +108,25 @@ class DataRepo @Inject constructor(private val context: Context) {
                 response.subjects
             } catch (e: Exception) {
                 Log.e("Retrofit Test Fail", "Failed to fetch subjects", e)
+                emptyList()
+            }
+        }
+    }
+
+    // ------------------- Focus Calls -------------------
+
+    suspend fun fetchFocusOfUser(subjectId: Int, focusYear: Int, active: Int): List<Focus> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = service.getFocusOfUser(subjectId, focusYear, active)
+                withContext(Dispatchers.Main) {
+                    for (focus in response.focus) {
+                        Log.d("Retrofit Test", focus.focusName + " " + focus.focusId)
+                    }
+                }
+                response.focus
+            } catch (e: Exception) {
+                Log.e("Retrofit Test", "Failed to fetch focus", e)
                 emptyList()
             }
         }
