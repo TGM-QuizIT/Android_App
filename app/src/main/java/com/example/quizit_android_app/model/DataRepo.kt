@@ -119,7 +119,7 @@ class DataRepo @Inject constructor(private val context: Context) {
         return withContext(Dispatchers.IO) {
             try {
                 val userYear = sessionManager.getUserYear()
-                val response = service.getFocusOfUser(subjectId, year = userYear, active)
+                val response = service.getFocusOfUser(subjectId, userYear = userYear, active)
                 withContext(Dispatchers.Main) {
                     for (focus in response.focus) {
                         Log.d("Retrofit Test", focus.focusName + " " + focus.focusId)
@@ -132,5 +132,46 @@ class DataRepo @Inject constructor(private val context: Context) {
             }
         }
     }
+
+    // ------------------- Quiz Calls -------------------
+
+    suspend fun fetchQuizOfSubject(subjectId: Int): List<Questions> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val userYear = sessionManager.getUserYear()
+                val response = service.getQuizOfSubject(subjectId, userYear)
+                withContext(Dispatchers.Main) {
+                    for (question in response.questions) {
+                        Log.d("Retrofit Test", question.questionText + " " + question.questionId)
+                    }
+                }
+                response.questions
+            } catch (e: Exception) {
+                Log.e("Retrofit Test", "Failed to fetch quiz", e)
+                emptyList()
+            }
+        }
+    }
+
+    suspend fun fetchQuizOfFocus(focusId: Int): List<Questions> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = service.getQuizOfFocus(focusId)
+                withContext(Dispatchers.Main) {
+                    for (question in response.questions) {
+                        Log.d("Retrofit Test", question.questionText + " " + question.questionId)
+                    }
+                }
+                response.questions
+            } catch (e: Exception) {
+                Log.e("Retrofit Test", "Failed to fetch quiz", e)
+                emptyList()
+            }
+        }
+    }
+
+
+
+
 }
 

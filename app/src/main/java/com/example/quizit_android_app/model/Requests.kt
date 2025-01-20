@@ -36,5 +36,13 @@ interface Requests {
 
     // ------------------- Focus Calls -------------------
     @GET("focus")
-    suspend fun getFocusOfUser(@Query("id") id: Int?, @Query("year") year: Int?, @Query("active") active: Int?): FocusResponse
+    suspend fun getFocusOfUser(@Query("id") subjectId: Int?, @Query("year") userYear: Int?, @Query("active") active: Int?): FocusResponse
+
+    // ------------------- Quiz Calls -------------------
+
+    @GET("quiz/subject")
+    suspend fun getQuizOfSubject(@Query("id") subjectId: Int?, @Query("year") userYear: Int?): QuizOfSubjectResponse
+
+    @GET("quiz/focus")
+    suspend fun getQuizOfFocus(@Query("id") focusId: Int?): QuizOfFocusResponse
 }

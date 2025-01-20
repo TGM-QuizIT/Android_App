@@ -64,3 +64,35 @@ data class Focus (
     @SerializedName("questionCount"     ) var questionCount     : Int?    = null
 )
 
+// ------------------- Quiz Dataclasses -------------------
+
+data class QuizOfSubjectResponse (
+    @SerializedName("status"    ) var status    : String?              = null,
+    @SerializedName("subjectId" ) var subjectId : Int?                 = null,
+    @SerializedName("questions" ) var questions : ArrayList<Questions> = arrayListOf()
+)
+
+data class QuizOfFocusResponse (
+    @SerializedName("status"    ) var status    : String?              = null,
+    @SerializedName("focusId"   ) var focusId   : Int?                 = null,
+    @SerializedName("questions" ) var questions : ArrayList<Questions> = arrayListOf()
+)
+
+data class Options (
+    @SerializedName("optionId"      ) var optionId      : Int?     = null,
+    @SerializedName("optionText"    ) var optionText    : String?  = null,
+    @SerializedName("optionCorrect" ) var optionCorrect : Boolean? = null
+)
+
+data class Questions (
+    @SerializedName("questionId"   ) var questionId   : Int?               = null,
+    @SerializedName("questionText" ) var questionText : String?            = null,
+    @SerializedName("options"      ) var options      : ArrayList<Options> = arrayListOf(),
+    @SerializedName("focusId"      ) var focusId      : Int?               = null,
+    @SerializedName("mChoice"      ) var mChoice      : Boolean?           = null,
+    @SerializedName("textInput"    ) var textInput    : Boolean?           = null,
+    @SerializedName("imageAddress" ) var imageAddress : String?            = null
+)
+
+
+
