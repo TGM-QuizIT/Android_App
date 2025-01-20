@@ -46,4 +46,8 @@ class SessionManager @Inject constructor(private val context: Context) {
     suspend fun getUser(): User? {
         return user.first()
     }
+
+    suspend fun getUserId(): Int? {
+        return user.map { it?.userId }.first()
+    }
 }

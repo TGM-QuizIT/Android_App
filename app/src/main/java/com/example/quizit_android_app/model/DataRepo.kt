@@ -56,6 +56,22 @@ class DataRepo @Inject constructor(private val context: Context) {
         }
     }
 
+    suspend fun changeUserYear(userId: Int): Boolean  {
+        return withContext(Dispatchers.IO) {
+            try {
+                val id = sessionManager.getUserId()
+                //val response = service.changeUserYear(id)
+                withContext(Dispatchers.Main) {
+                    Log.d("Retrofit Test", "Year changed")
+                }
+                true
+            } catch (e: Exception) {
+                Log.e("Retrofit Test", "Failed to change year", e)
+                false
+            }
+        }
+    }
+
 
     // ------------------- Subject Calls -------------------
     suspend fun fetchSubjects(): List<Subject> {
@@ -76,10 +92,11 @@ class DataRepo @Inject constructor(private val context: Context) {
         }
     }
 
-    suspend fun fetchSubjectsOfUser(id: Int): List<Subject> {
+    suspend fun fetchSubjectsOfUser(): List<Subject> {
         return withContext(Dispatchers.IO) {
             try {
                 val repository = DataRepo(context)
+                val id = sessionManager.getUserId()
                 val response = repository.service.getSubjectOfUser(id)
                 withContext(Dispatchers.Main) {
                     for (subject in response.subjects) {

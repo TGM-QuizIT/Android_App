@@ -2,11 +2,9 @@ package com.example.quizit_android_app.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.quizit_android_app.usecases.GetUserUseCase
-import com.example.quizit_android_app.usecases.LogoutUseCase
+import com.example.quizit_android_app.usecases.User.GetUserUseCase
+import com.example.quizit_android_app.usecases.User.LogoutUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

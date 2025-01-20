@@ -1,4 +1,4 @@
-package com.example.quizit_android_app.usecases
+package com.example.quizit_android_app.usecases.User
 
 import com.example.quizit_android_app.model.SessionManager
 import com.example.quizit_android_app.model.User

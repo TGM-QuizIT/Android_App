@@ -1,11 +1,10 @@
 package com.example.quizit_android_app.ui
 
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.quizit_android_app.usecases.IsUserLoggedInUseCase
+import com.example.quizit_android_app.usecases.User.IsUserLoggedInUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -16,7 +15,7 @@ class MainViewModel @Inject constructor(
 
 ): ViewModel() {
 
-    private var _isLoggedIn = mutableStateOf(false)
+    private var _isLoggedIn = mutableStateOf(true)
     val isLoggedIn: State<Boolean> = _isLoggedIn
 
     init {
