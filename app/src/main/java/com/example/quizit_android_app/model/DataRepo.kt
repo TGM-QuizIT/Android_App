@@ -115,10 +115,11 @@ class DataRepo @Inject constructor(private val context: Context) {
 
     // ------------------- Focus Calls -------------------
 
-    suspend fun fetchFocusOfUser(subjectId: Int, focusYear: Int, active: Int): List<Focus> {
+    suspend fun fetchFocusOfUser(subjectId: Int, active: Int): List<Focus> {
         return withContext(Dispatchers.IO) {
             try {
-                val response = service.getFocusOfUser(subjectId, focusYear, active)
+                val userYear = sessionManager.getUserYear()
+                val response = service.getFocusOfUser(subjectId, year = userYear, active)
                 withContext(Dispatchers.Main) {
                     for (focus in response.focus) {
                         Log.d("Retrofit Test", focus.focusName + " " + focus.focusId)

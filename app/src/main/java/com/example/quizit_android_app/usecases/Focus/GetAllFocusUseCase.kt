@@ -7,8 +7,8 @@ import javax.inject.Inject
 class GetAllFocusUseCase @Inject constructor(
     val dataRepo: DataRepo
 ) {
-    suspend operator fun invoke(subjectId: Int, focusYear: Int, active: Int) : List<Focus> {
-        val response = dataRepo.fetchFocusOfUser(subjectId, focusYear, active)
+    suspend operator fun invoke(subjectId: Int, active: Int = 1) : List<Focus> {
+        val response = dataRepo.fetchFocusOfUser(subjectId, active)
         return response
     }
 }

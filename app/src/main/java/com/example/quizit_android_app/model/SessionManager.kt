@@ -43,11 +43,37 @@ class SessionManager @Inject constructor(private val context: Context) {
         return user.map { it != null }.first()
     }
 
+    // ------------------- User getter -------------------
+
     suspend fun getUser(): User? {
         return user.first()
     }
 
     suspend fun getUserId(): Int? {
         return user.map { it?.userId }.first()
+    }
+
+    suspend fun getUserName(): String? {
+        return user.map { it?.userName }.first()
+    }
+
+    suspend fun getUserYear(): Int? {
+        return user.map { it?.userYear }.first()
+    }
+
+    suspend fun getUserFullname(): String? {
+        return user.map { it?.userFullname }.first()
+    }
+
+    suspend fun getUserClass(): String? {
+        return user.map { it?.userClass }.first()
+    }
+
+    suspend fun getUserType(): String? {
+        return user.map { it?.userType }.first()
+    }
+
+    suspend fun getUserMail(): String? {
+        return user.map { it?.userMail }.first()
     }
 }
