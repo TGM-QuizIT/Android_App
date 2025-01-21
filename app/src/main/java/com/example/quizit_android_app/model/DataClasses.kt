@@ -1,6 +1,7 @@
 package com.example.quizit_android_app.model
 
 import com.google.gson.annotations.SerializedName
+import java.io.Serializable
 
 // ------------------- User Dataclasses -------------------
 data class UserResponse(
@@ -36,7 +37,7 @@ data class Subject (
     @SerializedName("subjectName"         ) var subjectName         : String = "",
     @SerializedName("subjectImageAddress" ) var subjectImageAddress : String = ""
 
-)
+): Serializable
 
 data class SubjectsResponse(
     @SerializedName("status") val status: String,
@@ -55,6 +56,7 @@ data class FocusResponse (
     @SerializedName("focus"  ) var focus  : List<Focus> = arrayListOf()
 )
 
+
 data class Focus (
     @SerializedName("focusId"           ) var focusId           : Int?    = null,
     @SerializedName("focusName"         ) var focusName         : String? = null,
@@ -62,7 +64,7 @@ data class Focus (
     @SerializedName("focusImageAddress" ) var focusImageAddress : String? = null,
     @SerializedName("subjectId"         ) var subjectId         : Int?    = null,
     @SerializedName("questionCount"     ) var questionCount     : Int?    = null
-)
+): Serializable
 
 // ------------------- Quiz Dataclasses -------------------
 
