@@ -45,4 +45,6 @@ interface Requests {
 
     @GET("quiz/focus")
     suspend fun getQuizOfFocus(@Query("id") focusId: Int?): QuizOfFocusResponse
+
+    // ------------------- Result Calls -------------------
 }

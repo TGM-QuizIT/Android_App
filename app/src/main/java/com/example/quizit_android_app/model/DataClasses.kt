@@ -52,7 +52,7 @@ data class NewSubjectRequest(
 
 data class FocusResponse (
     @SerializedName("status" ) var status : String?          = null,
-    @SerializedName("focus"  ) var focus  : List<Focus> = arrayListOf()
+    @SerializedName("focuses"  ) var focus  : List<Focus> = arrayListOf()
 )
 
 data class Focus (
@@ -93,6 +93,10 @@ data class Questions (
     @SerializedName("textInput"    ) var textInput    : Boolean?           = null,
     @SerializedName("imageAddress" ) var imageAddress : String?            = null
 )
+
+// ------------------- Result Dataclasses -------------------
+
+
 
 
 
