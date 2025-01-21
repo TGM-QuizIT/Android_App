@@ -99,6 +99,7 @@ class DataRepo @Inject constructor(private val context: Context) {
         return withContext(Dispatchers.IO) {
             try {
                 val id = sessionManager.getUserId()
+                Log.d("Retrofit Test", "User ID: $id")
                 val response = service.getSubjectOfUser(id)
                 withContext(Dispatchers.Main) {
                     for (subject in response.subjects) {
