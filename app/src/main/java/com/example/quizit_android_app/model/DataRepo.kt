@@ -120,15 +120,17 @@ class DataRepo @Inject constructor(private val context: Context) {
         return withContext(Dispatchers.IO) {
             try {
                 val userYear = sessionManager.getUserYear()
+                Log.d("Retrofit Test FetchFocus", "User Year: $userYear")
                 val response = service.getFocusOfUser(subjectId, userYear = userYear, active)
+                Log.d("Retrofit Test FetchFocus", "Subject ID: $subjectId Active: $active")
                 withContext(Dispatchers.Main) {
                     for (focus in response.focus) {
-                        Log.d("Retrofit Test", focus.focusName + " " + focus.focusId)
+                        Log.d("Retrofit Test FetchFocus", focus.focusName + " " + focus.focusId)
                     }
                 }
                 response.focus
             } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to fetch focus", e)
+                Log.e("Retrofit Test FetchFocus", "Failed to fetch focus", e)
                 emptyList()
             }
         }
