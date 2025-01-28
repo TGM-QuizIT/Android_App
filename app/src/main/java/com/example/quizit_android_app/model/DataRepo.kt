@@ -173,6 +173,92 @@ class DataRepo @Inject constructor(private val context: Context) {
         }
     }
 
+    // ------------------- Result Calls -------------------
+
+    suspend fun postResultOfFocus(focusId: Int, score: Double) {
+        return withContext(Dispatchers.IO) {
+            try {
+                val id = sessionManager.getUserId()
+                val response = service.postResultOfFocus(PostResultRequestBody(score, id, focusId))
+                withContext(Dispatchers.Main) {
+                    Log.d("Retrofit Test", "Focus Result posted")
+                }
+            } catch (e: Exception) {
+                Log.e("Retrofit Test", "Failed to post focus result", e)
+            }
+        }
+    }
+
+    suspend fun postResultOfSubject(subjectID: Int, score: Double) {
+        return withContext(Dispatchers.IO) {
+            try {
+                val id = sessionManager.getUserId()
+                val response = service.postResultOfFocus(PostResultRequestBody(score, id, subjectID))
+                withContext(Dispatchers.Main) {
+                    Log.d("Retrofit Test", "Subject Result posted")
+                }
+            } catch (e: Exception) {
+                Log.e("Retrofit Test", "Failed to post Subject result", e)
+            }
+        }
+    }
+
+    suspend fun fetchResultsOfUser(amount: Int? = null): List<Result> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val id = sessionManager.getUserId()
+                val response = service.getResultsOfUser(id, amount)
+                withContext(Dispatchers.Main) {
+                    for (result in response.results) {
+                        Log.d("Retrofit Test", result.resultId.toString() + " " + result.resultScore)
+                    }
+                }
+                response.results
+            } catch (e: Exception) {
+                Log.e("Retrofit Test", "Failed to fetch results", e)
+                emptyList()
+            }
+        }
+    }
+
+    suspend fun fetchResultsOfSubject(subjectId: Int, amount: Int? = null): List<Result> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val id = sessionManager.getUserId()
+                val response = service.getResultsOfSubject(id, subjectId, amount)
+                withContext(Dispatchers.Main) {
+                    for (result in response.results) {
+                        Log.d("Retrofit Test", result.resultId.toString() + " " + result.resultScore)
+                    }
+                }
+                response.results
+            } catch (e: Exception) {
+                Log.e("Retrofit Test", "Failed to fetch results", e)
+                emptyList()
+            }
+        }
+    }
+
+    suspend fun fetchResultsOfFocus(focusId: Int, amount: Int? = null): List<Result> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val id = sessionManager.getUserId()
+                val response = service.getResultsOfFocus(id, focusId, amount)
+                withContext(Dispatchers.Main) {
+                    for (result in response.results) {
+                        Log.d("Retrofit Test", result.resultId.toString() + " " + result.resultScore)
+                    }
+                }
+                response.results
+            } catch (e: Exception) {
+                Log.e("Retrofit Test", "Failed to fetch results", e)
+                emptyList()
+            }
+        }
+    }
+
+    // ------------------- Friend Calls -------------------
+
 
 
 

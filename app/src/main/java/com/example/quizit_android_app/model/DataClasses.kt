@@ -1,5 +1,6 @@
 package com.example.quizit_android_app.model
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 
@@ -97,6 +98,31 @@ data class Questions (
 )
 
 // ------------------- Result Dataclasses -------------------
+
+data class GetResultsResponse (
+    @SerializedName("status"  ) var status  : String?            = null,
+    @SerializedName("results" ) var results : ArrayList<Result> = arrayListOf()
+)
+
+data class Result (
+
+    @SerializedName("resultId"    ) var resultId    : Int?    = null,
+    @SerializedName("resultScore" ) var resultScore : Double?    = null,
+    @SerializedName("userId"      ) var userId      : Int?    = null,
+    @SerializedName("focusId"     ) var focusId     : Int?    = null,
+    @SerializedName("subjectId"   ) var subjectId   : String? = null,
+    @SerializedName("resultDate"  ) var resultDate  : String? = null
+)
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class PostResultRequestBody (
+    @SerializedName("resultScore") val resultScore: Double,
+    @SerializedName("userId") val userId: Int?,
+    @SerializedName("focusId") val focusId: Int? = null,
+    @SerializedName("subjectId") val subjectId: Int? = null
+)
+
+// ------------------- Friend Dataclasses -------------------
 
 
 

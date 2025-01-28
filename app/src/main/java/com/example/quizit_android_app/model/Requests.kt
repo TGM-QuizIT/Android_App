@@ -47,4 +47,23 @@ interface Requests {
     suspend fun getQuizOfFocus(@Query("id") focusId: Int?): QuizOfFocusResponse
 
     // ------------------- Result Calls -------------------
+
+    @POST("result")
+    suspend fun postResultOfFocus(@Body result: PostResultRequestBody)
+
+    @POST("result/subject")
+    suspend fun postResultOfSubject(@Body result: PostResultRequestBody)
+
+    @GET("result")
+    suspend fun getResultsOfUser(@Query("userId") userId: Int?, @Query("amount") amount: Int? = null): GetResultsResponse
+
+    @GET("result")
+    suspend fun getResultsOfSubject(@Query("userId") userId: Int?, @Query("subjectId") subjectId: Int?, @Query("amount") amount: Int? = null): GetResultsResponse
+
+    @GET("result")
+    suspend fun getResultsOfFocus(@Query("userId") userId: Int?, @Query("focusId") focusId: Int?, @Query("amount") amount: Int? = null): GetResultsResponse
+
+    // ------------------- Friend Calls -------------------
+
+
 }

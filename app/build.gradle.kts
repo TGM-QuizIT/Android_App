@@ -99,6 +99,5 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
     implementation("com.google.code.gson:gson:2.11.0")
-
-
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.18.0")
 }
