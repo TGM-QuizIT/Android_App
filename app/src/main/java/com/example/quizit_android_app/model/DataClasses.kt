@@ -169,12 +169,12 @@ data class PendingFriendships (
 )
 
 data class FriendRequestBody (
-    @SerializedName("userId") val userId: Int? = null,
-    @SerializedName("friendId") val friendId: Int
+    @SerializedName("user1Id") val userId: Int? = null,
+    @SerializedName("user2Id") val friendId: Int
 )
 
 data class AcceptFriendRequestBody(
-    @SerializedName("id") val id: Int
+    @SerializedName("friendshipId") val id: Int
 )
 
 

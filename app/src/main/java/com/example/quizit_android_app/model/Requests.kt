@@ -86,7 +86,7 @@ interface Requests {
     // ------------------- Friend Calls -------------------
 
     @GET("/friends")
-    suspend fun getFriends(@Query("userId") userId: Int?): AllFriendshipResponse
+    suspend fun getFriends(@Query("id") userId: Int?): AllFriendshipResponse
 
     @POST("/friends")
     suspend fun addFriend(@Body friendRequestBody: FriendRequestBody): FriendshipResponse
