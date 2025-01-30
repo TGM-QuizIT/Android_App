@@ -76,6 +76,23 @@ class DataRepo @Inject constructor(private val context: Context) {
         }
     }
 
+    suspend fun fetchAllUsers(year: Int? = null): List<User?> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = service.getAllUsers(year)
+                withContext(Dispatchers.Main) {
+                    for (user in response.users) {
+                        Log.d("Retrofit Test", "")
+                    }
+                }
+                response.users
+            } catch (e: Exception) {
+                Log.e("Retrofit Test", "Failed to fetch users", e)
+                emptyList()
+            }
+        }
+    }
+
 
     // ------------------- Subject Calls -------------------
     suspend fun fetchSubjects(): List<Subject> {
@@ -259,7 +276,51 @@ class DataRepo @Inject constructor(private val context: Context) {
 
     // ------------------- Friend Calls -------------------
 
+    suspend fun fetchAllFriends(): AllFriendshipResponse? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val id = sessionManager.getUserId()
+                val response = service.getFriends(id)
+                withContext(Dispatchers.Main) {
+                    for (friend in response.acceptedFriendships) {
+                        Log.d("Retrofit Test", friend.friend?.userName+"")
+                    }
+                }
+                response
+            } catch (e: Exception) {
+                Log.e("Retrofit Test", "Failed to fetch friends", e)
+                null
+            }
+        }
+    }
 
+    suspend fun addFriendship(friendId: Int): String {
+        return withContext(Dispatchers.IO) {
+            try {
+                val id = sessionManager.getUserId()
+                val response = service.addFriend(FriendRequestBody(id, friendId))
+                withContext(Dispatchers.Main) {
+                    Log.d("Retrofit Test", "Friendship added")
+                }
+            } catch (e: Exception) {
+                Log.e("Retrofit Test", "Failed to add friendship", e)
+                "Failed to add friendship"
+            }.toString()
+        }
+    }
+
+    suspend fun acceptFriendship(friendshipId: Int) {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = service.acceptFriend(AcceptFriendRequestBody(friendshipId))
+                withContext(Dispatchers.Main) {
+                    Log.d("Retrofit Test", "Friendship accepted")
+                }
+            } catch (e: Exception) {
+                Log.e("Retrofit Test", "Failed to accept friendship", e)
+            }
+        }
+    }
 
 
 }

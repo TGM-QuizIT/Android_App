@@ -21,6 +21,8 @@ interface Requests {
     @PUT("user")
     suspend fun changeUserYear(@Body changeUserYearRequestBody: ChangeUserYearRequestBody): UserResponse
 
+    @GET("user")
+    suspend fun getAllUsers(@Query("year") year: Int?): UserResponse
 
 
     // ------------------- Subject Calls -------------------
@@ -36,12 +38,19 @@ interface Requests {
 
     // ------------------- Focus Calls -------------------
     @GET("focus")
-    suspend fun getFocusOfUser(@Query("id") subjectId: Int?, @Query("year") userYear: Int?, @Query("active") active: Int?): FocusResponse
+    suspend fun getFocusOfUser(
+        @Query("id") subjectId: Int?,
+        @Query("year") userYear: Int?,
+        @Query("active") active: Int?
+    ): FocusResponse
 
     // ------------------- Quiz Calls -------------------
 
     @GET("quiz/subject")
-    suspend fun getQuizOfSubject(@Query("id") subjectId: Int?, @Query("year") userYear: Int?): QuizOfSubjectResponse
+    suspend fun getQuizOfSubject(
+        @Query("id") subjectId: Int?,
+        @Query("year") userYear: Int?
+    ): QuizOfSubjectResponse
 
     @GET("quiz/focus")
     suspend fun getQuizOfFocus(@Query("id") focusId: Int?): QuizOfFocusResponse
@@ -55,15 +64,34 @@ interface Requests {
     suspend fun postResultOfSubject(@Body result: PostResultRequestBody)
 
     @GET("result")
-    suspend fun getResultsOfUser(@Query("userId") userId: Int?, @Query("amount") amount: Int? = null): GetResultsResponse
+    suspend fun getResultsOfUser(
+        @Query("userId") userId: Int?,
+        @Query("amount") amount: Int? = null
+    ): GetResultsResponse
 
     @GET("result")
-    suspend fun getResultsOfSubject(@Query("userId") userId: Int?, @Query("subjectId") subjectId: Int?, @Query("amount") amount: Int? = null): GetResultsResponse
+    suspend fun getResultsOfSubject(
+        @Query("userId") userId: Int?,
+        @Query("subjectId") subjectId: Int?,
+        @Query("amount") amount: Int? = null
+    ): GetResultsResponse
 
     @GET("result")
-    suspend fun getResultsOfFocus(@Query("userId") userId: Int?, @Query("focusId") focusId: Int?, @Query("amount") amount: Int? = null): GetResultsResponse
+    suspend fun getResultsOfFocus(
+        @Query("userId") userId: Int?,
+        @Query("focusId") focusId: Int?,
+        @Query("amount") amount: Int? = null
+    ): GetResultsResponse
 
     // ------------------- Friend Calls -------------------
 
+    @GET("/friends")
+    suspend fun getFriends(@Query("userId") userId: Int?): AllFriendshipResponse
+
+    @POST("/friends")
+    suspend fun addFriend(@Body friendRequestBody: FriendRequestBody): FriendshipResponse
+
+    @PUT("/friends/accept")
+    suspend fun acceptFriend(@Body acceptFriendRequestBody: AcceptFriendRequestBody ): FriendshipResponse
 
 }

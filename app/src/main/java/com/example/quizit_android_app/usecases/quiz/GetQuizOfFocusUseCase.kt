@@ -1,4 +1,4 @@
-package com.example.quizit_android_app.usecases.Quiz
+package com.example.quizit_android_app.usecases.quiz
 
 import com.example.quizit_android_app.model.DataRepo
 import com.example.quizit_android_app.model.Questions

@@ -7,7 +7,8 @@ import java.io.Serializable
 // ------------------- User Dataclasses -------------------
 data class UserResponse(
     @SerializedName("status") val status: String,
-    @SerializedName("user") val user: User?,
+    @SerializedName("user") val user: User? = null,
+    @SerializedName("users") val users: List<User?> = emptyList(),
     @SerializedName("reason") val reason: String?
 )
 
@@ -105,7 +106,6 @@ data class GetResultsResponse (
 )
 
 data class Result (
-
     @SerializedName("resultId"    ) var resultId    : Int?    = null,
     @SerializedName("resultScore" ) var resultScore : Double?    = null,
     @SerializedName("userId"      ) var userId      : Int?    = null,
@@ -122,7 +122,60 @@ data class PostResultRequestBody (
     @SerializedName("subjectId") val subjectId: Int? = null
 )
 
-// ------------------- Friend Dataclasses -------------------
+// ------------------- Friendship Dataclasses -------------------
+
+data class FriendshipResponse (
+    @SerializedName("status"     ) var status     : String?     = null,
+    @SerializedName("friendship" ) var friendship : Friendship? = Friendship()
+)
+
+data class Friendship (
+    @SerializedName("friendshipId"      ) var friendshipId      : Int?     = null,
+    @SerializedName("friend"            ) var friend            : Friend?  = Friend(),
+    @SerializedName("friendshipPending" ) var friendshipPending : Boolean? = null,
+    @SerializedName("friendshipSince"   ) var friendshipSince   : String?  = null,
+    @SerializedName("actionReq"         ) var actionReq         : Boolean? = null
+)
+
+data class AllFriendshipResponse (
+    @SerializedName("status"              ) var status              : String?                        = null,
+    @SerializedName("userId"              ) var userId              : Int?                           = null,
+    @SerializedName("acceptedFriendships" ) var acceptedFriendships : ArrayList<AcceptedFriendships> = arrayListOf(),
+    @SerializedName("pendingFriendships"  ) var pendingFriendships  : ArrayList<PendingFriendships>  = arrayListOf()
+)
+
+data class Friend (
+    @SerializedName("userId"       ) var userId       : Int?     = null,
+    @SerializedName("userName"     ) var userName     : String?  = null,
+    @SerializedName("userYear"     ) var userYear     : Int?     = null,
+    @SerializedName("userFullname" ) var userFullname : String?  = null,
+    @SerializedName("userClass"    ) var userClass    : String?  = null,
+    @SerializedName("userType"     ) var userType     : String?  = null,
+    @SerializedName("userMail"     ) var userMail     : String?  = null,
+    @SerializedName("userBlocked"  ) var userBlocked  : Boolean? = null
+)
+
+data class AcceptedFriendships (
+    @SerializedName("friendshipId"    ) var friendshipId    : Int?    = null,
+    @SerializedName("friend"          ) var friend          : Friend? = Friend(),
+    @SerializedName("friendshipSince" ) var friendshipSince : String? = null
+)
+
+data class PendingFriendships (
+    @SerializedName("friendshipId"    ) var friendshipId    : Int?     = null,
+    @SerializedName("friend"          ) var friend          : Friend?  = Friend(),
+    @SerializedName("actionReq"       ) var actionReq       : Boolean? = null,
+    @SerializedName("friendshipSince" ) var friendshipSince : String?  = null
+)
+
+data class FriendRequestBody (
+    @SerializedName("userId") val userId: Int? = null,
+    @SerializedName("friendId") val friendId: Int
+)
+
+data class AcceptFriendRequestBody(
+    @SerializedName("id") val id: Int
+)
 
 
 

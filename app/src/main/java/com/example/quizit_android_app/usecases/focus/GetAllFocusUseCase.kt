@@ -1,4 +1,4 @@
-package com.example.quizit_android_app.usecases.Focus
+package com.example.quizit_android_app.usecases.focus
 
 import android.util.Log
 import com.example.quizit_android_app.model.DataRepo
