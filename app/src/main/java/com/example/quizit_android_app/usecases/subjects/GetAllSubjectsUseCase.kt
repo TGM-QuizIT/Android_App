@@ -1,4 +1,4 @@
-package com.example.quizit_android_app.usecases.Subjects
+package com.example.quizit_android_app.usecases.subjects
 
 import android.util.Log
 import com.example.quizit_android_app.model.Subject

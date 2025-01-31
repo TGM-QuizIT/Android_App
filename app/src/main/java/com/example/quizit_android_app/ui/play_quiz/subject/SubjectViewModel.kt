@@ -6,7 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.quizit_android_app.model.Subject
-import com.example.quizit_android_app.usecases.Subjects.GetAllSubjectsUseCase
+import com.example.quizit_android_app.usecases.subjects.GetAllSubjectsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
