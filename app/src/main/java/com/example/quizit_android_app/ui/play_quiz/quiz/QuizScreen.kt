@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -26,16 +25,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,48 +47,69 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.quizit_android_app.model.Focus
+import com.example.quizit_android_app.model.Options
+import com.example.quizit_android_app.model.Questions
+import com.example.quizit_android_app.model.Subject
 import com.example.quizit_android_app.ui.theme.Typography
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun QuizScreen(
-    navigateBack: () -> Unit,
-    quizViewModel: QuizViewModel = hiltViewModel()
+    navigateBack: (Subject?, Focus?) -> Unit,
+    quizViewModel: QuizViewModel = hiltViewModel(),
+    focus: Focus?,
+    subject: Subject?
 ) {
 
     val currentQuestionIndex = quizViewModel.currentQuestionIndex.value
     val selectedAnswers = quizViewModel.selectedAnswers.value
     val questions = quizViewModel.questions.value
-    val focus = quizViewModel.focus.value
+    val isLoading = quizViewModel.isLoading.value
+
 
 
     Scaffold(
         contentWindowInsets = WindowInsets(0.dp),
         topBar = {
             if (currentQuestionIndex < questions.size) {
-                QuizTopBar(currentQuestionIndex + 1, questions.size, focus, onClick = {
-                    navigateBack()
+                QuizTopBar(currentQuestionIndex + 1, questions.size, focus?.focusName, subject?.subjectName, onClick = {
+                    navigateBack(subject, focus)
                 })
             }
         },
         content = { paddingValues ->
-            if (currentQuestionIndex < questions.size) {
-                QuizQuestion(
-                    question = questions[currentQuestionIndex],
-                    selectedAnswers = selectedAnswers,
-                    onSelected = { optionId ->
-                        quizViewModel.toggleAnswer(optionId)
-                    },
-                    onNext = { quizViewModel.nextQuestion() },
-                    modifier = Modifier.padding(paddingValues)
-                )
-            } else {
-
-
-                val userScore = quizViewModel.calculateScore()
-                val userResults = quizViewModel.getResult()
-                QuizResult(focus = focus,score = userScore, results = userResults, onCloseResult = { navigateBack()  } )
+            Box(modifier = Modifier.fillMaxSize()) {
+                when {
+                    isLoading -> {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center),
+                            trackColor = Color.Gray
+                        )
+                    }
+                    currentQuestionIndex < questions.size -> {
+                        QuizQuestion(
+                            question = questions[currentQuestionIndex],
+                            selectedAnswers = selectedAnswers,
+                            onSelected = { optionId ->
+                                quizViewModel.toggleAnswer(optionId)
+                            },
+                            onNext = { quizViewModel.nextQuestion() },
+                            modifier = Modifier.padding(paddingValues)
+                        )
+                    }
+                    else -> {
+                        val userScore = quizViewModel.calculateScore()
+                        val userResults = quizViewModel.getResult()
+                        QuizResult(
+                            focus = focus?.focusName,
+                            subject = subject?.subjectName,
+                            score = userScore,
+                            results = userResults,
+                            onCloseResult = { navigateBack(subject, focus) }
+                        )
+                    }
+                }
             }
         },
         modifier = Modifier.padding(top = 16.dp)
@@ -100,7 +120,7 @@ fun QuizScreen(
 }
 
 @Composable
-fun QuizTopBar(currentQuestion: Int, totalQuestions: Int, focus: String, onClick: () -> Unit) {
+fun QuizTopBar(currentQuestion: Int, totalQuestions: Int, focus: String?, subject: String?, onClick: () -> Unit) {
 
     Column(
         modifier = Modifier
@@ -113,18 +133,28 @@ fun QuizTopBar(currentQuestion: Int, totalQuestions: Int, focus: String, onClick
             modifier = Modifier.fillMaxWidth()
         ) {
 
-            Text(
-                text = "$currentQuestion/$totalQuestions",
-                style = Typography.bodyMedium,
-                color = Color.Gray
-            )
-
             Box(
-                //modifier = Modifier
-                    //.fillMaxWidth()
+                modifier = Modifier
+                    .size(32.dp)
+
             ) {
                 Text(
-                    text = focus,
+                    text = "$currentQuestion/$totalQuestions",
+                    style = Typography.bodyMedium,
+                    color = Color.Gray,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = focus ?: subject ?: "",
                     style = Typography.titleMedium,
                     modifier = Modifier.align(Alignment.Center)
                 )
@@ -168,7 +198,7 @@ fun QuizTopBar(currentQuestion: Int, totalQuestions: Int, focus: String, onClick
 
 @Composable
 fun QuizQuestion(
-    question: Question,
+    question: Questions,
     selectedAnswers: List<Int>,
     onSelected: (Int) -> Unit,
     onNext: () -> Unit,
@@ -198,7 +228,7 @@ fun QuizQuestion(
                 modifier = Modifier.fillMaxSize()
             ) {
                 Text(
-                    text = question.questionText,
+                    text = question.questionText!!,
                     style = Typography.bodyMedium,
                     color = Color.Black,
                     modifier = Modifier.padding(16.dp),
@@ -210,13 +240,16 @@ fun QuizQuestion(
 
 
         Column(modifier = Modifier.fillMaxWidth()) {
-            question.options.forEach { option ->
-                OptionItem(
-                    option = option,
-                    isSelected = selectedAnswers.contains(option.optionId),
-                    onSelected = onSelected
-                )
 
+            LazyColumn {
+                items(question.options) {option ->
+                    OptionItem(
+                        option = option,
+                        isSelected = selectedAnswers.contains(option.optionId),
+                        onSelected = onSelected
+                    )
+
+                }
             }
         }
 
@@ -250,7 +283,7 @@ fun QuizQuestion(
 
 @Composable
 fun OptionItem(
-    option: Option,
+    option: Options?,
     isSelected: Boolean,
     onSelected: (Int) -> Unit
 ) {
@@ -260,7 +293,7 @@ fun OptionItem(
             .fillMaxWidth()
             .padding(vertical = 8.dp)
 
-            .clickable { onSelected(option.optionId) }
+            .clickable { onSelected(option?.optionId!!) }
             .background(
                 color = if (isSelected) MaterialTheme.colorScheme.secondary else Color.Transparent,
                 shape = RoundedCornerShape(8.dp)
@@ -268,7 +301,7 @@ fun OptionItem(
             .border(
                 width = if (!isSelected) 0.5.dp else 0.dp,
                 color = if (!isSelected) Color.Gray else Color.Transparent,
-                shape = RoundedCornerShape(8.dp) // Ensure rounded corners for border as well
+                shape = RoundedCornerShape(8.dp)
             )
             .padding(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent) ,
@@ -281,7 +314,7 @@ fun OptionItem(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = option.optionText,
+                text = option?.optionText!!,
                 style = Typography.bodySmall,
                 modifier = Modifier.weight(1f)
             )
@@ -292,8 +325,7 @@ fun OptionItem(
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.tertiary,
                     modifier = Modifier
-                        .size(32.dp)
-                        .padding(end = 8.dp)
+                        .size(16.dp)
                 )
             }
         }
@@ -303,7 +335,7 @@ fun OptionItem(
 }
 
 @Composable
-fun QuizResult(focus: String,score: Float, results: List<ResultItem>, onCloseResult: () -> Unit) {
+fun QuizResult(focus: String?, subject: String?, score: Float, results: List<ResultItem>, onCloseResult: () -> Unit) {
 
     Scaffold(
         contentWindowInsets = WindowInsets(0.dp),
@@ -317,16 +349,37 @@ fun QuizResult(focus: String,score: Float, results: List<ResultItem>, onCloseRes
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.Absolute.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Spacer(modifier = Modifier.size(32.dp))
+
+
+                    Box {
+                        if(subject != null && focus != null) {
+
+
+                                Text(
+                                    text = subject,
+                                    style = Typography.titleMedium,
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
+
+
+
+                        }
+                        else {
+                            Spacer(modifier = Modifier
+                                .align(Alignment.Center)
+                                .size(32.dp))
+                        }
+
+                    }
 
                     Box(
 
                     ) {
                         Text(
-                            text = focus,
+                            text = focus ?: subject ?: "",
                             style = Typography.titleMedium,
                             modifier = Modifier.align(Alignment.Center)
                         )
@@ -371,7 +424,7 @@ fun QuizResult(focus: String,score: Float, results: List<ResultItem>, onCloseRes
                 val percentage = (score * 100).toInt()
 
                 Text(
-                    modifier = Modifier.padding(start=16.dp),
+                    modifier = Modifier.padding(start=8.dp),
                     text = "Dein Resultat",
                     style = MaterialTheme.typography.titleMedium,
                 )
@@ -421,7 +474,25 @@ fun QuizResult(focus: String,score: Float, results: List<ResultItem>, onCloseRes
 
                             shape = RoundedCornerShape(8.dp)
                         ) {
-                            Text(text = "Freund herausfordern", color = Color.Black, style= MaterialTheme.typography.titleSmall)
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.PersonAdd,
+                                    contentDescription = "Freund herausfordern",
+                                    tint = Color.Black,
+
+
+                                )
+                                Text(text = "Herausfordern", color = Color.Black, style= MaterialTheme.typography.titleSmall)
+
+                                Spacer(modifier = Modifier)
+
+                            }
+
                         }
 
                         Spacer(modifier = Modifier.size(8.dp))
@@ -438,7 +509,22 @@ fun QuizResult(focus: String,score: Float, results: List<ResultItem>, onCloseRes
 
                             shape = RoundedCornerShape(8.dp)
                         ) {
-                            Text(text = "Historie", color = Color.Black, style = MaterialTheme.typography.titleSmall)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.History,
+                                    contentDescription = "Historie ansehen",
+                                    tint = Color.Black
+                                )
+                                Text(text = "Historie", color = Color.Black, style = MaterialTheme.typography.titleSmall)
+
+                                Spacer(modifier = Modifier)
+
+                            }
+
                         }
                     }
 
@@ -480,7 +566,7 @@ fun ResultCard(result: ResultItem, questionIndex: Int) {
         ) {
             Text(
                 modifier = Modifier.weight(1f),
-                text = result.question.questionText,
+                text = result?.question?.questionText!!,
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -503,15 +589,15 @@ fun ResultCard(result: ResultItem, questionIndex: Int) {
             var icon: ImageVector? = null
 
             // Bedingungen prüfen und Werte entsprechend setzen
-            if (option.optionId in result.userAnswer && option.optionCorrect) {
+            if (option.optionId in result.userAnswer && option?.optionCorrect!!) {
                 backgroundColor = Color(0xFF6FFD89)
                 icon = Icons.Default.Check
 
-            } else if (option.optionId in result.userAnswer && !option.optionCorrect) {
+            } else if (option.optionId in result.userAnswer && !option?.optionCorrect!!) {
                 backgroundColor = Color(0xFFFB6E5C)
                 icon = Icons.Default.Close
 
-            } else if (option.optionId !in result.userAnswer && option.optionCorrect) {
+            } else if (option.optionId !in result.userAnswer && option?.optionCorrect!!) {
                 backgroundColor = Color(0xFFE1E1E1)
                 icon = Icons.Default.Check
 
@@ -528,7 +614,7 @@ fun ResultCard(result: ResultItem, questionIndex: Int) {
             ) {
                 // Text der Option
                 Text(
-                    text = option.optionText,
+                    text = option?.optionText!!,
                     style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier.weight(1f)
                 )

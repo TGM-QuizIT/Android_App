@@ -5,17 +5,24 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.quizit_android_app.model.Subject
+import com.example.quizit_android_app.usecases.Subjects.GetAllSubjectsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val getAllSubjectsUseCase: GetAllSubjectsUseCase,
 ): ViewModel() {
 
     private var _subjectList by mutableStateOf(listOf<Subject>())
     val subjectList: List<Subject> get() = _subjectList
+
+    private var _isLoading by mutableStateOf(false)
+    val isLoading: Boolean get() = _isLoading
 
     init {
         setSubjects()
@@ -24,27 +31,15 @@ class HomeViewModel @Inject constructor(
 
 
     private fun setSubjects() {
-        _subjectList = listOf(
-            Subject(
-                subjectId = 1,
-                "Angewandte Mathematik",
-                "https://schoolizer.com/img/articles_photos/17062655360.jpg"
-            ),
-            Subject(
-                subjectId = 2,
-                "GGP",
-                "https://thumbs.dreamstime.com/b/stellen-sie-von-den-geografiesymbolen-ein-ausr%C3%BCstungen-f%C3%BCr-netzfahnen-weinleseentwurfsskizze-kritzeln-art-ausbildung-136641038.jpg"
-            ),
-            Subject(
-                subjectId = 3,
-                "SEW",
-                "https://blog.planview.com/de/wp-content/uploads/2020/01/Top-6-Software-Development-Methodologies.jpg"
-            ),
-            Subject(
-                subjectId = 3,
-                "SEW",
-                "https://blog.planview.com/de/wp-content/uploads/2020/01/Top-6-Software-Development-Methodologies.jpg"
-            )
-        )
+        viewModelScope.launch {
+            _isLoading = true
+            try {
+                _subjectList = getAllSubjectsUseCase()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                _isLoading = false
+            }
+        }
     }
 }

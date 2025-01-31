@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -22,7 +23,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -38,11 +41,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SportsScore
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.SportsScore
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
@@ -66,12 +73,16 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -79,6 +90,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEachIndexed
+import androidx.compose.ui.window.Popup
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.coroutineScope
@@ -135,7 +147,7 @@ fun SocialScreen(
                 }
             },
             content = { paddingValues ->
-                Box(modifier = Modifier.padding(paddingValues)) {
+                Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
                     when (selectedTabIndex) {
                         0 -> FriendsSection(
                             modifier = Modifier.fillMaxSize(),
@@ -282,7 +294,9 @@ fun UserCard(user: User, navigateToUserDetail: (Int) -> Unit) {
                     imageVector = Icons.Default.Person,
                     contentDescription = "User Icon",
                     tint = Color(0xFFB4DBFF),
-                    modifier = Modifier.size(40.dp).offset(0.dp, 1.dp)
+                    modifier = Modifier
+                        .size(40.dp)
+                        .offset(0.dp, 1.dp)
                 )
             }
 
@@ -369,24 +383,29 @@ fun FriendsSection(
     pendingFriendships: List<PendingFriendship>,
     navigateToUserDetail: (Int) -> Unit
 ) {
-    val scrollState = rememberScrollState()
-    Column(
+
+    LazyColumn(
         modifier = modifier
             .fillMaxWidth()
-            .verticalScroll(scrollState)
-            //.padding(16.dp)
+            .padding(top = 16.dp, bottom = 16.dp)
     ) {
-        friendships.forEach { friendship ->
+
+        items(friendships) { friendship ->
             FriendshipCard(friendship, navigateToUserDetail = { navigateToUserDetail(it) })
+
         }
 
-        Spacer(modifier = Modifier.size(32.dp))
+        item {
+            Spacer(modifier = Modifier.size(32.dp))
 
-        Text("Freundschaftsanfragen", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 16.dp))
+            Text("Freundschaftsanfragen", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 16.dp))
 
-        pendingFriendships.forEach { pendingFriendship ->
+        }
+
+        items(pendingFriendships) { pendingFriendship ->
             PendingFriendshipCard(pendingFriendship = pendingFriendship, navigateToUserDetail = { navigateToUserDetail(it) })
         }
+
 
     }
 }
@@ -396,7 +415,7 @@ fun FriendshipCard(friendship: Friendship, navigateToUserDetail: (Int) -> Unit) 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, top = 20.dp)
+            .padding(start = 16.dp, end = 16.dp, top = 24.dp)
             .clickable { navigateToUserDetail(friendship.friendId) },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -412,7 +431,9 @@ fun FriendshipCard(friendship: Friendship, navigateToUserDetail: (Int) -> Unit) 
                     imageVector = Icons.Default.Person,
                     contentDescription = "User Icon",
                     tint = Color(0xFFB4DBFF),
-                    modifier = Modifier.size(40.dp).offset(0.dp, 1.dp)
+                    modifier = Modifier
+                        .size(40.dp)
+                        .offset(0.dp, 1.dp)
                 )
             }
 
@@ -438,6 +459,10 @@ fun FriendshipCard(friendship: Friendship, navigateToUserDetail: (Int) -> Unit) 
         ) {
             // TODO Friend Notifications
         }
+
+        Spacer(modifier = Modifier.size(16.dp))
+
+
     }
 
 }
@@ -447,7 +472,7 @@ fun PendingFriendshipCard(pendingFriendship: PendingFriendship, navigateToUserDe
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, top = 16.dp)
+            .padding(start = 16.dp, end = 16.dp, top = 24.dp)
             .clickable { navigateToUserDetail(pendingFriendship.friendId) },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -464,7 +489,9 @@ fun PendingFriendshipCard(pendingFriendship: PendingFriendship, navigateToUserDe
                     imageVector = Icons.Default.Person,
                     contentDescription = "User Icon",
                     tint = Color(0xFFB4DBFF),
-                    modifier = Modifier.size(40.dp).offset(0.dp, 1.dp)
+                    modifier = Modifier
+                        .size(40.dp)
+                        .offset(0.dp, 1.dp)
                 )
             }
 
@@ -520,19 +547,27 @@ fun PendingFriendshipCard(pendingFriendship: PendingFriendship, navigateToUserDe
 }
 @Composable
 fun StatisticsSection(modifier: Modifier, results: List<Result>) {
+
+    var showPopup: Boolean by remember { mutableStateOf(false) }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 16.dp)
     ) {
-        StatisticsCard()
+        if(showPopup) {
+            StatisticsPopUp(onClose = { showPopup = false })
+        }
+        StatisticsCard(onClick = { showPopup = true })
 
         Spacer(modifier = Modifier.size(16.dp))
         Text("Quiz Historie", style = MaterialTheme.typography.titleMedium)
         Spacer(modifier = Modifier.size(16.dp))
 
 
-        LazyRow {
+        LazyRow(
+            modifier = Modifier.padding(PaddingValues(0.dp))
+        ) {
             items(results) { result ->
 
                 ResultCard(result = result)
@@ -544,7 +579,107 @@ fun StatisticsSection(modifier: Modifier, results: List<Result>) {
 }
 
 @Composable
-fun StatisticsCard() {
+fun StatisticsPopUp(onClose: () -> Unit) {
+    Popup(
+        onDismissRequest = onClose,
+        alignment = Alignment.Center,
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .fillMaxSize()
+                .wrapContentHeight()
+                .background(color = Color(0xFFF8F9FE), shape = RoundedCornerShape(16.dp))
+                .padding(16.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+
+            ) {
+                // Header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Statistiken Info",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = Color.Black
+                    )
+                    IconButton(onClick = onClose) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close",
+                            tint = Color.Black
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.size(16.dp))
+
+                // Statistics Items
+                StatisticsItem(
+                    icon = Icons.Default.EmojiEvents, // Example icon
+                    title = "Challenges",
+                    description = "Der Prozentsatz der gewonnenen Herausforderungen."
+                )
+                Spacer(modifier = Modifier.size(12.dp))
+                StatisticsItem(
+                    icon = Icons.Default.School, // Example icon
+                    title = "TGM -Level",
+                    description = "Die Platzierung im Vergleich zu anderen Schüler:innen sortiert nach dem Durchschnittsscore."
+                )
+                Spacer(modifier = Modifier.size(12.dp))
+                StatisticsItem(
+                    icon = Icons.Default.SportsScore, // Example icon
+                    title = "Score",
+                    description = "Der Durchschnittsscore deiner abgeschlossenen Quizze."
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun StatisticsItem(icon: ImageVector, title: String, description: String) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ){
+            Icon(
+                imageVector = icon,
+                contentDescription = title,
+                tint = Color(0xFFBAA7A7),
+                modifier = Modifier.size(35.dp)
+                    .align(Alignment.CenterVertically)
+            )
+            Spacer(modifier = Modifier.size(12.dp))
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = Color.Black,
+                modifier = Modifier.align(Alignment.CenterVertically)
+            )
+
+
+
+        }
+        Spacer(modifier = Modifier.size(4.dp))
+        Text(
+            text = description,
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.Gray
+        )
+    }
+}
+
+@Composable
+fun StatisticsCard(onClick: () -> Unit) {
 
     Card(
         colors = CardDefaults.cardColors(containerColor = Color(0xFF009DE0)),
@@ -552,25 +687,29 @@ fun StatisticsCard() {
         modifier = Modifier
             .fillMaxWidth()
             .height(110.dp)
+            .padding(end = 0.dp)
+            .clickable { onClick() }
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceAround
+                .padding(vertical = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
         ){
             Column(
-                modifier = Modifier.align(Alignment.CenterVertically),
+                modifier = Modifier
+                    .weight(1f)
+                    .align(Alignment.CenterVertically),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.StarBorder,
+                    imageVector = Icons.Default.EmojiEvents,
                     contentDescription = "Star Icon",
                     modifier = Modifier.size(30.dp),
                 )
 
                 Text(
-                    "Punkte",
+                    "Challenges",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White.copy(alpha = 0.5f)
                 )
@@ -599,7 +738,9 @@ fun StatisticsCard() {
             )
 
             Column(
-                modifier = Modifier.align(Alignment.CenterVertically),
+                modifier = Modifier
+                    .weight(1f)
+                    .align(Alignment.CenterVertically),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
@@ -637,13 +778,15 @@ fun StatisticsCard() {
             )
 
             Column(
-                modifier = Modifier.align(Alignment.CenterVertically),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier = Modifier
+                    .weight(1f)
+                    .align(Alignment.CenterVertically),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
 
                 Icon(
-                    imageVector = Icons.Outlined.Description,
-                    contentDescription = "Star Icon",
+                    imageVector = Icons.Outlined.SportsScore,
+                    contentDescription = "Score Icon",
                     modifier = Modifier.size(30.dp),
                 )
 
@@ -680,7 +823,7 @@ fun ResultCard(result: Result) {
                 contentScale = ContentScale.FillBounds,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(8f/3f)
+                    .aspectRatio(8f / 3f)
             )
 
             Spacer(modifier = Modifier.size(8.dp))

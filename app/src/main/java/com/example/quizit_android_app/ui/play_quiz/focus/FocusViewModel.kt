@@ -7,50 +7,66 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.quizit_android_app.model.Focus
 import com.example.quizit_android_app.model.Subject
-import com.example.quizit_android_app.models.Focus
+import com.example.quizit_android_app.usecases.Focus.GetAllFocusUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class FocusViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val getAllFocusUseCase: GetAllFocusUseCase
 ): ViewModel() {
     private var _focusList by mutableStateOf(listOf<Focus>())
     val focusList: List<Focus> get() = _focusList
 
-    private var _subject = mutableStateOf<Subject?>(null)
-    val subject: Subject? get() = _subject.value
+
+
+    private var _overallQuestionCount = mutableStateOf<Int>(0)
+    val overallQuestionCount: Int get() = _overallQuestionCount.value
+
+    private var _isLoading = mutableStateOf(false)
+    val isLoading: Boolean get() = _isLoading.value
 
     init {
-        val subjectId: Int = savedStateHandle.get<String>("subjectId")?.toIntOrNull() ?: 0
+        var subjectId: Int = savedStateHandle.get<String>("subjectId")?.toIntOrNull() ?: 0
         setFocusList(subjectId)
-        setSubject(subjectId)
     }
 
     private fun setFocusList(id: Int) {
 
-        Log.i("",""+id)
-        _focusList = listOf(
-            Focus(focusId = 1, "2. Weltkrieg", 20, "https://example.com/image1.jpg"),
-            Focus(focusId = 2, "Mittelalter", 24, "https://example.com/image2.jpg"),
-            Focus(focusId = 3,"Zwischenkriegszeit", 30, "https://example.com/image3.jpg"),
-            Focus(focusId = 4,"Ideologien", 32, "https://example.com/image4.jpg"),
-            Focus(focusId = 5,"Kalter Krieg", 41, "https://example.com/image5.jpg")
-        )
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                _focusList = getAllFocusUseCase(id)
+                _overallQuestionCount.value = getQuestionCount()
+
+            } catch (e: Exception) {
+                Log.e("FocusViewModel", "Error fetching focus: "+e)
+            } finally {
+                _isLoading.value = false
+            }
+
+        }
     }
 
-    private fun setSubject(id: Int) {
-        Log.i("",""+id)
-        Log.i("",""+id)
-        _subject.value = Subject(
-            subjectId = 2,
-            "GGP",
-            "https://thumbs.dreamstime.com/b/stellen-sie-von-den-geografiesymbolen-ein-ausr%C3%BCstungen-f%C3%BCr-netzfahnen-weinleseentwurfsskizze-kritzeln-art-ausbildung-136641038.jpg"
-        )
+    private fun getQuestionCount(): Int {
+        var count = 0
+        _focusList.forEach { focus ->
+            count = count + focus.questionCount!!
+        }
+
+        Log.d("",count.toString())
+        return count
     }
+
 
 }
+
+
 
 
 

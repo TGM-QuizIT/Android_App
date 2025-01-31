@@ -182,11 +182,6 @@ fun LoginScreen(
                         Spacer(modifier = Modifier.height(64.dp))
                     }
 
-
-
-
-
-
                 }
             }
         )

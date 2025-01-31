@@ -20,6 +20,9 @@ class SubjectViewModel @Inject constructor(
     private var _subjectList = mutableStateOf(listOf<Subject>())
     val subjectList: List<Subject> get() = _subjectList.value
 
+    private var _isLoading = mutableStateOf(false)
+    val isLoading: Boolean get() = _isLoading.value
+
 
     init {
         setSubjects()
@@ -27,8 +30,15 @@ class SubjectViewModel @Inject constructor(
 
     private fun setSubjects() {
         viewModelScope.launch {
-            _subjectList.value = getAllSubjectsUseCase()
-            Log.d("SubjectViewModel", "setSubjects: ${_subjectList.value}")
+            _isLoading.value = true
+            try {
+                _subjectList.value = getAllSubjectsUseCase()
+                Log.d("SubjectViewModel", "setSubjects: ${_subjectList.value}")
+            } catch (e: Exception) {
+                Log.e("SubjectViewModel", "Error fetching subjects", e)
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 

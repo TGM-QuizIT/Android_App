@@ -27,8 +27,8 @@ sealed class BottomBarScreen(
         title = "Friends",
         icon = Icons.Outlined.Group
     )
-    object Quiz: BottomBarScreen(
-        route = "quiz",
+    object Subject: BottomBarScreen(
+        route = "subject",
         title = "Quiz",
         icon = Icons.Outlined.Book
     )

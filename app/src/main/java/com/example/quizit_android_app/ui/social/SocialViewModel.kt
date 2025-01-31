@@ -63,6 +63,8 @@ class SocialViewModel @Inject constructor(
             PendingFriendship(1, 1, "Max Mustermann", 1999),
             PendingFriendship(2, 2, "Erika Mustermann", 1999),
             PendingFriendship(3, 3, "Hans Mustermann", 1999),
+            PendingFriendship(3, 3, "Hans Mustermann", 1999),
+            PendingFriendship(3, 3, "Hans Mustermann", 1999),
         )
     }
 

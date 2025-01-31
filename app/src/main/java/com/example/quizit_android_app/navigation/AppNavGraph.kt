@@ -1,6 +1,7 @@
 package com.example.quizit_android_app.navigation
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.CircularProgressIndicator
@@ -17,10 +18,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.quizit_android_app.model.Focus
+import com.example.quizit_android_app.model.Subject
 import com.example.quizit_android_app.ui.MainViewModel
 import com.example.quizit_android_app.ui.home.HomeScreen
 import com.example.quizit_android_app.ui.login.LoginScreen
 import com.example.quizit_android_app.ui.play_quiz.focus.FocusScreen
+import com.example.quizit_android_app.ui.play_quiz.quiz.QuizDetailScreen
 import com.example.quizit_android_app.ui.play_quiz.subject.SubjectScreen
 import com.example.quizit_android_app.ui.quiz.QuizScreen
 import com.example.quizit_android_app.ui.settings.SettingsScreen
@@ -49,23 +53,25 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
         composable("home") {
             HomeScreen(
                 navigateToSubject ={
-                    navController.navigate("quiz")
+                    navController.navigate("subject")
                 },
-                navigateToFocus = { id->
-                    navController.navigate("focus/$id")
+                navigateToFocus = { subject->
+                    navController.currentBackStackEntry?.savedStateHandle?.set("subject", subject)
+                    navController.navigate("focus/${subject.subjectId}")
                 },
                 navigateToStatistics = {
                     navController.navigate("social/true")
                 }
             )
         }
-        composable("quiz") {
+        composable("subject") {
             SubjectScreen(
-                navigateToFocus = { id ->
-                    navController.navigate("focus/$id")
+                navigateToFocus = { subject ->
+                    navController.currentBackStackEntry?.savedStateHandle?.set("subject", subject)
+                    navController.navigate("focus/${subject.subjectId}")
                 },
                 navigateBack = {
-                    navController.popBackStack()
+                    navController.navigate("home")
                 }
             )
         }
@@ -78,22 +84,42 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
             )
         }
         composable("focus/{subjectId}") { backStackEntry ->
+
+            val subject = navController.previousBackStackEntry?.savedStateHandle?.get<Subject>("subject")
+            Log.d("AppNavGraph", subject.toString())
             FocusScreen(
-                navigateToQuiz = { id ->
-                    navController.navigate("quiz/$id")
+                navigateToQuiz = { subject, focus ->
+                    navController.currentBackStackEntry?.savedStateHandle?.set("focus", focus)
+                    navController.currentBackStackEntry?.savedStateHandle?.set("subject", subject)
+
+
+                    if(focus==null) {
+                        navController.navigate("quiz/${subject?.subjectId}/true")
+                    }
+                    else {
+                        navController.navigate("quiz/${focus.focusId}/false")
+                    }
                 },
-                navigateBack = {
-                    navController.popBackStack()
-                }
+                navigateBack = { subject2  ->
+                    navController.currentBackStackEntry?.savedStateHandle?.set("subject", subject2)
+                    navController.navigate("subject")
+                },
+                subject = subject
 
             )
         }
 
-        composable("quiz/{focusId}") { backStackEntry ->
+        composable("quiz/{id}/{isQuizOfSubject}") { backStackEntry ->
+            val subject = navController.previousBackStackEntry?.savedStateHandle?.get<Subject>("subject")
+            val focus= navController.previousBackStackEntry?.savedStateHandle?.get<Focus>("focus")
             QuizScreen(
-                navigateBack = {
-                    navController.popBackStack()
-                }
+                navigateBack = { subject2, focus2 ->
+                    navController.currentBackStackEntry?.savedStateHandle?.set("subject", subject2)
+                    navController.currentBackStackEntry?.savedStateHandle?.set("focus", focus2)
+                    navController.navigate("focus/${subject2?.subjectId}")
+                },
+                subject = subject,
+                focus = focus,
             )
         }
 
@@ -134,6 +160,10 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
 
         composable("login") {
             LoginScreen(onLoginSuccess = { viewModel.setLoggedIn(true) })
+        }
+
+        composable("quiz_detail/{id}") {
+            QuizDetailScreen()
         }
 
 

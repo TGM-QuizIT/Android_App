@@ -1,7 +1,9 @@
 package com.example.quizit_android_app.model
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable
+import kotlinx.parcelize.Parcelize
 
 // ------------------- User Dataclasses -------------------
 data class UserResponse(
@@ -32,12 +34,13 @@ data class ChangeUserYearRequestBody(
 
 
 // ------------------- Subject Dataclasses -------------------
+@Parcelize
 data class Subject (
     @SerializedName("subjectId"           ) var subjectId           : Int,
     @SerializedName("subjectName"         ) var subjectName         : String = "",
     @SerializedName("subjectImageAddress" ) var subjectImageAddress : String = ""
 
-): Serializable
+):Parcelable
 
 data class SubjectsResponse(
     @SerializedName("status") val status: String,
@@ -56,7 +59,7 @@ data class FocusResponse (
     @SerializedName("focuses"  ) var focus  : List<Focus> = arrayListOf()
 )
 
-
+@Parcelize
 data class Focus (
     @SerializedName("focusId"           ) var focusId           : Int?    = null,
     @SerializedName("focusName"         ) var focusName         : String? = null,
@@ -64,7 +67,7 @@ data class Focus (
     @SerializedName("focusImageAddress" ) var focusImageAddress : String? = null,
     @SerializedName("subjectId"         ) var subjectId         : Int?    = null,
     @SerializedName("questionCount"     ) var questionCount     : Int?    = null
-): Serializable
+):Parcelable
 
 // ------------------- Quiz Dataclasses -------------------
 

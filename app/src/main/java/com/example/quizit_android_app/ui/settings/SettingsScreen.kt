@@ -28,27 +28,42 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.DrawerDefaults.shape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.quizit_android_app.R
+import com.example.quizit_android_app.model.User
 
 
 @Composable
@@ -57,114 +72,154 @@ fun SettingsScreen(
     onLogout: () -> Unit
 ) {
 
+    val user: User? = viewModel.user
+    val isLoading: Boolean = viewModel.isLoading
+
+
+
     Scaffold(
         contentWindowInsets = WindowInsets(0.dp),
-        content = { paddingValues->
+        topBar = {
             Column(
-                modifier = Modifier
-                    .padding(paddingValues).padding(top = 16.dp, bottom = 32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
             ) {
                 Text("Settings", style = MaterialTheme.typography.titleLarge, modifier = Modifier.align(
                     Alignment.CenterHorizontally))
 
-                Spacer(modifier = Modifier.size(8.dp))
+            }
+
+
+        },
+        content = { paddingValues->
+
+            if(isLoading) {
                 Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .background(Color(0xFFEAF2FF), shape = CircleShape),
+                    modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = "User Icon",
-                        tint = Color(0xFFB4DBFF),
-                        modifier = Modifier.size(70.dp)
-                    )
+                    CircularProgressIndicator( modifier = Modifier.align(Alignment.Center), trackColor = Color.Gray)
                 }
-
-                Spacer(modifier = Modifier.size(8.dp))
-
-                Text(
-                    "Timo Enzi",
-                    style = MaterialTheme.typography.titleLarge,
-
-                )
-                Spacer(modifier = Modifier.size(8.dp))
-
-                Text("tenzi@student.tgm.ac.at", style = MaterialTheme.typography.titleMedium, color = Color(0xFF71727A))
-
-                Spacer(modifier = Modifier.size(32.dp))
-
-                SelectYearItem(userYear = 5)
-
-                SettingsListItem(title = "Kontaktiere uns", imageVector = Icons.Default.Mail, onClick = {})
-
-                SettingsListItem(title = "Über uns", imageVector = Icons.Outlined.Info, onClick = {})
-                
-                SettingsListItem(
-                    title = "Abmelden",
-                    imageVector = Icons.Default.Logout,
-                    onClick = {
-                        viewModel.logOut()
-                        onLogout()
-                    }
-                )
-
-
+            } else {
 
                 Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Bottom,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+                    modifier = Modifier
+                        .padding(paddingValues)
+                        .padding(top = 8.dp, bottom = 32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
 
-                    Column(
-                    ){
-                        Image(
-                            painter = painterResource(id = R.drawable.logo_lightmode),
-                            contentDescription = "QuizIT Logo",
-                            modifier = Modifier
-                                .width(75.dp)
-                                .aspectRatio(975f/337f)
-                                .align(Alignment.CenterHorizontally),
-                            contentScale = ContentScale.FillBounds
-                        )
+                    ) {
 
-                        Spacer(modifier = Modifier.height(32.dp))
-                        Image(
-                            painter = painterResource(id = R.drawable.just_do_it),
-                            contentDescription = "IT Logo",
-                            modifier = Modifier
-                                .width(100.dp)
-                                .aspectRatio(719f/223f)
-                                .align(Alignment.CenterHorizontally),
-                            contentScale = ContentScale.FillBounds
+
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .background(Color(0xFFEAF2FF), shape = CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "User Icon",
+                            tint = Color(0xFFB4DBFF),
+                            modifier = Modifier.size(70.dp)
                         )
                     }
 
+                    Spacer(modifier = Modifier.size(8.dp))
+
+                    Text(
+                        user?.userFullname ?: "",
+                        style = MaterialTheme.typography.titleLarge,
+
+                        )
+                    Spacer(modifier = Modifier.size(8.dp))
+
+                    Text(user?.userMail ?: "", style = MaterialTheme.typography.titleMedium, color = Color(0xFF71727A))
+
+                    Spacer(modifier = Modifier.size(32.dp))
+
+                    SelectYearItem(userYear = user?.userYear ?: 0, onYearSelected = {
+                        viewModel.updateUserYear(it)
+                    })
+
+                    SettingsListItem(title = "Kontaktiere uns", imageVector = Icons.Default.Mail, onClick = {})
+
+                    SettingsListItem(title = "Über uns", imageVector = Icons.Outlined.Info, onClick = {})
+
+                    SettingsListItem(
+                        title = "Abmelden",
+                        imageVector = Icons.Default.Logout,
+                        onClick = {
+                            viewModel.logOut()
+                            onLogout()
+                        }
+                    )
+
+
+
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Bottom,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+
+                        Column(
+                        ){
+                            Image(
+                                painter = painterResource(id = R.drawable.logo_lightmode),
+                                contentDescription = "QuizIT Logo",
+                                modifier = Modifier
+                                    .width(75.dp)
+                                    .aspectRatio(975f / 337f)
+                                    .align(Alignment.CenterHorizontally),
+                                contentScale = ContentScale.FillBounds
+                            )
+
+                            Spacer(modifier = Modifier.height(32.dp))
+                            Image(
+                                painter = painterResource(id = R.drawable.just_do_it),
+                                contentDescription = "IT Logo",
+                                modifier = Modifier
+                                    .width(100.dp)
+                                    .aspectRatio(719f / 223f)
+                                    .align(Alignment.CenterHorizontally),
+                                contentScale = ContentScale.FillBounds
+                            )
+                        }
+
+                    }
                 }
 
+            }
 
-           }
+
+
         }
     )
 }
 
 @Composable
-fun SelectYearItem(userYear: Int) {
+fun SelectYearItem(userYear: Int, onYearSelected: (Int) -> Unit) {
+
+    var expanded by remember { mutableStateOf(false) }
+    var selectedYear by remember { mutableStateOf(userYear) }
+    var dropdownWidth by remember { mutableStateOf(0) } // Speichert die Breite der zweiten Row
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 32.dp, end = 32.dp, bottom = 16.dp)
-            .background(shape = RoundedCornerShape(16.dp), color = Color.Transparent),
+            .background(
+                shape = if(expanded) RoundedCornerShape(topStart= 16.dp, topEnd= 16.dp, bottomStart= 16.dp, bottomEnd = 0.dp) else RoundedCornerShape(16.dp),
+                color = Color(0xFFF8F9FE)),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(
             modifier = Modifier
-                .background(shape = RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp), color = Color(0xFFEAF2FF))
+                .background(
+                    shape = RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp),
+                    color = Color(0xFFEAF2FF)
+                )
                 .padding(16.dp),
             horizontalAlignment = Alignment.Start
         ) {
@@ -176,28 +231,87 @@ fun SelectYearItem(userYear: Int) {
                     .size(35.dp)
                     .align(Alignment.CenterHorizontally),
             )
-
         }
         Spacer(modifier = Modifier.size(16.dp))
 
-        Column {
-            Text("Jahrgang auswählen", style = MaterialTheme.typography.bodyMedium)
-            Text(userYear.toString()+"xHIT", style = MaterialTheme.typography.bodyMedium, color = Color(0xFF71727A))
-        }
+        // Box als Anker für das DropdownMenu
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .onGloballyPositioned { coordinates ->
+                    dropdownWidth =  coordinates.size.width
+                }
+                .clickable { expanded = !expanded }
+                .offset(x = -16.dp, y = 16.dp),
 
-
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.End
         ) {
-            Icon(
-                imageVector = Icons.Default.ArrowForward,
-                contentDescription = "Forward Icon",
-                tint = Color(0xFF8F9098)
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp),
+
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .offset(y = -16.dp)
+                ) {
+                    Text("Jahrgang auswählen", style = MaterialTheme.typography.bodyMedium)
+                    Text(userYear.toString() + "xHIT", style = MaterialTheme.typography.bodyMedium, color = Color(0xFF71727A))
+                }
+
+                if(expanded) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowDownward,
+                        contentDescription = "Forward Icon",
+                        tint = Color(0xFF8F9098),
+                        modifier = Modifier.align(Alignment.CenterVertically).offset(y = -16.dp)
+                        ,
+                    )
+
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.ArrowForward,
+                        contentDescription = "Forward Icon",
+                        tint = Color(0xFF8F9098),
+                        modifier = Modifier.align(Alignment.CenterVertically).offset(y = -16.dp)
+                    )
+                }
+
+
+            }
+
+            val availableYears = listOf(1, 2, 3, 4, 5)
+
+            // DropdownMenu mit gemessener Breite
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier
+                    .width(with(LocalDensity.current) { dropdownWidth.toDp() + 16.dp }),
+                containerColor = Color(0xFFF8F9FE),
+                shape = RoundedCornerShape(bottomStart= 16.dp, bottomEnd = 16.dp),
+                // Dropdown auf die Breite der Box setzen
+            ) {
+                availableYears.forEach { year ->
+                    DropdownMenuItem(
+                        onClick = {
+                            selectedYear = year
+                            onYearSelected(year)
+                            expanded = false
+                        },
+                        text = {
+                            Text(text = year.toString()+"xHIT", style = MaterialTheme.typography.bodyMedium)
+                        }
+                    )
+                }
+            }
         }
     }
 }
+
+
 
 @Composable
 fun SettingsListItem(title: String, imageVector: ImageVector, onClick: () -> Unit) {
@@ -205,12 +319,16 @@ fun SettingsListItem(title: String, imageVector: ImageVector, onClick: () -> Uni
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 32.dp, end = 32.dp, bottom = 16.dp)
-            .clickable(onClick = {onClick()}),
+            .clickable(onClick = { onClick() })
+        .background(shape = RoundedCornerShape(16.dp), color = Color(0xFFF8F9FE)),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(
             modifier = Modifier
-                .background(shape = RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp), color = Color(0xFFEAF2FF))
+                .background(
+                    shape = RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp),
+                    color = Color(0xFFEAF2FF)
+                )
                 .padding(16.dp),
             horizontalAlignment = Alignment.Start
         ) {
@@ -232,8 +350,9 @@ fun SettingsListItem(title: String, imageVector: ImageVector, onClick: () -> Uni
         }
 
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
             horizontalAlignment = Alignment.End
+
         ) {
             Icon(
                 imageVector = Icons.Default.ArrowForward,
