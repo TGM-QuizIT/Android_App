@@ -192,7 +192,7 @@ class DataRepo @Inject constructor(private val context: Context) {
 
     // ------------------- Result Calls -------------------
 
-    suspend fun postResultOfFocus(focusId: Int, score: Double) {
+    suspend fun postResultOfFocus(focusId: Int, score: Double): GetResultsResponse {
         return withContext(Dispatchers.IO) {
             try {
                 val id = sessionManager.getUserId()
@@ -200,22 +200,26 @@ class DataRepo @Inject constructor(private val context: Context) {
                 withContext(Dispatchers.Main) {
                     Log.d("Retrofit Test", "Focus Result posted")
                 }
+                response
             } catch (e: Exception) {
                 Log.e("Retrofit Test", "Failed to post focus result", e)
+                GetResultsResponse()
             }
         }
     }
 
-    suspend fun postResultOfSubject(subjectID: Int, score: Double) {
+    suspend fun postResultOfSubject(subjectID: Int, score: Double): GetResultsResponse {
         return withContext(Dispatchers.IO) {
             try {
                 val id = sessionManager.getUserId()
-                val response = service.postResultOfFocus(PostResultRequestBody(score, id, subjectID))
+                val response = service.postResultOfSubject(PostResultRequestBody(score, id, subjectID))
                 withContext(Dispatchers.Main) {
                     Log.d("Retrofit Test", "Subject Result posted")
                 }
+                response
             } catch (e: Exception) {
                 Log.e("Retrofit Test", "Failed to post Subject result", e)
+                GetResultsResponse()
             }
         }
     }
@@ -321,6 +325,123 @@ class DataRepo @Inject constructor(private val context: Context) {
             }
         }
     }
+
+    // ------------------- Challenge Calls -------------------
+
+    suspend fun addChallengeForFocus(friendshipId: Int, focusId: Int) {
+        return withContext(Dispatchers.IO) {
+            try {
+                val id = sessionManager.getUserId()
+                val response = service.addChallengeForFocus(AdChallengeForFocusRequestBody(friendshipId, focusId, id))
+                withContext(Dispatchers.Main) {
+                    Log.d("Retrofit Test", "Challenge added")
+                }
+            } catch (e: Exception) {
+                Log.e("Retrofit Test", "Failed to add challenge", e)
+            }
+        }
+    }
+
+    suspend fun addChallengeForSubject(friendshipId: Int, subjectId: Int) {
+        return withContext(Dispatchers.IO) {
+            try {
+                val id = sessionManager.getUserId()
+                val response = service.addChallengeForSubject(AdChallengeForSubjectRequestBody(friendshipId, subjectId, id))
+                withContext(Dispatchers.Main) {
+                    Log.d("Retrofit Test", "Challenge added")
+                }
+            } catch (e: Exception) {
+                Log.e("Retrofit Test", "Failed to add challenge", e)
+            }
+        }
+    }
+
+    suspend fun deleteChallenge(challengeId: Int) {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = service.deleteChallenge(challengeId)
+                withContext(Dispatchers.Main) {
+                    Log.d("Retrofit Test", "Challenge deleted")
+                }
+            } catch (e: Exception) {
+                Log.e("Retrofit Test", "Failed to delete challenge", e)
+            }
+        }
+    }
+
+    suspend fun assignResultToChallenge(challengeId: Int, resultId: Int): AssignResultToChallengeResponse {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = service.assignResultToChallenge(AssignResultToChallengeRequestBody(challengeId, resultId))
+                withContext(Dispatchers.Main) {
+                    Log.d("Retrofit Test", "Result assigned to challenge")
+                }
+                response
+            } catch (e: Exception) {
+                Log.e("Retrofit Test", "Failed to assign result to challenge", e)
+                AssignResultToChallengeResponse()
+            }
+        }
+    }
+
+    suspend fun getChallengesOfFriendship(friendshipId: Int): ChallengeResponse {
+        return withContext(Dispatchers.IO) {
+            try {
+                val id = sessionManager.getUserId()
+                val response = service.getChallengesOfFriendship(friendshipId, id)
+                withContext(Dispatchers.Main) {
+                    for (challenge in response.openChallenges) {
+                        Log.d("Retrofit Test", challenge.challengeId.toString() + " " + challenge.focus)
+                    }
+                }
+                response
+            } catch (e: Exception) {
+                Log.e("Retrofit Test", "Failed to fetch challenges", e)
+                ChallengeResponse()
+            }
+        }
+    }
+
+    suspend fun getChallengesForSubject(subjectId: Int): ChallengeResponse{
+        return withContext(Dispatchers.IO) {
+            try {
+                val id = sessionManager.getUserId()
+                val response = service.getChallengesForSubject(subjectId, id)
+                withContext(Dispatchers.Main) {
+                    for (challenge in response.openChallenges) {
+                        Log.d("Retrofit Test", challenge.challengeId.toString() + " " + challenge.focus)
+                    }
+                }
+                response
+            } catch (e: Exception) {
+                Log.e("Retrofit Test", "Failed to fetch challenges", e)
+                ChallengeResponse()
+            }
+        }
+    }
+
+    suspend fun getDoneChallenges(): DoneChallengesResponse {
+        return withContext(Dispatchers.IO) {
+            try {
+                val id = sessionManager.getUserId()
+                val response = service.getDoneChallenges(id)
+                withContext(Dispatchers.Main) {
+                    for (challenge in response.doneChallenges) {
+                        Log.d("Retrofit Test", challenge.challengeId.toString() + " " + challenge.focus)
+                    }
+                }
+                response
+            } catch (e: Exception) {
+                Log.e("Retrofit Test", "Failed to fetch challenges", e)
+                DoneChallengesResponse()
+            }
+        }
+    }
+
+    // TODO: all challenges for a user (all friends and subjects)
+
+
+
 
 
 }

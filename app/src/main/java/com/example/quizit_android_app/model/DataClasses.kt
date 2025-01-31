@@ -177,6 +177,82 @@ data class AcceptFriendRequestBody(
     @SerializedName("friendshipId") val id: Int
 )
 
+// ------------------- Challenge Dataclasses -------------------
+
+data class AdChallengeForFocusRequestBody (
+    @SerializedName("friendshipId") val friendshipId: Int,
+    @SerializedName("focusId") val focusId: Int,
+    @SerializedName("userId") val userId: Int?
+)
+
+data class AdChallengeForSubjectRequestBody (
+    @SerializedName("friendshipId") val friendshipId: Int,
+    @SerializedName("subjectId") val focusId: Int,
+    @SerializedName("userId") val userId: Int?
+)
+
+data class AssignResultToChallengeRequestBody (
+    @SerializedName("challengeId") val challengeId: Int,
+    @SerializedName("resultId") val resultId: Int
+)
+
+data class AssignResultToChallengeResponse (
+    @SerializedName("status"    ) var status    : String?    = null,
+    @SerializedName("challenge" ) var challenge : Challenge? = Challenge()
+)
+
+data class FriendScore (
+    @SerializedName("resultId"       ) var resultId       : Int?    = null,
+    @SerializedName("resultScore"    ) var resultScore    : Double? = null,
+    @SerializedName("userId"         ) var userId         : Int?    = null,
+    @SerializedName("focus"          ) var focus          : Focus?  = Focus(),
+    @SerializedName("resultDateTime" ) var resultDateTime : String? = null
+)
+
+data class Challenge (
+    @SerializedName("challengeId"       ) var challengeId       : Int?         = null,
+    @SerializedName("challengeDateTime" ) var challengeDateTime : String?      = null,
+    @SerializedName("friendship"        ) var friendship        : Friendship?  = Friendship(),
+    @SerializedName("focus"             ) var focus             : Focus?       = Focus(),
+    @SerializedName("friendScore"       ) var friendScore       : FriendScore? = FriendScore()
+)
+
+data class ChallengeResponse (
+    @SerializedName("status"         ) var status         : String?                   = null,
+    @SerializedName("openChallenges" ) var openChallenges : ArrayList<OpenChallenges> = arrayListOf(),
+    @SerializedName("doneChallenges" ) var doneChallenges : ArrayList<DoneChallenges> = arrayListOf()
+)
+
+data class OpenChallenges (
+    @SerializedName("challengeId"       ) var challengeId       : Int?        = null,
+    @SerializedName("challengeDateTime" ) var challengeDateTime : String?     = null,
+    @SerializedName("friendship"        ) var friendship        : Friendship? = Friendship(),
+    @SerializedName("focus"             ) var focus             : Focus?      = Focus(),
+    @SerializedName("score"             ) var score             : String?     = null,
+    @SerializedName("friendScore"       ) var friendScore       : String?     = null
+)
+
+data class Score (
+    @SerializedName("resultId"       ) var resultId       : Int?    = null,
+    @SerializedName("resultScore"    ) var resultScore    : Double? = null,
+    @SerializedName("userId"         ) var userId         : Int?    = null,
+    @SerializedName("focus"          ) var focus          : Focus?  = Focus(),
+    @SerializedName("resultDateTime" ) var resultDateTime : String? = null
+)
+
+data class DoneChallenges (
+    @SerializedName("challengeId"       ) var challengeId       : Int?         = null,
+    @SerializedName("challengeDateTime" ) var challengeDateTime : String?      = null,
+    @SerializedName("friendship"        ) var friendship        : Friendship?  = Friendship(),
+    @SerializedName("focus"             ) var focus             : Focus?       = Focus(),
+    @SerializedName("score"             ) var score             : Score?       = Score(),
+    @SerializedName("friendScore"       ) var friendScore       : FriendScore? = FriendScore()
+)
+
+data class DoneChallengesResponse (
+    @SerializedName("status"         ) var status         : String?                   = null,
+    @SerializedName("doneChallenges" ) var doneChallenges : ArrayList<DoneChallenges> = arrayListOf()
+)
 
 
 

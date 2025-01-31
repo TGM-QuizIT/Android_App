@@ -1,6 +1,7 @@
 package com.example.quizit_android_app.model
 
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.POST
@@ -58,10 +59,10 @@ interface Requests {
     // ------------------- Result Calls -------------------
 
     @POST("result")
-    suspend fun postResultOfFocus(@Body result: PostResultRequestBody)
+    suspend fun postResultOfFocus(@Body result: PostResultRequestBody): GetResultsResponse
 
     @POST("result/subject")
-    suspend fun postResultOfSubject(@Body result: PostResultRequestBody)
+    suspend fun postResultOfSubject(@Body result: PostResultRequestBody): GetResultsResponse
 
     @GET("result")
     suspend fun getResultsOfUser(
@@ -93,5 +94,28 @@ interface Requests {
 
     @PUT("/friends/accept")
     suspend fun acceptFriend(@Body acceptFriendRequestBody: AcceptFriendRequestBody ): FriendshipResponse
+
+    // ------------------- Challenge Calls -------------------
+
+    @POST("/challenge")
+    suspend fun addChallengeForFocus(@Body adChallengeForFocusRequestBody: AdChallengeForFocusRequestBody)
+
+    @POST("/challenge/subject")
+    suspend fun addChallengeForSubject(@Body adChallengeForSubjectRequestBody: AdChallengeForSubjectRequestBody)
+
+    @DELETE("/challenge")
+    suspend fun deleteChallenge(@Query("id") challengeId: Int?)
+
+    @PUT("/challenge")
+    suspend fun assignResultToChallenge(@Body assignResultToChallengeRequestBody: AssignResultToChallengeRequestBody): AssignResultToChallengeResponse
+
+    @GET("/challenge/friendship")
+    suspend fun getChallengesOfFriendship(@Query("friendshipId") friendshipId: Int?, @Query("userId") userId: Int?): ChallengeResponse
+
+    @GET("challenge")
+    suspend fun getChallengesForSubject(@Query("subjectId") subjectId: Int?, @Query("userId") userId: Int?): ChallengeResponse
+
+    @GET("challenge/done")
+    suspend fun getDoneChallenges(@Query("userId") userId: Int?): DoneChallengesResponse
 
 }
