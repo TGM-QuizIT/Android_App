@@ -86,30 +86,30 @@ interface Requests {
 
     // ------------------- Friend Calls -------------------
 
-    @GET("/friends")
+    @GET("friends")
     suspend fun getFriends(@Query("id") userId: Int?): AllFriendshipResponse
 
-    @POST("/friends")
+    @POST("friends")
     suspend fun addFriend(@Body friendRequestBody: FriendRequestBody): FriendshipResponse
 
-    @PUT("/friends/accept")
+    @PUT("friends/accept")
     suspend fun acceptFriend(@Body acceptFriendRequestBody: AcceptFriendRequestBody ): FriendshipResponse
 
     // ------------------- Challenge Calls -------------------
 
-    @POST("/challenge")
+    @POST("challenge")
     suspend fun addChallengeForFocus(@Body adChallengeForFocusRequestBody: AdChallengeForFocusRequestBody)
 
-    @POST("/challenge/subject")
+    @POST("challenge/subject")
     suspend fun addChallengeForSubject(@Body adChallengeForSubjectRequestBody: AdChallengeForSubjectRequestBody)
 
-    @DELETE("/challenge")
+    @DELETE("challenge")
     suspend fun deleteChallenge(@Query("id") challengeId: Int?)
 
-    @PUT("/challenge")
+    @PUT("challenge")
     suspend fun assignResultToChallenge(@Body assignResultToChallengeRequestBody: AssignResultToChallengeRequestBody): AssignResultToChallengeResponse
 
-    @GET("/challenge/friendship")
+    @GET("challenge/friendship")
     suspend fun getChallengesOfFriendship(@Query("friendshipId") friendshipId: Int?, @Query("userId") userId: Int?): ChallengeResponse
 
     @GET("challenge")
