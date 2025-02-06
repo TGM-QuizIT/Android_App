@@ -104,6 +104,18 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
                     navController.currentBackStackEntry?.savedStateHandle?.set("subject", subject2)
                     navController.navigate("subject")
                 },
+                navigateToQuizDetail = { subject, focus ->
+                    navController.currentBackStackEntry?.savedStateHandle?.set("focus", focus)
+                    navController.currentBackStackEntry?.savedStateHandle?.set("subject", subject)
+
+                    if(focus==null) {
+                        navController.navigate("quiz_detail/${subject?.subjectId}/true")
+                    }
+                    else {
+                        navController.navigate("quiz_detail/${focus.focusId}/false")
+                    }
+
+                },
                 subject = subject
 
             )
@@ -120,6 +132,15 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
                 },
                 subject = subject,
                 focus = focus,
+            )
+        }
+
+        composable("quiz_detail/{id}/{isDetailOfSubject}") { backStackEntry ->
+            val subject = navController.previousBackStackEntry?.savedStateHandle?.get<Subject>("subject")
+            val focus= navController.previousBackStackEntry?.savedStateHandle?.get<Focus>("focus")
+            QuizDetailScreen(
+                subject = subject!!,
+                focus = focus
             )
         }
 
@@ -162,9 +183,7 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
             LoginScreen(onLoginSuccess = { viewModel.setLoggedIn(true) })
         }
 
-        composable("quiz_detail/{id}") {
-            QuizDetailScreen()
-        }
+
 
 
     }

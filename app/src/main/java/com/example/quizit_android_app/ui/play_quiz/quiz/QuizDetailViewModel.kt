@@ -6,7 +6,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.example.quizit_android_app.model.Subject
-import com.example.quizit_android_app.ui.social.Friendship
 import com.example.quizit_android_app.ui.social.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -19,32 +18,27 @@ class QuizDetailViewModel @Inject constructor(
     private var _results by mutableStateOf(listOf<Result>())
     val results: List<Result> get() = _results
 
-    private var _challenges by mutableStateOf(listOf<Challenge>())
-    val challenges: List<Challenge> get() = _challenges
+
 
     init {
+        val subjectId = savedStateHandle?.get<String>("subjectId")?.toIntOrNull()
+        val focusId = savedStateHandle?.get<String>("focusId")?.toIntOrNull()
 
-        setResults()
-        setChallenges()
+    }
+
+    private fun setContent() {
+
     }
 
     private fun setResults() {
 
     }
 
-    private fun setChallenges() {
+    private fun setChallenges(id: Int) {
+
 
     }
 
 
 }
 
-data class Challenge(
-    val challengeId: Int,
-    val friendship: Friendship,
-    val focusId: Int,
-    val subject: Subject,
-    val challengeDate: String,
-    val result1: Int,
-    val result2: Int,
-)

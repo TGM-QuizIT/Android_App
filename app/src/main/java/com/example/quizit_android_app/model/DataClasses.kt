@@ -40,7 +40,7 @@ data class UserStatsResponse (
 data class Stats (
     @SerializedName("avgPoints" ) var avgPoints : Double? = null,
     @SerializedName("ranking"   ) var ranking   : Int?    = null,
-    @SerializedName("winRate"   ) var winRate   : Int?    = null
+    @SerializedName("winRate"   ) var winRate   : Double?    = null
 )
 
 

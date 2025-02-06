@@ -99,7 +99,7 @@ class DataRepo @Inject constructor(private val context: Context) {
                 val id = sessionManager.getUserId()
                 val response = service.getUserStats(id)
                 withContext(Dispatchers.Main) {
-                    Log.d("Retrofit Test", response.stats.toString())
+                    Log.d("Retrofit Test user stats", response.stats.toString())
                 }
                 response
             } catch (e: Exception) {

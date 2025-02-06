@@ -7,39 +7,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.quizit_android_app.model.Focus
+import com.example.quizit_android_app.model.Subject
 import com.example.quizit_android_app.ui.social.Result
 
 @Composable
 fun QuizDetailScreen(
     viewModel: QuizDetailViewModel = hiltViewModel(),
+    focus: Focus?,
+    subject: Subject,
+
 ) {
-    val results = viewModel.results
-    val challenges = viewModel.challenges
 
 
 
-}
-
-@Composable
-fun QuizHistorySection(results: List<Result>) {
-
-    Text("Deine Resultate", style = MaterialTheme.typography.titleMedium)
-
-    LazyColumn {
-        itemsIndexed(results) { index, result ->
-            ResultListItem(result = result, number = index + 1)
-        }
-    }
-
-
-}
-
-@Composable
-fun ResultListItem(result: Result, number: Int) {
-
-}
-
-@Composable
-fun ChallengeSection(challenges: List<Challenge>) {
 
 }

@@ -56,6 +56,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import com.example.quizit_android_app.R
 import com.example.quizit_android_app.model.Subject
+import com.example.quizit_android_app.model.UserStatsResponse
 import com.example.quizit_android_app.ui.social.StatisticsCard
 import com.example.quizit_android_app.ui.social.StatisticsPopUp
 import com.example.quizit_android_app.ui.theme.Typography
@@ -74,6 +75,7 @@ fun HomeScreen(
 
 
     val subjectList = homeViewModel.subjectList
+    val stats = homeViewModel.stats
     val isLoading = homeViewModel.isLoading
 
 
@@ -139,7 +141,8 @@ fun HomeScreen(
                     StatisticsSection(
                         navigateToStatistics = {
                             navigateToStatistics()
-                        }
+                        },
+                        stats = stats
                     )
                 }
 
@@ -302,7 +305,7 @@ fun ChallengeSection() {
 
 }*/
 @Composable
-fun StatisticsSection(navigateToStatistics: () -> Unit) {
+fun StatisticsSection(navigateToStatistics: () -> Unit, stats: UserStatsResponse?) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -339,7 +342,7 @@ fun StatisticsSection(navigateToStatistics: () -> Unit) {
             StatisticsPopUp(onClose = { showPopup = false })
         }
 
-        StatisticsCard(onClick = { showPopup = true })
+        StatisticsCard(onClick = { showPopup = true }, stats = stats)
     }
 }
 

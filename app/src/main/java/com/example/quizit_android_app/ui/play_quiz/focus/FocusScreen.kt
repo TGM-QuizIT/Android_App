@@ -61,6 +61,7 @@ fun FocusScreen(
     navigateToQuiz: (Subject?, Focus?) -> Unit,
     navigateBack: (Subject?) -> Unit,
     focusViewModel: FocusViewModel = hiltViewModel(),
+    navigateToQuizDetail: (Subject, Focus?) -> Unit,
     subject: Subject?
 ) {
 
@@ -134,6 +135,9 @@ fun FocusScreen(
                                     overallQuestionCount = overallQuestionCount,
                                     onQuizStart = { subject, focus ->
                                         navigateToQuiz(subject, focus)
+                                    },
+                                    navigateToQuizDetail = {  subject, focus ->
+                                        navigateToQuizDetail(subject, focus)
                                     }
                                 )
                             }
@@ -145,6 +149,9 @@ fun FocusScreen(
                                     overallQuestionCount = overallQuestionCount,
                                     onQuizStart = {subject, focus ->
                                         navigateToQuiz(subject, focus)
+                                    },
+                                    navigateToQuizDetail = {  subject, focus ->
+                                        navigateToQuizDetail(subject, focus)
                                     }
                                 )
                             }
@@ -164,13 +171,14 @@ fun FocusCard(
     focus: Focus?,
     onQuizStart: (Subject?, Focus?) -> Unit,
     overallQuestionCount: Int,
+    navigateToQuizDetail: (Subject, Focus?) -> Unit
 ) {
     Card(
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp, horizontal = 16.dp)
-            .clickable(onClick = { }),
+            .clickable {navigateToQuizDetail(subject!!, focus) },
         colors = CardDefaults.cardColors(
             containerColor = if (type == CardType.Subject) Color(0xFFEAF2FF) else Color(0xFFF8F9FE),
             contentColor = Color.Black

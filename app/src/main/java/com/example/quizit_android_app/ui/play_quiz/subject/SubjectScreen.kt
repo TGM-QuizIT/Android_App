@@ -81,22 +81,25 @@ fun SubjectScreen(
             ) {
                 if(isLoading) {
                     CircularProgressIndicator( modifier = Modifier.align(Alignment.Center),trackColor = Color.Gray )
-                }
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(horizontal = 16.dp, vertical = 16.dp),
-                ) {
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                            .padding(horizontal = 16.dp, vertical = 16.dp),
+                    ) {
 
-                    items(subjectList) { subject ->
-                        SubjectCard(subject = subject, width = 0.dp, navigateToFocus = { subject ->
-                            navigateToFocus(subject)
-                        })
+                        items(subjectList) { subject ->
+                            SubjectCard(subject = subject, width = 0.dp, navigateToFocus = { subject ->
+                                navigateToFocus(subject)
+                            })
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
                     }
+
                 }
+
             }
 
         }

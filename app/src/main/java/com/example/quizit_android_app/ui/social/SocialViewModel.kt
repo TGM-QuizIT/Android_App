@@ -1,72 +1,101 @@
 package com.example.quizit_android_app.ui.social
 
-import android.os.Build
+import  android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.quizit_android_app.model.AcceptedFriendships
+import com.example.quizit_android_app.model.Friendship
+import com.example.quizit_android_app.model.PendingFriendships
+import com.example.quizit_android_app.model.User
+import com.example.quizit_android_app.model.UserStatsResponse
+import com.example.quizit_android_app.usecases.friendship.GetAcceptedFriendships
+import com.example.quizit_android_app.usecases.friendship.GetAllFriendshipsUseCase
+import com.example.quizit_android_app.usecases.friendship.GetPendingFriendshipsUseCase
+import com.example.quizit_android_app.usecases.user.GetAllUsersUseCase
+import com.example.quizit_android_app.usecases.user.GetUserStatsUseCase
+import com.example.quizit_android_app.usecases.user.GetUserUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
+@HiltViewModel
 @RequiresApi(Build.VERSION_CODES.O)
 class SocialViewModel @Inject constructor(
-    val savedStateHandle: SavedStateHandle
+    val savedStateHandle: SavedStateHandle,
+    val getAllFriendshipsUseCase: GetAcceptedFriendships,
+    val getPendingFriendshipsUseCase: GetPendingFriendshipsUseCase,
+    val getAllUsersUseCase: GetAllUsersUseCase,
+    val getUserStatsUseCase: GetUserStatsUseCase,
+    val getUserUseCase: GetUserUseCase,
 ): ViewModel() {
     private val _selectedTabIndex = mutableStateOf(0)
     val selectedTabIndex: State<Int> = _selectedTabIndex
 
-    private val _friendships = mutableStateOf(listOf<Friendship>())
-    val friendships: State<List<Friendship>> = _friendships
+    private val _friendships = mutableStateOf(listOf<AcceptedFriendships>())
+    val friendships: State<List<AcceptedFriendships>> = _friendships
 
-    private val _pendingFriendships = mutableStateOf(listOf<PendingFriendship>())
-    val pendingFriendships: State<List<PendingFriendship>> = _pendingFriendships
+    private val _pendingFriendships = mutableStateOf(listOf<PendingFriendships>())
+    val pendingFriendships: State<List<PendingFriendships>> = _pendingFriendships
+
+    private var _isLoading = mutableStateOf(false)
+    val isLoading: Boolean get() = _isLoading.value
+
+    private var _isModalSheetLoading = mutableStateOf(false)
+    val isModalSheetLoading: Boolean get() = _isModalSheetLoading.value
+
+    private var _userStats = mutableStateOf<UserStatsResponse?>(null)
+    val userStats: State<UserStatsResponse?> = _userStats
 
     //TODO States & Abfrage für Punkte,Level,Score
 
     private val _userResults = mutableStateOf(listOf<Result>())
     val userResults: State<List<Result>> = _userResults
 
-    private val _users = mutableStateOf(listOf<User>())
-    val users : State<List<User>> = _users
+    private val _users = mutableStateOf(listOf<User?>())
+    val users : State<List<User?>> = _users
 
-    private val _filteredUsers = mutableStateOf(listOf<User>())
-    val filteredUsers : State<List<User>> = _filteredUsers
+    private val _filteredUsers = mutableStateOf(listOf<User?>())
+    val filteredUsers : State<List<User?>> = _filteredUsers
 
     private val _searchText = mutableStateOf("")
     val searchText : State<String> = _searchText
 
     init {
+        Log.d("SocialViewModel", "init: $savedStateHandle")
         val showStatistics: Boolean = savedStateHandle.get<Boolean>("showStatistics") ?: false
 
         if(showStatistics) {
             updateTabIndex(1)
         }
-        setFriendships()
-        setPendingFriendships()
+        setContent()
         setUserResults()
     }
 
-    private fun setFriendships() {
-        _friendships.value = listOf(
-            Friendship(1, 1, "Max Mustermann", 1999, "01.01.2021"),
-            Friendship(2, 2, "Erika Mustermann", 1999, "01.01.2021"),
-            Friendship(3, 3, "Hans Mustermann", 1999, "01.01.2021"),
-            Friendship(4, 4, "Lisa Mustermann", 1999, "01.01.2021"),
-            Friendship(5, 5, "Peter Mustermann", 1999, "01.01.2021"),
-        )
+    private fun setContent() {
+
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                _friendships.value = getAllFriendshipsUseCase()
+                _pendingFriendships.value = getPendingFriendshipsUseCase()
+                _userStats.value = getUserStatsUseCase()
+            } catch (e: Exception) {
+                //TODO Error handling
+            } finally {
+                _isLoading.value = false
+            }
+        }
+
+
     }
 
-    private fun setPendingFriendships() {
-        _pendingFriendships.value = listOf(
-            PendingFriendship(1, 1, "Max Mustermann", 1999),
-            PendingFriendship(2, 2, "Erika Mustermann", 1999),
-            PendingFriendship(3, 3, "Hans Mustermann", 1999),
-            PendingFriendship(3, 3, "Hans Mustermann", 1999),
-            PendingFriendship(3, 3, "Hans Mustermann", 1999),
-        )
-    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun setUserResults() {
@@ -86,21 +115,26 @@ class SocialViewModel @Inject constructor(
         _selectedTabIndex.value = index
     }
 
+    fun updateIsModalSheetLoading() {
+        _isModalSheetLoading.value = !_isModalSheetLoading.value
+    }
+
 
     public fun setUsers() {
-        _users.value = listOf(
-            User(1, "jdoe", "John Doe", 1, "1AHIT", "schueler", "jdoe@student.tgm.ac.at"),
-            User(2, "asmith", "Anna Smith", 2, "2BHIT", "schueler", "asmith@student.tgm.ac.at"),
-            User(3, "mbrown", "Michael Brown", 3, "3CHIT", "schueler", "mbrown@student.tgm.ac.at"),
-            User(4, "jwhite", "Jessica White", 4, "4DHIT", "schueler", "jwhite@student.tgm.ac.at"),
-            User(5, "pdavis", "Paul Davis", 1, "1AHIT", "schueler", "pdavis@student.tgm.ac.at"),
-            User(6, "lwilson", "Laura Wilson", 2, "2BHIT", "schueler", "lwilson@student.tgm.ac.at"),
-            User(7, "cmiller", "Chris Miller", 3, "3CHIT", "schueler", "cmiller@student.tgm.ac.at"),
-            User(8, "akelly", "Alex Kelly", 4, "4DHIT", "schueler", "akelly@student.tgm.ac.at"),
-            User(9, "bturner", "Barbara Turner", 1, "1AHIT", "schueler", "bturner@student.tgm.ac.at"),
-            User(10, "nroberts", "Nathan Roberts", 2, "2BHIT", "schueler", "nroberts@student.tgm.ac.at")
-        )
-        filterUsers()
+        viewModelScope.launch {
+            _isModalSheetLoading.value = true
+            try {
+                val user = getUserUseCase()
+                _users.value = getAllUsersUseCase()
+                _users.value = _users.value.filter { it?.userId != user?.userId }
+                filterUsers()
+            } catch (e: Exception) {
+                //TODO Error handling
+            } finally {
+                _isModalSheetLoading.value = false
+            }
+        }
+
     }
 
     private fun filterUsers() {
@@ -109,9 +143,9 @@ class SocialViewModel @Inject constructor(
             _users.value
         } else {
             _users.value.filter { user ->
-                user.userName.lowercase().contains(query) ||
-                user.userFullname.lowercase().contains(query) ||
-                user.userMail.lowercase().contains(query)
+                user?.userName!!.lowercase().contains(query) ||
+                user?.userFullname!!.lowercase().contains(query) ||
+                user?.userMail!!.lowercase().contains(query)
             }
         }
 
@@ -124,20 +158,7 @@ class SocialViewModel @Inject constructor(
 }
 
 //Helper classes
-data class Friendship(
-    val friendshipId: Int,
-    val friendId: Int,
-    val friendName: String,
-    val friendYear: Int,
-    val friendshipSince: String
-)
 
-data class PendingFriendship(
-    val friendshipId: Int,
-    val friendId: Int,
-    val friendName: String,
-    val friendYear: Int
-)
 
 data class Result(
     val resultId: Int,
@@ -147,12 +168,3 @@ data class Result(
     val resultDate: String
 )
 
-data class User(
-    val userId: Int,
-    val userName: String,
-    val userFullname: String,
-    val userYear: Int,
-    val userClass: String,
-    val userType: String,
-    val userMail: String
-)

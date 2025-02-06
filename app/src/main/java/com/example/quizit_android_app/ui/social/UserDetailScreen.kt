@@ -244,7 +244,7 @@ fun UserDetailScreen(
                         StatisticsPopUp(onClose = { showPopup = false })
                     }
 
-                    StatisticsCard(onClick = { showPopup = true })
+                    //StatisticsCard(onClick = { showPopup = true })
                 }
             }
         }

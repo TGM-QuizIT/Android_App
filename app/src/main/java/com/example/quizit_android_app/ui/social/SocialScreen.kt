@@ -54,6 +54,7 @@ import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -93,6 +94,11 @@ import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.window.Popup
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
+import com.example.quizit_android_app.model.AcceptedFriendships
+import com.example.quizit_android_app.model.Friendship
+import com.example.quizit_android_app.model.PendingFriendships
+import com.example.quizit_android_app.model.User
+import com.example.quizit_android_app.model.UserStatsResponse
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
@@ -111,19 +117,30 @@ fun SocialScreen(
     val searchText = viewModel.searchText.value
     val filteredUsers = viewModel.filteredUsers.value
 
+    val isLoading = viewModel.isLoading
+    val isModalSheetLoading = viewModel.isModalSheetLoading
+
+    val stats = viewModel.userStats.value
+
     val sheetState = androidx.compose.material.rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
     val coroutineScope = rememberCoroutineScope()
 
     ModalBottomSheetLayout(
         sheetState = sheetState,
         sheetContent = {
+
+
             BottomSheetLayoutContent(
                 onHide = { coroutineScope.launch { sheetState.hide() } },
                 searchText = searchText,
                 filteredUsers = filteredUsers,
                 onUpdate = { viewModel.updateSearchText(it) },
-                navigateToUserDetail = {navigateToUserDetail(it)}
+                navigateToUserDetail = {navigateToUserDetail(it)},
+                isModalSheetLoading = isModalSheetLoading
             )
+
+
+
         }
     ) {
         Scaffold(
@@ -147,40 +164,55 @@ fun SocialScreen(
                 }
             },
             content = { paddingValues ->
-                Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
-                    when (selectedTabIndex) {
-                        0 -> FriendsSection(
-                            modifier = Modifier.fillMaxSize(),
-                            friendships = friendships,
-                            pendingFriendships = pendingFriendships,
-                            navigateToUserDetail = { navigateToUserDetail(it) }
+
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    if(isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center),
+                            trackColor = Color.Gray
                         )
-                        1 -> StatisticsSection(modifier = Modifier.fillMaxSize(), results = results)
+                    } else {
+                        Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
+                            when (selectedTabIndex) {
+                                0 -> FriendsSection(
+                                    modifier = Modifier.fillMaxSize(),
+                                    friendships = friendships,
+                                    pendingFriendships = pendingFriendships,
+                                    navigateToUserDetail = { navigateToUserDetail(it) }
+                                )
+                                1 -> StatisticsSection(modifier = Modifier.fillMaxSize(), results = results, stats = stats)
+                            }
+
+                            if (selectedTabIndex == 0) {
+                                FloatingActionButton(
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            sheetState.show()
+                                            viewModel.setUsers()
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .align(Alignment.BottomEnd)
+                                        .padding(16.dp)
+                                        .size(52.dp),
+                                    shape = CircleShape,
+                                    containerColor = Color(0xFF006FFD),
+                                    contentColor = Color.White
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Add,
+                                        contentDescription = "Add",
+                                    )
+                                }
+                            }
+                        }
+
                     }
 
-                    if (selectedTabIndex == 0) {
-                        FloatingActionButton(
-                            onClick = {
-                                coroutineScope.launch {
-                                    sheetState.show()
-                                    viewModel.setUsers()
-                                }
-                            },
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(16.dp)
-                                .size(52.dp),
-                            shape = CircleShape,
-                            containerColor = Color(0xFF006FFD),
-                            contentColor = Color.White
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Add",
-                            )
-                        }
-                    }
                 }
+
             }
         )
     }
@@ -191,9 +223,10 @@ fun SocialScreen(
 fun BottomSheetLayoutContent(
     onHide: () -> Unit,
     searchText: String,
-    filteredUsers: List<User>,
+    filteredUsers: List<User?>,
     onUpdate: (String) -> Unit,
-    navigateToUserDetail: (Int) -> Unit
+    navigateToUserDetail: (Int) -> Unit,
+    isModalSheetLoading: Boolean
 ) {
 
     Column(
@@ -217,13 +250,10 @@ fun BottomSheetLayoutContent(
                     imageVector = Icons.Default.Close,
                     contentDescription = "Close",
                     tint = Color.Black,
-
                     )
             }
 
         }
-
-
 
         TextField(
             modifier = Modifier
@@ -260,26 +290,39 @@ fun BottomSheetLayoutContent(
 
 
 
-        )
+            )
 
-        LazyColumn {
-            items(filteredUsers) { user ->
-                UserCard(user = user, navigateToUserDetail = { navigateToUserDetail(it) })
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            if(isModalSheetLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    trackColor = Color.Gray
+                )
+            } else {
+
+
+                LazyColumn {
+                    items(filteredUsers) { user ->
+                        UserCard(user = user, navigateToUserDetail = { navigateToUserDetail(it) })
+
+                    }
+                }
 
             }
+            }
         }
-
-    }
 
 }
 
 @Composable
-fun UserCard(user: User, navigateToUserDetail: (Int) -> Unit) {
+fun UserCard(user: User?, navigateToUserDetail: (Int) -> Unit) {
     Row(
         modifier = Modifier
             .padding(start = 16.dp, end = 16.dp, top = 20.dp)
             .fillMaxWidth()
-            .clickable { navigateToUserDetail(user.userId) },
+            .clickable { navigateToUserDetail(user?.userId!!) },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -304,12 +347,12 @@ fun UserCard(user: User, navigateToUserDetail: (Int) -> Unit) {
 
             Column {
                 Text(
-                    text = user.userFullname,
+                    text = user?.userFullname!!,
                     style = MaterialTheme.typography.titleSmall,
                 )
                 Spacer(modifier = Modifier.size(4.dp))
                 Text(
-                    text = user.userClass,
+                    text = user.userClass!!,
                     style = MaterialTheme.typography.labelLarge,
                     color = Color(0xFF71727A)
                 )
@@ -379,8 +422,8 @@ fun SegmentTabBar(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
 @Composable
 fun FriendsSection(
     modifier: Modifier,
-    friendships: List<Friendship>,
-    pendingFriendships: List<PendingFriendship>,
+    friendships: List<AcceptedFriendships>,
+    pendingFriendships: List<PendingFriendships>,
     navigateToUserDetail: (Int) -> Unit
 ) {
 
@@ -411,12 +454,12 @@ fun FriendsSection(
 }
 
 @Composable
-fun FriendshipCard(friendship: Friendship, navigateToUserDetail: (Int) -> Unit) {
+fun FriendshipCard(friendship: AcceptedFriendships, navigateToUserDetail: (Int) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp, top = 24.dp)
-            .clickable { navigateToUserDetail(friendship.friendId) },
+            .clickable { navigateToUserDetail(friendship.friend?.userId!!) },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -441,12 +484,12 @@ fun FriendshipCard(friendship: Friendship, navigateToUserDetail: (Int) -> Unit) 
 
             Column {
                 Text(
-                    text = friendship.friendName,
+                    text = friendship.friend?.userFullname!!,
                     style = MaterialTheme.typography.titleSmall,
                 )
                 Spacer(modifier = Modifier.size(4.dp))
                 Text(
-                    text = friendship.friendYear.toString(),
+                    text = friendship.friend?.userYear!!.toString()+"xHIT",
                     style = MaterialTheme.typography.labelLarge,
                     color = Color(0xFF71727A)
                 )
@@ -468,12 +511,12 @@ fun FriendshipCard(friendship: Friendship, navigateToUserDetail: (Int) -> Unit) 
 }
 
 @Composable
-fun PendingFriendshipCard(pendingFriendship: PendingFriendship, navigateToUserDetail: (Int) -> Unit) {
+fun PendingFriendshipCard(pendingFriendship: PendingFriendships, navigateToUserDetail: (Int) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp, top = 24.dp)
-            .clickable { navigateToUserDetail(pendingFriendship.friendId) },
+            .clickable { navigateToUserDetail(pendingFriendship.friend?.userId!!) },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -499,12 +542,12 @@ fun PendingFriendshipCard(pendingFriendship: PendingFriendship, navigateToUserDe
 
             Column {
                 Text(
-                    text = pendingFriendship.friendName,
+                    text = pendingFriendship.friend?.userFullname!!,
                     style = MaterialTheme.typography.titleSmall,
                 )
                 Spacer(modifier = Modifier.size(4.dp))
                 Text(
-                    text = pendingFriendship.friendYear.toString(),
+                    text = pendingFriendship.friend?.userYear.toString()+"xHIT",
                     style = MaterialTheme.typography.labelLarge,
                     color = Color(0xFF71727A)
                 )
@@ -546,7 +589,7 @@ fun PendingFriendshipCard(pendingFriendship: PendingFriendship, navigateToUserDe
     }
 }
 @Composable
-fun StatisticsSection(modifier: Modifier, results: List<Result>) {
+fun StatisticsSection(modifier: Modifier, results: List<Result>,  stats: UserStatsResponse?) {
 
     var showPopup: Boolean by remember { mutableStateOf(false) }
 
@@ -558,7 +601,7 @@ fun StatisticsSection(modifier: Modifier, results: List<Result>) {
         if(showPopup) {
             StatisticsPopUp(onClose = { showPopup = false })
         }
-        StatisticsCard(onClick = { showPopup = true })
+        StatisticsCard(onClick = { showPopup = true }, stats = stats)
 
         Spacer(modifier = Modifier.size(16.dp))
         Text("Quiz Historie", style = MaterialTheme.typography.titleMedium)
@@ -679,7 +722,7 @@ fun StatisticsItem(icon: ImageVector, title: String, description: String) {
 }
 
 @Composable
-fun StatisticsCard(onClick: () -> Unit) {
+fun StatisticsCard(onClick: () -> Unit,  stats: UserStatsResponse?) {
 
     Card(
         colors = CardDefaults.cardColors(containerColor = Color(0xFF009DE0)),
@@ -715,7 +758,7 @@ fun StatisticsCard(onClick: () -> Unit) {
                 )
 
                 Text(
-                    "590",
+                    stats?.stats?.winRate.toString()+"%",
                     style= MaterialTheme.typography.bodyMedium
                 )
 
@@ -756,7 +799,7 @@ fun StatisticsCard(onClick: () -> Unit) {
                 )
 
                 Text(
-                    "590",
+                    "#"+stats?.stats?.ranking.toString(),
                     style= MaterialTheme.typography.bodyMedium
                 )
             }
@@ -797,7 +840,7 @@ fun StatisticsCard(onClick: () -> Unit) {
                 )
 
                 Text(
-                    "590",
+                    stats?.stats?.avgPoints.toString()+"%",
                     style= MaterialTheme.typography.bodyMedium
                 )
 
