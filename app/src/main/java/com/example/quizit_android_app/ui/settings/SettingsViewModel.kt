@@ -4,9 +4,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.quizit_android_app.model.User
-import com.example.quizit_android_app.usecases.User.ChangeUserYearUseCase
-import com.example.quizit_android_app.usecases.User.GetUserUseCase
-import com.example.quizit_android_app.usecases.User.LogoutUseCase
+import com.example.quizit_android_app.usecases.user.ChangeUserYearUseCase
+import com.example.quizit_android_app.usecases.user.GetUserUseCase
+import com.example.quizit_android_app.usecases.user.LogoutUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

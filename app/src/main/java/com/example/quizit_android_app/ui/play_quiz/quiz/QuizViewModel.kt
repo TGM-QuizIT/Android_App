@@ -10,8 +10,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.quizit_android_app.model.Focus
 import com.example.quizit_android_app.model.Questions
 import com.example.quizit_android_app.model.Subject
-import com.example.quizit_android_app.usecases.Quiz.GetQuizOfFocusUseCase
-import com.example.quizit_android_app.usecases.Quiz.GetQuizOfSubjectUseCase
+import com.example.quizit_android_app.usecases.quiz.GetQuizOfFocusUseCase
+import com.example.quizit_android_app.usecases.quiz.GetQuizOfSubjectUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
