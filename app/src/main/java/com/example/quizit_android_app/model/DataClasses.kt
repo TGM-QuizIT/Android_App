@@ -32,6 +32,17 @@ data class ChangeUserYearRequestBody(
     @SerializedName("userYear") val userYear: Int?
 )
 
+data class UserStatsResponse (
+    @SerializedName("status" ) var status : String? = null,
+    @SerializedName("stats"  ) var stats  : Stats?  = Stats()
+)
+
+data class Stats (
+    @SerializedName("avgPoints" ) var avgPoints : Double? = null,
+    @SerializedName("ranking"   ) var ranking   : Int?    = null,
+    @SerializedName("winRate"   ) var winRate   : Int?    = null
+)
+
 
 // ------------------- Subject Dataclasses -------------------
 data class Subject (

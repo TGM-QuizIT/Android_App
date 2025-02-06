@@ -93,6 +93,22 @@ class DataRepo @Inject constructor(private val context: Context) {
         }
     }
 
+    suspend fun fetchUserStats(): UserStatsResponse? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val id = sessionManager.getUserId()
+                val response = service.getUserStats(id)
+                withContext(Dispatchers.Main) {
+                    Log.d("Retrofit Test", response.stats.toString())
+                }
+                response
+            } catch (e: Exception) {
+                Log.e("Retrofit Test", "Failed to fetch user stats", e)
+                UserStatsResponse()
+            }
+        }
+    }
+
 
     // ------------------- Subject Calls -------------------
     suspend fun fetchSubjects(): List<Subject> {

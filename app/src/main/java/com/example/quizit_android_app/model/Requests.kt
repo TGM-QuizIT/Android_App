@@ -25,6 +25,9 @@ interface Requests {
     @GET("user")
     suspend fun getAllUsers(@Query("year") year: Int?): UserResponse
 
+    @GET("user/stats")
+    suspend fun getUserStats(@Query("id") userId: Int?): UserStatsResponse
+
 
     // ------------------- Subject Calls -------------------
     @GET("subject")
