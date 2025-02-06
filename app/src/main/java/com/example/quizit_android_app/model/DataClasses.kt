@@ -35,9 +35,9 @@ data class ChangeUserYearRequestBody(
 
 // ------------------- Subject Dataclasses -------------------
 data class Subject (
-    @SerializedName("subjectId"           ) var subjectId           : Int,
-    @SerializedName("subjectName"         ) var subjectName         : String = "",
-    @SerializedName("subjectImageAddress" ) var subjectImageAddress : String = ""
+    @SerializedName("subjectId"           ) var subjectId           : Int?   = null,
+    @SerializedName("subjectName"         ) var subjectName         : String? = null,
+    @SerializedName("subjectImageAddress" ) var subjectImageAddress : String? = null
 
 ): Serializable
 
@@ -228,6 +228,7 @@ data class OpenChallenges (
     @SerializedName("challengeDateTime" ) var challengeDateTime : String?     = null,
     @SerializedName("friendship"        ) var friendship        : Friendship? = Friendship(),
     @SerializedName("focus"             ) var focus             : Focus?      = Focus(),
+    @SerializedName("subject"           ) var subject           : Subject?    = Subject(),
     @SerializedName("score"             ) var score             : String?     = null,
     @SerializedName("friendScore"       ) var friendScore       : String?     = null
 )
@@ -245,6 +246,7 @@ data class DoneChallenges (
     @SerializedName("challengeDateTime" ) var challengeDateTime : String?      = null,
     @SerializedName("friendship"        ) var friendship        : Friendship?  = Friendship(),
     @SerializedName("focus"             ) var focus             : Focus?       = Focus(),
+    @SerializedName("subject"           ) var subject           : Subject?    = Subject(),
     @SerializedName("score"             ) var score             : Score?       = Score(),
     @SerializedName("friendScore"       ) var friendScore       : FriendScore? = FriendScore()
 )
