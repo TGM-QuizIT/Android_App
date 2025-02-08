@@ -197,7 +197,7 @@ data class FriendRequestBody (
 )
 
 data class AcceptFriendRequestBody(
-    @SerializedName("friendshipId") val id: Int
+    @SerializedName("id") val id: Int
 )
 
 // ------------------- Challenge Dataclasses -------------------

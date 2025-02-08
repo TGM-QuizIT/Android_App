@@ -329,15 +329,33 @@ class DataRepo @Inject constructor(private val context: Context) {
         }
     }
 
-    suspend fun acceptFriendship(friendshipId: Int) {
+    suspend fun acceptFriendship(friendshipId: Int): FriendshipResponse {
         return withContext(Dispatchers.IO) {
             try {
                 val response = service.acceptFriend(AcceptFriendRequestBody(friendshipId))
                 withContext(Dispatchers.Main) {
                     Log.d("Retrofit Test", "Friendship accepted")
                 }
+                response
             } catch (e: Exception) {
                 Log.e("Retrofit Test", "Failed to accept friendship", e)
+                FriendshipResponse()
+            }
+        }
+    }
+
+    /**
+     * Deletes a friendship -- für anfrage ablehnen oder freundschaft beenden
+     */
+    suspend fun deleteFriendship(friendshipId: Int) {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = service.deleteFriend(friendshipId)
+                withContext(Dispatchers.Main) {
+                    Log.d("Retrofit Test", "Friendship deleted")
+                }
+            } catch (e: Exception) {
+                Log.e("Retrofit Test", "Failed to delete friendship", e)
             }
         }
     }
