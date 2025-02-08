@@ -98,6 +98,9 @@ interface Requests {
     @PUT("friends/accept")
     suspend fun acceptFriend(@Body acceptFriendRequestBody: AcceptFriendRequestBody ): FriendshipResponse
 
+    @DELETE("friends")
+    suspend fun deleteFriend(@Query("id") friendshipId: Int?)
+
     // ------------------- Challenge Calls -------------------
 
     @POST("challenge")
