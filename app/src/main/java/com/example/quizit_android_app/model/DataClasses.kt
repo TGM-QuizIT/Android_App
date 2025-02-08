@@ -21,6 +21,8 @@ data class UserResponse(
     @SerializedName("reason") val reason: String?
 )
 
+@kotlinx.serialization.Serializable
+@Parcelize
 data class User (
     @SerializedName("userId"       ) var userId       : Int?    = null,
     @SerializedName("userName"     ) var userName     : String? = null,
@@ -29,7 +31,7 @@ data class User (
     @SerializedName("userClass"    ) var userClass    : String? = null,
     @SerializedName("userType"     ) var userType     : String? = null,
     @SerializedName("userMail"     ) var userMail     : String? = null
-)
+): Parcelable
 
 data class LoginRequestBody(
     @SerializedName("userName") val username: String,
@@ -252,8 +254,8 @@ data class OpenChallenges (
     @SerializedName("friendship"        ) var friendship        : Friendship? = Friendship(),
     @SerializedName("focus"             ) var focus             : Focus?      = Focus(),
     @SerializedName("subject"           ) var subject           : Subject?    = null,
-    @SerializedName("score"             ) var score             : String?     = null,
-    @SerializedName("friendScore"       ) var friendScore       : String?     = null
+    @SerializedName("score"             ) var score             : Double?     = null,
+    @SerializedName("friendScore"       ) var friendScore       : Double?     = null
 )
 
 data class Score (
@@ -336,9 +338,6 @@ object CustomNavType {
             return if (value == null) "null" else encodeToBase64UrlSafe(Json.encodeToString(value))
         }
     }
-
-
-
 }
 
 fun encodeToBase64UrlSafe(data: String): String {

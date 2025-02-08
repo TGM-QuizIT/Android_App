@@ -15,6 +15,7 @@ import com.example.quizit_android_app.model.PendingFriendships
 import com.example.quizit_android_app.model.User
 import com.example.quizit_android_app.model.UserStatsResponse
 import com.example.quizit_android_app.navigation.SocialRoute
+import com.example.quizit_android_app.usecases.friendship.AcceptFriendshipUseCase
 import com.example.quizit_android_app.usecases.friendship.GetAcceptedFriendships
 import com.example.quizit_android_app.usecases.friendship.GetAllFriendshipsUseCase
 import com.example.quizit_android_app.usecases.friendship.GetPendingFriendshipsUseCase
@@ -36,6 +37,7 @@ class SocialViewModel @Inject constructor(
     val getAllUsersUseCase: GetAllUsersUseCase,
     val getUserStatsUseCase: GetUserStatsUseCase,
     val getUserUseCase: GetUserUseCase,
+    val acceptFriendshipUseCase: AcceptFriendshipUseCase,
 ): ViewModel() {
     private val _selectedTabIndex = mutableStateOf(0)
     val selectedTabIndex: State<Int> = _selectedTabIndex
@@ -166,6 +168,19 @@ class SocialViewModel @Inject constructor(
     public fun updateSearchText(text: String) {
         _searchText.value = text
         filterUsers()
+    }
+
+    public fun acceptFriendship(isAccept: Boolean, id: Int) {
+        viewModelScope.launch {
+
+            if(isAccept) {
+                acceptFriendshipUseCase(id)
+            } else {
+                //TODO decline
+            }
+
+        }
+
     }
 }
 

@@ -8,6 +8,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -15,6 +16,7 @@ import androidx.navigation.toRoute
 import com.example.quizit_android_app.model.CustomNavType
 import com.example.quizit_android_app.model.Focus
 import com.example.quizit_android_app.model.Subject
+import com.example.quizit_android_app.model.User
 import com.example.quizit_android_app.ui.MainViewModel
 import com.example.quizit_android_app.ui.home.HomeScreen
 import com.example.quizit_android_app.ui.login.LoginScreen
@@ -74,7 +76,7 @@ data class SocialRoute(
 
 @Serializable
 data class UserDetailRoute(
-    val userId: Int
+    val id: Int
 )
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -165,8 +167,8 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
 
         composable<SocialRoute> {
             SocialScreen(
-                navigateToUserDetail = { userId ->
-                    navController.navigate(UserDetailRoute(userId))
+                navigateToUserDetail = { id
+                    navController.navigate(UserDetailRoute(id))
                 }
             )
         }

@@ -3,6 +3,7 @@ package com.example.quizit_android_app.ui.home
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,8 +22,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -55,6 +58,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import com.example.quizit_android_app.R
+import com.example.quizit_android_app.model.OpenChallenges
 import com.example.quizit_android_app.model.Subject
 import com.example.quizit_android_app.model.UserStatsResponse
 import com.example.quizit_android_app.ui.social.StatisticsCard
@@ -68,6 +72,7 @@ import com.example.quizit_android_app.ui.theme.Typography
 fun HomeScreen(
     navigateToSubject: () -> Unit,
     navigateToFocus: (Subject) -> Unit,
+    navigateToChallenge: () -> Unit,
     navigateToStatistics: () -> Unit,
     homeViewModel: HomeViewModel = hiltViewModel()
 
@@ -128,7 +133,7 @@ fun HomeScreen(
                         .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)
                 ) {
 
-                    SubjectSection(subjects = subjectList, onClick = {
+                    SubjectSection(subjects = subjectList, navigateToSubjects = {
                         navigateToSubject()
                     }, navigateToFocus = { subject ->
                         navigateToFocus(subject)
@@ -136,7 +141,11 @@ fun HomeScreen(
 
                     Spacer(modifier = Modifier.size(16.dp))
 
-                    //ChallengeSection()
+                    ChallengeSection(navigateToChallenge = {
+                        navigateToChallenge()
+                    })
+
+                    Spacer(modifier = Modifier.size(16.dp))
 
                     StatisticsSection(
                         navigateToStatistics = {
@@ -159,7 +168,7 @@ fun HomeScreen(
 
 
 @Composable
-fun SubjectSection(subjects: List<Subject>, onClick: () -> Unit, navigateToFocus: (Subject) -> Unit) {
+fun SubjectSection(subjects: List<Subject>, navigateToSubjects: () -> Unit, navigateToFocus: (Subject) -> Unit) {
 
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -179,7 +188,7 @@ fun SubjectSection(subjects: List<Subject>, onClick: () -> Unit, navigateToFocus
             Text(
                 text = "mehr anzeigen",
                 modifier = Modifier
-                    .clickable { onClick() },
+                    .clickable { navigateToSubjects() },
                 style = Typography.titleSmall
             )
         }
@@ -253,7 +262,7 @@ fun SubjectCard(subject: Subject, width: Dp, navigateToFocus: (Subject) -> Unit)
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 8.dp, end = 8.dp, bottom = 4.dp,top= 12.dp),
+                    .padding(start = 8.dp, end = 8.dp, bottom = 4.dp, top = 12.dp),
 
                 border = BorderStroke(1.5.dp, color = Color(0xFF006FFD)),
                 shape = RoundedCornerShape(8.dp)
@@ -268,42 +277,150 @@ fun SubjectCard(subject: Subject, width: Dp, navigateToFocus: (Subject) -> Unit)
     }
 }
 
-/*@Composable
-fun ChallengeSection() {
-
+@Composable
+fun ChallengeSection(
+    navigateToChallenge: () -> Unit
+) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(end = 16.dp)
-    ) {
+        modifier = Modifier.fillMaxWidth()
+    ){
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-
+                .padding(end = 16.dp)
         ) {
-
             Text(
-                "Herausforderungen",
+                "Deine Fächer",
                 style = Typography.titleMedium
-
             )
 
             Text(
                 text = "mehr anzeigen",
                 modifier = Modifier
-                    .clickable {  },
+                    .clickable { navigateToChallenge() },
                 style = Typography.titleSmall
             )
-
-
         }
+
         Spacer(modifier = Modifier.size(16.dp))
+
+
     }
 
 
-}*/
+}
+
+@Composable
+fun ChallengeCard(type: ChallengeType, challenge: OpenChallenges) {
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.fillMaxWidth(0.3f),
+        colors = CardDefaults.cardColors(containerColor = if(challenge.focus == null) Color(0xFFeaf2ff) else Color(0xFFf8f9fe))
+    ) {
+        Column {
+            when (type) {
+                ChallengeType.FRIEND -> {
+                    AsyncImage(
+                        model = challenge.focus?.focusImageAddress ?: challenge.subject?.subjectImageAddress,
+                        contentDescription = "Challenge Image",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(2f/1f)
+                    )
+
+                }
+                else -> {
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+
+                        Box(
+                            modifier = Modifier
+                                .size(45.dp)
+                                .background(Color(0xFFEAF2FF), shape = CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "User Icon",
+                                tint = Color(0xFFB4DBFF),
+                                modifier = Modifier.size(35.dp)
+                            )
+                        }
+
+                        Column {
+                            Text(
+                                text = challenge.friendship?.friend?.userFullname!!,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Text(
+                                text = challenge.friendship?.friend?.userClass!!,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    }
+
+                }
+
+            }
+
+
+            Spacer(modifier = Modifier.size(8.dp))
+
+            Text(
+                text = when(type) {
+                    ChallengeType.SUBJECT -> challenge.focus?.focusName ?: challenge.subject?.subjectName!!
+                    else -> challenge.focus?.focusName ?: challenge.subject?.subjectName!!
+                },
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.Black,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+            )
+
+            Spacer(modifier = Modifier.size(8.dp))
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(24.dp)
+                    .padding(start = 16.dp, end = 16.dp)
+                    .background(Color.White, shape = RoundedCornerShape(8.dp))
+                    .border(1.dp, Color(0xFF006FFD), shape = RoundedCornerShape(8.dp)),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(challenge.friendScore!!.toFloat() / 100)
+                        .height(24.dp)
+                        .background(Color(0xFF006FFD), shape = RoundedCornerShape(8.dp))
+                ) {
+                    Text(
+                        text = "${challenge.friendScore}%",
+                        color = Color.Black,
+                        modifier = Modifier.align(Alignment.Center),
+                        style = MaterialTheme.typography.labelLarge
+                    )
+
+                }
+
+            }
+
+        }
+
+    }
+
+}
+
+enum class ChallengeType {
+    OVERALL,
+    FRIEND,
+    SUBJECT
+}
 @Composable
 fun StatisticsSection(navigateToStatistics: () -> Unit, stats: UserStatsResponse?) {
     Column(

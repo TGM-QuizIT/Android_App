@@ -180,7 +180,10 @@ fun SocialScreen(
                                     modifier = Modifier.fillMaxSize(),
                                     friendships = friendships,
                                     pendingFriendships = pendingFriendships,
-                                    navigateToUserDetail = { navigateToUserDetail(it) }
+                                    navigateToUserDetail = { navigateToUserDetail(it) },
+                                    acceptFriendship = { isAccept, id ->
+                                        viewModel.acceptFriendship(isAccept, id)
+                                    }
                                 )
                                 1 -> StatisticsSection(modifier = Modifier.fillMaxSize(), results = results, stats = stats)
                             }
@@ -424,7 +427,8 @@ fun FriendsSection(
     modifier: Modifier,
     friendships: List<AcceptedFriendships>,
     pendingFriendships: List<PendingFriendships>,
-    navigateToUserDetail: (Int) -> Unit
+    navigateToUserDetail: (Int) -> Unit,
+    acceptFriendship: (Boolean, Int) -> Unit
 ) {
 
     LazyColumn(
@@ -446,7 +450,9 @@ fun FriendsSection(
         }
 
         items(pendingFriendships) { pendingFriendship ->
-            PendingFriendshipCard(pendingFriendship = pendingFriendship, navigateToUserDetail = { navigateToUserDetail(it) })
+            PendingFriendshipCard(pendingFriendship = pendingFriendship, navigateToUserDetail = { navigateToUserDetail(it) }, acceptFriendship = { acceptFriendship, id ->
+                acceptFriendship(acceptFriendship, id)
+            })
         }
 
 
@@ -511,7 +517,7 @@ fun FriendshipCard(friendship: AcceptedFriendships, navigateToUserDetail: (Int) 
 }
 
 @Composable
-fun PendingFriendshipCard(pendingFriendship: PendingFriendships, navigateToUserDetail: (Int) -> Unit) {
+fun PendingFriendshipCard(pendingFriendship: PendingFriendships, navigateToUserDetail: (Int) -> Unit, acceptFriendship: (Boolean, Int) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -556,7 +562,8 @@ fun PendingFriendshipCard(pendingFriendship: PendingFriendships, navigateToUserD
 
         Row {
             IconButton(
-                onClick = { // TODO
+                onClick = {
+                    acceptFriendship(true, pendingFriendship.friendshipId!!)
                 },
                 modifier = Modifier
                     .background(Color(0xFF0DE334), shape = CircleShape)
@@ -573,7 +580,8 @@ fun PendingFriendshipCard(pendingFriendship: PendingFriendships, navigateToUserD
 
 
             IconButton(
-                onClick = { //TODO
+                onClick = {
+                    acceptFriendship(false, pendingFriendship.friendshipId!!)
                 },
                 modifier = Modifier
                     .background(Color(0xFFFF3B30), shape = CircleShape)
