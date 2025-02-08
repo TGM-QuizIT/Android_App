@@ -1,7 +1,5 @@
-package com.example.quizit_android_app.model
+package com.example.quizit_android_app.model.retrofit
 
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.Base64
@@ -11,7 +9,6 @@ import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import java.io.Serializable
 
 // ------------------- User Dataclasses -------------------
 data class UserResponse(

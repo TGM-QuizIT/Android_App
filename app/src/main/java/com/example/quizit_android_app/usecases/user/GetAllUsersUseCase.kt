@@ -1,8 +1,8 @@
 package com.example.quizit_android_app.usecases.user
 
 import android.util.Log
-import com.example.quizit_android_app.model.DataRepo
-import com.example.quizit_android_app.model.User
+import com.example.quizit_android_app.model.retrofit.DataRepo
+import com.example.quizit_android_app.model.retrofit.User
 import javax.inject.Inject
 
 class GetAllUsersUseCase @Inject constructor(

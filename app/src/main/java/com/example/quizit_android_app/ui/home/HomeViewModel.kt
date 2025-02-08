@@ -6,8 +6,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.quizit_android_app.model.Subject
-import com.example.quizit_android_app.model.UserStatsResponse
+import com.example.quizit_android_app.model.retrofit.Subject
+import com.example.quizit_android_app.model.retrofit.UserStatsResponse
 import com.example.quizit_android_app.usecases.subjects.GetAllSubjectsUseCase
 import com.example.quizit_android_app.usecases.user.GetUserStatsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel

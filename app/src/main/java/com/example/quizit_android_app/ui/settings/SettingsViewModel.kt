@@ -3,7 +3,7 @@ package com.example.quizit_android_app.ui.settings
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.quizit_android_app.model.User
+import com.example.quizit_android_app.model.retrofit.User
 import com.example.quizit_android_app.usecases.user.ChangeUserYearUseCase
 import com.example.quizit_android_app.usecases.user.GetUserUseCase
 import com.example.quizit_android_app.usecases.user.LogoutUseCase

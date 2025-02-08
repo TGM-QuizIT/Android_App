@@ -7,9 +7,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
-import com.example.quizit_android_app.model.Focus
-import com.example.quizit_android_app.model.Subject
+import com.example.quizit_android_app.model.retrofit.Focus
+import com.example.quizit_android_app.model.retrofit.Subject
 import com.example.quizit_android_app.navigation.FocusRoute
 import com.example.quizit_android_app.usecases.focus.GetAllFocusUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel

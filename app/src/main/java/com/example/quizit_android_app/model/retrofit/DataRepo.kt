@@ -1,8 +1,9 @@
-package com.example.quizit_android_app.model
+package com.example.quizit_android_app.model.retrofit
 
 import android.content.Context
 import android.util.Log
 import com.example.quizit_android_app.R
+import com.example.quizit_android_app.model.SessionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -93,7 +94,7 @@ class DataRepo @Inject constructor(private val context: Context) {
         }
     }
 
-    suspend fun fetchUserStats(): UserStatsResponse? {
+    suspend fun fetchUserStats(): UserStatsResponse {
         return withContext(Dispatchers.IO) {
             try {
                 val id = sessionManager.getUserId()
@@ -436,7 +437,7 @@ class DataRepo @Inject constructor(private val context: Context) {
         }
     }
 
-    suspend fun getChallengesForSubject(subjectId: Int): ChallengeResponse{
+    suspend fun getChallengesForSubject(subjectId: Int): ChallengeResponse {
         return withContext(Dispatchers.IO) {
             try {
                 val id = sessionManager.getUserId()

@@ -1,4 +1,4 @@
-package com.example.quizit_android_app.model
+package com.example.quizit_android_app.model.retrofit
 
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -43,17 +43,14 @@ interface Requests {
     // ------------------- Focus Calls -------------------
     @GET("focus")
     suspend fun getFocusOfUser(
-        @Query("id") subjectId: Int?,
-        @Query("year") userYear: Int?,
-        @Query("active") active: Int?
+        @Query("id") subjectId: Int?, @Query("year") userYear: Int?, @Query("active") active: Int?
     ): FocusResponse
 
     // ------------------- Quiz Calls -------------------
 
     @GET("quiz/subject")
     suspend fun getQuizOfSubject(
-        @Query("id") subjectId: Int?,
-        @Query("year") userYear: Int?
+        @Query("id") subjectId: Int?, @Query("year") userYear: Int?
     ): QuizOfSubjectResponse
 
     @GET("quiz/focus")
@@ -69,8 +66,7 @@ interface Requests {
 
     @GET("result")
     suspend fun getResultsOfUser(
-        @Query("userId") userId: Int?,
-        @Query("amount") amount: Int? = null
+        @Query("userId") userId: Int?, @Query("amount") amount: Int? = null
     ): GetResultsResponse
 
     @GET("result")
@@ -96,7 +92,7 @@ interface Requests {
     suspend fun addFriend(@Body friendRequestBody: FriendRequestBody): FriendshipResponse
 
     @PUT("friends/accept")
-    suspend fun acceptFriend(@Body acceptFriendRequestBody: AcceptFriendRequestBody ): FriendshipResponse
+    suspend fun acceptFriend(@Body acceptFriendRequestBody: AcceptFriendRequestBody): FriendshipResponse
 
     @DELETE("friends")
     suspend fun deleteFriend(@Query("id") friendshipId: Int?)
@@ -116,10 +112,16 @@ interface Requests {
     suspend fun assignResultToChallenge(@Body assignResultToChallengeRequestBody: AssignResultToChallengeRequestBody): AssignResultToChallengeResponse
 
     @GET("challenge/friendship")
-    suspend fun getChallengesOfFriendship(@Query("friendshipId") friendshipId: Int?, @Query("userId") userId: Int?): ChallengeResponse
+    suspend fun getChallengesOfFriendship(
+        @Query("friendshipId") friendshipId: Int?,
+        @Query("userId") userId: Int?
+    ): ChallengeResponse
 
     @GET("challenge")
-    suspend fun getChallengesForSubject(@Query("subjectId") subjectId: Int?, @Query("userId") userId: Int?): ChallengeResponse
+    suspend fun getChallengesForSubject(
+        @Query("subjectId") subjectId: Int?,
+        @Query("userId") userId: Int?
+    ): ChallengeResponse
 
     @GET("challenge/done")
     suspend fun getDoneChallenges(@Query("userId") userId: Int?): DoneChallengesResponse
