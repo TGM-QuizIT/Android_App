@@ -58,18 +58,18 @@ import com.example.quizit_android_app.ui.theme.Typography
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FocusScreen(
-    navigateToQuiz: (Subject?, Focus?) -> Unit,
-    navigateBack: (Subject?) -> Unit,
+    navigateToQuiz: (Subject, Focus?) -> Unit,
+    navigateBack: () -> Unit,
     focusViewModel: FocusViewModel = hiltViewModel(),
     navigateToQuizDetail: (Subject, Focus?) -> Unit,
-    subject: Subject?
 ) {
 
-    Log.d("FocusScreen", "subject: "+subject)
+
 
     val focusList = focusViewModel.focusList
     val overallQuestionCount = focusViewModel.overallQuestionCount
     val isLoading = focusViewModel.isLoading
+    val subject = focusViewModel.subject
 
     Scaffold(
         contentWindowInsets = WindowInsets(0.dp),
@@ -80,7 +80,7 @@ fun FocusScreen(
                     .padding(top = 16.dp)
             ) {
                 IconButton(
-                    onClick = { navigateBack(subject) },
+                    onClick = { navigateBack() },
                     modifier = Modifier.align(Alignment.CenterStart)
                 ) {
                     Icon(
@@ -130,7 +130,7 @@ fun FocusScreen(
                             item {
                                 FocusCard(
                                     type = CardType.Subject,
-                                    subject = subject,
+                                    subject = subject!!,
                                     focus = null,
                                     overallQuestionCount = overallQuestionCount,
                                     onQuizStart = { subject, focus ->
@@ -145,7 +145,7 @@ fun FocusScreen(
                                 FocusCard(
                                     type = CardType.Focus,
                                     focus = it,
-                                    subject = subject,
+                                    subject = subject!!,
                                     overallQuestionCount = overallQuestionCount,
                                     onQuizStart = {subject, focus ->
                                         navigateToQuiz(subject, focus)
@@ -167,9 +167,9 @@ fun FocusScreen(
 @Composable
 fun FocusCard(
     type: CardType,
-    subject: Subject?,
+    subject: Subject,
     focus: Focus?,
-    onQuizStart: (Subject?, Focus?) -> Unit,
+    onQuizStart: (Subject, Focus?) -> Unit,
     overallQuestionCount: Int,
     navigateToQuizDetail: (Subject, Focus?) -> Unit
 ) {
@@ -178,7 +178,7 @@ fun FocusCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp, horizontal = 16.dp)
-            .clickable {navigateToQuizDetail(subject!!, focus) },
+            .clickable {navigateToQuizDetail(subject, focus) },
         colors = CardDefaults.cardColors(
             containerColor = if (type == CardType.Subject) Color(0xFFEAF2FF) else Color(0xFFF8F9FE),
             contentColor = Color.Black
@@ -244,8 +244,14 @@ fun FocusCard(
                     }
 
                 }
+
                 AsyncImage(
-                    model = focus?.focusImageAddress ?: subject?.subjectImageAddress ?: "",
+
+                    model = when (type) {
+
+                        CardType.Subject -> subject.subjectImageAddress
+                        CardType.Focus -> focus?.focusImageAddress
+                    },
                     contentDescription = "Image",
                     modifier = Modifier
                         .fillMaxWidth()

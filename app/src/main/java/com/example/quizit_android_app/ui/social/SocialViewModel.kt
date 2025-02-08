@@ -8,11 +8,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.example.quizit_android_app.model.AcceptedFriendships
 import com.example.quizit_android_app.model.Friendship
 import com.example.quizit_android_app.model.PendingFriendships
 import com.example.quizit_android_app.model.User
 import com.example.quizit_android_app.model.UserStatsResponse
+import com.example.quizit_android_app.navigation.SocialRoute
 import com.example.quizit_android_app.usecases.friendship.GetAcceptedFriendships
 import com.example.quizit_android_app.usecases.friendship.GetAllFriendshipsUseCase
 import com.example.quizit_android_app.usecases.friendship.GetPendingFriendshipsUseCase
@@ -69,7 +71,7 @@ class SocialViewModel @Inject constructor(
 
     init {
         Log.d("SocialViewModel", "init: $savedStateHandle")
-        val showStatistics: Boolean = savedStateHandle.get<Boolean>("showStatistics") ?: false
+        val showStatistics: Boolean = savedStateHandle.toRoute<SocialRoute>()?.showStatistics ?: false
 
         if(showStatistics) {
             updateTabIndex(1)
@@ -83,9 +85,16 @@ class SocialViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                _friendships.value = getAllFriendshipsUseCase()
-                _pendingFriendships.value = getPendingFriendshipsUseCase()
-                _userStats.value = getUserStatsUseCase()
+                if(_friendships.value.isEmpty()) {
+                    _friendships.value = getAllFriendshipsUseCase()
+                }
+
+                if(_pendingFriendships.value.isEmpty()) {
+                    _pendingFriendships.value = getPendingFriendshipsUseCase()
+                }
+                if(_userStats.value == null) {
+                    _userStats.value = getUserStatsUseCase()
+                }
             } catch (e: Exception) {
                 //TODO Error handling
             } finally {
@@ -124,10 +133,13 @@ class SocialViewModel @Inject constructor(
         viewModelScope.launch {
             _isModalSheetLoading.value = true
             try {
-                val user = getUserUseCase()
-                _users.value = getAllUsersUseCase()
-                _users.value = _users.value.filter { it?.userId != user?.userId }
-                filterUsers()
+
+                if(_users.value.isEmpty()) {
+                    val user = getUserUseCase()
+                    _users.value = getAllUsersUseCase()
+                    _users.value = _users.value.filter { it?.userId != user?.userId }
+                    filterUsers()
+                }
             } catch (e: Exception) {
                 //TODO Error handling
             } finally {

@@ -21,8 +21,7 @@ class QuizDetailViewModel @Inject constructor(
 
 
     init {
-        val subjectId = savedStateHandle?.get<String>("subjectId")?.toIntOrNull()
-        val focusId = savedStateHandle?.get<String>("focusId")?.toIntOrNull()
+
 
     }
 

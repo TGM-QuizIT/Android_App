@@ -3,13 +3,14 @@ package com.example.quizit_android_app.ui.quiz
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.example.quizit_android_app.model.Focus
 import com.example.quizit_android_app.model.Questions
 import com.example.quizit_android_app.model.Subject
+import com.example.quizit_android_app.navigation.QuizRoute
 import com.example.quizit_android_app.usecases.quiz.GetQuizOfFocusUseCase
 import com.example.quizit_android_app.usecases.quiz.GetQuizOfSubjectUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -50,10 +51,12 @@ class QuizViewModel @Inject constructor(
 
 
     init {
+        _focus.value = QuizRoute.from(savedStateHandle).focus
+        _subject.value = QuizRoute.from(savedStateHandle).subject
 
 
-        val id = savedStateHandle?.get<String>("id")?.toIntOrNull()
-        val isQuizOfSubject = savedStateHandle?.get<String>("isQuizOfSubject").toBoolean()
+        val id = _focus.value?.focusId ?: _subject.value?.subjectId
+        val isQuizOfSubject = _focus.value == null
 
 
         setQuestions(id, isQuizOfSubject)
@@ -64,11 +67,16 @@ class QuizViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true // Ladezustand aktivieren
             try {
-                _questions.value = if (isQuizOfSubject) {
-                    getQuizOfSubjectUseCase(id!!)
-                } else {
-                    getQuizOfFocusUseCase(id!!)
+
+                if(_questions.value.isEmpty()) {
+                    _questions.value = if (isQuizOfSubject) {
+                        getQuizOfSubjectUseCase(id!!)
+                    } else {
+                        getQuizOfFocusUseCase(id!!)
+                    }
+
                 }
+
             } catch (e: Exception) {
                 Log.e("QuizViewModel", "Error loading questions", e)
             } finally {

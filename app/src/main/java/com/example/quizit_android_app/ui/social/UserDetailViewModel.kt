@@ -6,6 +6,8 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.navigation.toRoute
+import com.example.quizit_android_app.navigation.UserDetailRoute
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -21,7 +23,7 @@ class UserDetailViewModel @Inject constructor(
     val userResults: State<List<Result>> = _userResults
 
     init {
-        val userId: Int = savedStateHandle.get<String>("userId")?.toIntOrNull() ?: 0
+        val userId: Int = savedStateHandle.toRoute<UserDetailRoute>().userId
         setUserResults()
     }
 

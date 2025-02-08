@@ -56,10 +56,8 @@ import com.example.quizit_android_app.ui.theme.Typography
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun QuizScreen(
-    navigateBack: (Subject?, Focus?) -> Unit,
+    navigateBack: () -> Unit,
     quizViewModel: QuizViewModel = hiltViewModel(),
-    focus: Focus?,
-    subject: Subject?
 ) {
 
     val currentQuestionIndex = quizViewModel.currentQuestionIndex.value
@@ -67,6 +65,8 @@ fun QuizScreen(
     val questions = quizViewModel.questions.value
     val isLoading = quizViewModel.isLoading.value
 
+    val focus = quizViewModel.focus.value
+    val subject = quizViewModel.subject.value
 
 
     Scaffold(
@@ -74,7 +74,7 @@ fun QuizScreen(
         topBar = {
             if (currentQuestionIndex < questions.size) {
                 QuizTopBar(currentQuestionIndex + 1, questions.size, focus?.focusName, subject?.subjectName, onClick = {
-                    navigateBack(subject, focus)
+                    navigateBack()
                 })
             }
         },
@@ -106,7 +106,7 @@ fun QuizScreen(
                             subject = subject?.subjectName,
                             score = userScore,
                             results = userResults,
-                            onCloseResult = { navigateBack(subject, focus) }
+                            onCloseResult = { navigateBack() }
                         )
                     }
                 }

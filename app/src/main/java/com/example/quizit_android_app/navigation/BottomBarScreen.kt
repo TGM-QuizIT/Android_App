@@ -8,27 +8,27 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class BottomBarScreen(
-    val route: String,
+    val route: Any,
     val title: String,
     val icon: ImageVector
 ) {
     object Home: BottomBarScreen(
-        route = "home",
+        route = com.example.quizit_android_app.navigation.HomeRoute,
         title = "Home",
         icon = Icons.Outlined.Home
     )
     object Settings: BottomBarScreen(
-        route = "settings",
+        route = com.example.quizit_android_app.navigation.SettingsRoute,
         title = "Settings",
         icon = Icons.Outlined.Settings
     )
     object Friends: BottomBarScreen(
-        route = "social",
+        route = SocialRoute(),
         title = "Friends",
         icon = Icons.Outlined.Group
     )
     object Subject: BottomBarScreen(
-        route = "subject",
+        route = com.example.quizit_android_app.navigation.SubjectRoute,
         title = "Quiz",
         icon = Icons.Outlined.Book
     )

@@ -40,8 +40,12 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading = true
             try {
-                _subjectList = getAllSubjectsUseCase()
-                _stats = getUserStatsUseCase()
+
+                if(_subjectList.isEmpty()) {
+                    _subjectList = getAllSubjectsUseCase()
+
+                }
+                if(_stats == null) _stats = getUserStatsUseCase()
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {

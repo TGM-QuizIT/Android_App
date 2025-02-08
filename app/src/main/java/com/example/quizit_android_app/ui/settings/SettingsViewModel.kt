@@ -34,7 +34,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             try  {
-                _user.value = getUserUseCase()
+                if(_user.value == null) _user.value = getUserUseCase()
             } catch (e: Exception) {
                 _user.value = null
             } finally {

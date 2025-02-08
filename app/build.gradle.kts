@@ -5,6 +5,8 @@ plugins {
     kotlin("kapt")
     id("dagger.hilt.android.plugin")
     id("kotlin-parcelize")
+    kotlin("plugin.serialization") version "1.9.0"
+
 }
 
 android {
@@ -101,4 +103,8 @@ dependencies {
 
     implementation("com.google.code.gson:gson:2.11.0")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.18.0")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.0")
+
+    implementation(libs.kotlinx.serialization.json)
 }

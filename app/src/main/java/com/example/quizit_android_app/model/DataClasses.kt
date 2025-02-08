@@ -1,7 +1,16 @@
 package com.example.quizit_android_app.model
 
+import android.net.Uri
+import android.os.Build
+import android.os.Bundle
+import android.os.Parcelable
+import android.util.Base64
+import androidx.navigation.NavType
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.google.gson.annotations.SerializedName
+import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.io.Serializable
 
 // ------------------- User Dataclasses -------------------
@@ -45,12 +54,14 @@ data class Stats (
 
 
 // ------------------- Subject Dataclasses -------------------
+@kotlinx.serialization.Serializable
+@Parcelize
 data class Subject (
     @SerializedName("subjectId"           ) var subjectId           : Int   = 0,
     @SerializedName("subjectName"         ) var subjectName         : String = "",
     @SerializedName("subjectImageAddress" ) var subjectImageAddress : String = ""
 
-): Serializable
+): Parcelable
 
 data class SubjectsResponse(
     @SerializedName("status") val status: String,
@@ -69,7 +80,8 @@ data class FocusResponse (
     @SerializedName("focuses"  ) var focus  : List<Focus> = arrayListOf()
 )
 
-
+@kotlinx.serialization.Serializable
+@Parcelize
 data class Focus (
     @SerializedName("focusId"           ) var focusId           : Int?    = null,
     @SerializedName("focusName"         ) var focusName         : String? = null,
@@ -77,7 +89,7 @@ data class Focus (
     @SerializedName("focusImageAddress" ) var focusImageAddress : String? = null,
     @SerializedName("subjectId"         ) var subjectId         : Int?    = null,
     @SerializedName("questionCount"     ) var questionCount     : Int?    = null
-): Serializable
+): Parcelable
 
 // ------------------- Quiz Dataclasses -------------------
 
@@ -268,5 +280,72 @@ data class DoneChallengesResponse (
 )
 
 
+object CustomNavType {
 
+    val SubjectType = object : NavType<Subject>(
+        isNullableAllowed = false,
+    )  {
+        override fun get(bundle: Bundle, key: String): Subject? {
+            return Json.decodeFromString(bundle.getString(key)?: return  null)
+        }
+
+        override fun parseValue(value: String): Subject {
+            return Json.decodeFromString(decodeFromBase64UrlSafe(value))
+        }
+
+        override fun put(bundle: Bundle, key: String, value: Subject) {
+            bundle.putString(key, Json.encodeToString(value))
+        }
+
+        override fun serializeAsValue(value: Subject): String {
+            return encodeToBase64UrlSafe(Json.encodeToString(value))
+        }
+    }
+
+    val FocusType = object : NavType<Focus?>(
+        isNullableAllowed = true,
+    ) {
+        override fun get(bundle: Bundle, key: String): Focus? {
+            val encoded = bundle.getString(key) ?: return null
+            if (encoded == "null") return null
+            return try {
+                Json.decodeFromString(decodeFromBase64UrlSafe(encoded))
+            } catch (e: Exception) {
+                null
+            }
+        }
+
+        override fun parseValue(value: String): Focus? {
+            if (value == "null") return null
+            return try {
+                Json.decodeFromString(decodeFromBase64UrlSafe(value))
+            } catch (e: Exception) {
+                null
+            }
+        }
+
+        override fun put(bundle: Bundle, key: String, value: Focus?) {
+            if (value == null) {
+                bundle.putString(key, "null")
+            } else {
+                bundle.putString(key, encodeToBase64UrlSafe(Json.encodeToString(value)))
+            }
+        }
+
+        override fun serializeAsValue(value: Focus?): String {
+            return if (value == null) "null" else encodeToBase64UrlSafe(Json.encodeToString(value))
+        }
+    }
+
+
+
+}
+
+fun encodeToBase64UrlSafe(data: String): String {
+    return Base64.encodeToString(data.toByteArray(Charsets.UTF_8), Base64.URL_SAFE or Base64.NO_WRAP)
+}
+
+fun decodeFromBase64UrlSafe(encoded: String): String {
+    return String(Base64.decode(encoded, Base64.URL_SAFE or Base64.NO_WRAP), Charsets.UTF_8)
+}
 
