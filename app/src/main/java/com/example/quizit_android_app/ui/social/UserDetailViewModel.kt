@@ -23,7 +23,7 @@ class UserDetailViewModel @Inject constructor(
     val userResults: State<List<Result>> = _userResults
 
     init {
-        val userId: Int = savedStateHandle.toRoute<UserDetailRoute>().userId
+        val userId: Int = savedStateHandle.toRoute<UserDetailRoute>().id
         setUserResults()
     }
 

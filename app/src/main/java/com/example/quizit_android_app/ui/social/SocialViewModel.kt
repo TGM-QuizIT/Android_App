@@ -16,6 +16,7 @@ import com.example.quizit_android_app.model.User
 import com.example.quizit_android_app.model.UserStatsResponse
 import com.example.quizit_android_app.navigation.SocialRoute
 import com.example.quizit_android_app.usecases.friendship.AcceptFriendshipUseCase
+import com.example.quizit_android_app.usecases.friendship.DeleteDeclineFriendshipUseCase
 import com.example.quizit_android_app.usecases.friendship.GetAcceptedFriendships
 import com.example.quizit_android_app.usecases.friendship.GetAllFriendshipsUseCase
 import com.example.quizit_android_app.usecases.friendship.GetPendingFriendshipsUseCase
@@ -38,6 +39,7 @@ class SocialViewModel @Inject constructor(
     val getUserStatsUseCase: GetUserStatsUseCase,
     val getUserUseCase: GetUserUseCase,
     val acceptFriendshipUseCase: AcceptFriendshipUseCase,
+    val deleteDeclineFriendshipUseCase: DeleteDeclineFriendshipUseCase
 ): ViewModel() {
     private val _selectedTabIndex = mutableStateOf(0)
     val selectedTabIndex: State<Int> = _selectedTabIndex
@@ -174,9 +176,28 @@ class SocialViewModel @Inject constructor(
         viewModelScope.launch {
 
             if(isAccept) {
-                acceptFriendshipUseCase(id)
+
+                val friendshipResponse = acceptFriendshipUseCase(id)
+                val friendship = friendshipResponse.friendship
+
+                if(friendshipResponse.status == "Success") {
+                    val acceptedFriendship = AcceptedFriendships(
+                        friendshipId = friendship!!.friendshipId,
+                        friendshipSince = friendship.friendshipSince,
+                        friend = friendship.friend,
+
+                        )
+                    _friendships.value = _friendships.value + acceptedFriendship
+                    _pendingFriendships.value = _pendingFriendships.value.filter { it.friendshipId != id }
+                }
+
             } else {
-                //TODO decline
+
+                deleteDeclineFriendshipUseCase(id)
+                _pendingFriendships.value = _pendingFriendships.value.filter { it.friendshipId != id }
+
+
+
             }
 
         }
