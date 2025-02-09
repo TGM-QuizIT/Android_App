@@ -10,12 +10,18 @@ import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
+// ------------------- General Dataclasses -------------------
+
+data class StatusResponse (
+    @SerializedName("status" ) var status : String? = null
+)
+
 // ------------------- User Dataclasses -------------------
 data class UserResponse(
-    @SerializedName("status") val status: String,
+    @SerializedName("status") val status: String? = null,
     @SerializedName("user") val user: User? = null,
     @SerializedName("users") val users: List<User?> = emptyList(),
-    @SerializedName("reason") val reason: String?
+    @SerializedName("reason") val reason: String? = null
 )
 
 @kotlinx.serialization.Serializable
@@ -276,6 +282,11 @@ data class DoneChallenges (
 data class DoneChallengesResponse (
     @SerializedName("status"         ) var status         : String?                   = null,
     @SerializedName("doneChallenges" ) var doneChallenges : ArrayList<DoneChallenges> = arrayListOf()
+)
+
+data class OpenChallengesResponse (
+    @SerializedName("status"         ) var status         : String?                   = null,
+    @SerializedName("openChallenges" ) var openChallenges : ArrayList<OpenChallenges> = arrayListOf()
 )
 
 

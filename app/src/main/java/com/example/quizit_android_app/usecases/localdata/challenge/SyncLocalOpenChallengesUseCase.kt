@@ -9,8 +9,7 @@ class SyncLocalOpenChallengesUseCase @Inject constructor(
     val contentDataStore: ContentDataStore
 ) {
     suspend operator fun invoke() {
-        // TODO: alle offenen challenges eines users holen
-        //val openChallenges = dataRepo.getOpenChallenges()
-        //contentDataStore.saveOpenChallenges(openChallenges.openChallenges)
+        val openChallenges = dataRepo.fetchAllOpenChallenges()
+        contentDataStore.saveOpenChallenges(openChallenges.openChallenges)
     }
 }

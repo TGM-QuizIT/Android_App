@@ -9,8 +9,7 @@ class SyncLocalFocusUseCase @Inject constructor(
     val contentDataStore: ContentDataStore
 ) {
     suspend operator fun invoke() {
-        // TODO: alle schwerpunkte eines user holen, unabhängig vom fach
-        //val focus = dataRepo.fetchFocusOfUser()
-        //contentDataStore.saveFocus(focus)
+        val focus = dataRepo.fetchAllFocusOfUser()
+        contentDataStore.saveFocus(focus)
     }
 }

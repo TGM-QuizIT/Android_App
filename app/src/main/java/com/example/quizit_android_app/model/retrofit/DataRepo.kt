@@ -39,25 +39,25 @@ class DataRepo @Inject constructor(private val context: Context) {
                     response.user?.let {
                         // Save the session with login
                         sessionManager.saveSession(it)
-                        Log.d("Retrofit Test", "${it.userName} ${it.userId}")
+                        Log.d("login", "${it.userName} ${it.userId}")
                     }
                 }
                 response.user
             } catch (e: HttpException) {
                 if (e.code() == 401) {
-                    Log.e("Retrofit Test", "Unauthorized: Invalid credentials")
+                    Log.e("login", "Unauthorized: Invalid credentials")
                 } else {
-                    Log.e("Retrofit Test", "HTTP error: ${e.code()}")
+                    Log.e("login", "HTTP error: ${e.code()}")
                 }
                 null
             } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to login", e)
+                Log.e("login", "Failed to login", e)
                 null
             }
         }
     }
 
-    suspend fun changeUserYear(newUserYear: Int): Boolean  {
+    suspend fun changeUserYear(newUserYear: Int): UserResponse  {
         return withContext(Dispatchers.IO) {
             try {
                 val id = sessionManager.getUserId()
@@ -65,14 +65,14 @@ class DataRepo @Inject constructor(private val context: Context) {
                 withContext(Dispatchers.Main) {
                     response.user?.let {
                         sessionManager.saveSession(it)
-                        Log.d("Retrofit Test", "${it.userName} ${it.userId}")
+                        Log.d("changeUserYear", "${it.userName} ${it.userId} ${it.userYear}")
                     }
-                    Log.d("Retrofit Test", "Year changed")
+                    Log.d("changeUserYear", "Year changed")
                 }
-                true
+                response
             } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to change year", e)
-                false
+                Log.e("changeUserYear", "Failed to change year", e)
+                UserResponse()
             }
         }
     }
@@ -83,12 +83,12 @@ class DataRepo @Inject constructor(private val context: Context) {
                 val response = service.getAllUsers(year)
                 withContext(Dispatchers.Main) {
                     for (user in response.users) {
-                        Log.d("Retrofit Test", "")
+                        Log.d("fetchAllUsers", "")
                     }
                 }
                 response.users
             } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to fetch users", e)
+                Log.e("fetchAllUsers", "Failed to fetch users", e)
                 emptyList()
             }
         }
@@ -100,11 +100,11 @@ class DataRepo @Inject constructor(private val context: Context) {
                 val id = sessionManager.getUserId()
                 val response = service.getUserStats(id)
                 withContext(Dispatchers.Main) {
-                    Log.d("Retrofit Test user stats", response.stats.toString())
+                    Log.d("fetchUserStats", response.stats.toString())
                 }
                 response
             } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to fetch user stats", e)
+                Log.e("fetchUserStats", "Failed to fetch user stats", e)
                 UserStatsResponse()
             }
         }
@@ -118,12 +118,12 @@ class DataRepo @Inject constructor(private val context: Context) {
                 val response = service.getSubjects()
                 withContext(Dispatchers.Main) {
                     for (subject in response.subjects) {
-                        Log.d("Retrofit Test", subject.subjectName + " " + subject.subjectId)
+                        Log.d("fetchSubjects", subject.subjectName + " " + subject.subjectId)
                     }
                 }
                 response.subjects
             } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to fetch subjects", e)
+                Log.e("fetchSubjects", "Failed to fetch subjects", e)
                 emptyList()
             }
         }
@@ -133,16 +133,16 @@ class DataRepo @Inject constructor(private val context: Context) {
         return withContext(Dispatchers.IO) {
             try {
                 val id = sessionManager.getUserId()
-                Log.d("Retrofit Test", "User ID: $id")
+                Log.d("fetchSubjectsOfUser", "User ID: $id")
                 val response = service.getSubjectOfUser(id)
                 withContext(Dispatchers.Main) {
                     for (subject in response.subjects) {
-                        Log.d("Retrofit Test", subject.subjectName + " " + subject.subjectId)
+                        Log.d("fetchSubjectsOfUser", subject.subjectName + " " + subject.subjectId)
                     }
                 }
                 response.subjects
             } catch (e: Exception) {
-                Log.e("Retrofit Test Fail", "Failed to fetch subjects", e)
+                Log.e("fetchSubjectsOfUser", "Failed to fetch subjects", e)
                 emptyList()
             }
         }
@@ -150,16 +150,42 @@ class DataRepo @Inject constructor(private val context: Context) {
 
     // ------------------- Focus Calls -------------------
 
-    suspend fun fetchFocusOfUser(subjectId: Int, active: Int): List<Focus> {
+    suspend fun fetchAllFocusOfUser(): List<Focus> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val subjects = fetchSubjectsOfUser()
+                val allFocuses = mutableListOf<Focus>()
+
+                for (subject in subjects) {
+                    subject.subjectId.let { subjectId ->
+                        val focuses = fetchFocusForSubject(subjectId, active = 1)
+                        allFocuses.addAll(focuses)
+                    }
+                }
+
+                withContext(Dispatchers.Main) {
+                    for (focus in allFocuses) {
+                        Log.d("fetchAllFocusOfUser", focus.focusName + " " + focus.focusId)
+                    }
+                }
+                allFocuses
+            } catch (e: Exception) {
+                Log.e("fetchAllFocusOfUser", "Failed to fetch focus", e)
+                emptyList()
+            }
+        }
+    }
+
+    suspend fun fetchFocusForSubject(subjectId: Int, active: Int): List<Focus> {
         return withContext(Dispatchers.IO) {
             try {
                 val userYear = sessionManager.getUserYear()
-                Log.d("Retrofit Test FetchFocus", "User Year: $userYear")
+                Log.d("fetchFocusForSubject", "User Year: $userYear")
                 val response = service.getFocusOfUser(subjectId, userYear = userYear, active)
-                Log.d("Retrofit Test FetchFocus", "Subject ID: $subjectId Active: $active")
+                Log.d("fetchFocusForSubject", "Subject ID: $subjectId Active: $active")
                 withContext(Dispatchers.Main) {
                     for (focus in response.focus) {
-                        Log.d("Retrofit Test FetchFocus", focus.focusName + " " + focus.focusId)
+                        Log.d("fetchFocusForSubject", focus.focusName + " " + focus.focusId)
                     }
                 }
                 response.focus
@@ -179,12 +205,12 @@ class DataRepo @Inject constructor(private val context: Context) {
                 val response = service.getQuizOfSubject(subjectId, userYear)
                 withContext(Dispatchers.Main) {
                     for (question in response.questions) {
-                        Log.d("Retrofit Test", question.questionText + " " + question.questionId)
+                        Log.d("fetchQuizOfSubject", question.questionText + " " + question.questionId)
                     }
                 }
                 response.questions
             } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to fetch quiz", e)
+                Log.e("fetchQuizOfSubject", "Failed to fetch quiz", e)
                 emptyList()
             }
         }
@@ -196,12 +222,12 @@ class DataRepo @Inject constructor(private val context: Context) {
                 val response = service.getQuizOfFocus(focusId)
                 withContext(Dispatchers.Main) {
                     for (question in response.questions) {
-                        Log.d("Retrofit Test", question.questionText + " " + question.questionId)
+                        Log.d("fetchQuizOfFocus", question.questionText + " " + question.questionId)
                     }
                 }
                 response.questions
             } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to fetch quiz", e)
+                Log.e("fetchQuizOfFocus", "Failed to fetch quiz", e)
                 emptyList()
             }
         }
@@ -215,11 +241,11 @@ class DataRepo @Inject constructor(private val context: Context) {
                 val id = sessionManager.getUserId()
                 val response = service.postResultOfFocus(PostResultRequestBody(score, id, focusId))
                 withContext(Dispatchers.Main) {
-                    Log.d("Retrofit Test", "Focus Result posted")
+                    Log.d("postResultOfFocus", "Focus Result posted")
                 }
                 response
             } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to post focus result", e)
+                Log.e("postResultOfFocus", "Failed to post focus result", e)
                 GetResultsResponse()
             }
         }
@@ -231,11 +257,11 @@ class DataRepo @Inject constructor(private val context: Context) {
                 val id = sessionManager.getUserId()
                 val response = service.postResultOfSubject(PostResultRequestBody(score, id, subjectID))
                 withContext(Dispatchers.Main) {
-                    Log.d("Retrofit Test", "Subject Result posted")
+                    Log.d("postResultOfSubject", "Subject Result posted")
                 }
                 response
             } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to post Subject result", e)
+                Log.e("postResultOfSubject", "Failed to post Subject result", e)
                 GetResultsResponse()
             }
         }
@@ -248,12 +274,12 @@ class DataRepo @Inject constructor(private val context: Context) {
                 val response = service.getResultsOfUser(id, amount)
                 withContext(Dispatchers.Main) {
                     for (result in response.results) {
-                        Log.d("Retrofit Test", result.resultId.toString() + " " + result.resultScore)
+                        Log.d("fetchResultsOfUser", result.resultId.toString() + " " + result.resultScore)
                     }
                 }
                 response.results
             } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to fetch results", e)
+                Log.e("fetchResultsOfUser", "Failed to fetch results", e)
                 emptyList()
             }
         }
@@ -266,12 +292,12 @@ class DataRepo @Inject constructor(private val context: Context) {
                 val response = service.getResultsOfSubject(id, subjectId, amount)
                 withContext(Dispatchers.Main) {
                     for (result in response.results) {
-                        Log.d("Retrofit Test", result.resultId.toString() + " " + result.resultScore)
+                        Log.d("fetchResultsOfSubject", result.resultId.toString() + " " + result.resultScore)
                     }
                 }
                 response.results
             } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to fetch results", e)
+                Log.e("fetchResultsOfSubject", "Failed to fetch results", e)
                 emptyList()
             }
         }
@@ -284,12 +310,12 @@ class DataRepo @Inject constructor(private val context: Context) {
                 val response = service.getResultsOfFocus(id, focusId, amount)
                 withContext(Dispatchers.Main) {
                     for (result in response.results) {
-                        Log.d("Retrofit Test", result.resultId.toString() + " " + result.resultScore)
+                        Log.d("fetchResultsOfFocus", result.resultId.toString() + " " + result.resultScore)
                     }
                 }
                 response.results
             } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to fetch results", e)
+                Log.e("fetchResultsOfFocus", "Failed to fetch results", e)
                 emptyList()
             }
         }
@@ -304,12 +330,12 @@ class DataRepo @Inject constructor(private val context: Context) {
                 val response = service.getFriends(id)
                 withContext(Dispatchers.Main) {
                     for (friend in response.acceptedFriendships) {
-                        Log.d("Retrofit Test", friend.friend?.userName+"")
+                        Log.d("fetchAllFriends", friend.friend?.userName+"")
                     }
                 }
                 response
             } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to fetch friends", e)
+                Log.e("fetchAllFriends", "Failed to fetch friends", e)
                 null
             }
         }
@@ -321,11 +347,10 @@ class DataRepo @Inject constructor(private val context: Context) {
                 val id = sessionManager.getUserId()
                 val response = service.addFriend(FriendRequestBody(id, friendId))
                 withContext(Dispatchers.Main) {
-                    Log.d("Retrofit Test", "Friendship added")
+                    Log.d("addFriendship", "Friendship added")
                 }
             } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to add friendship", e)
-                "Failed to add friendship"
+                Log.e("addFriendship", "Failed to add friendship", e)
             }.toString()
         }
     }
@@ -335,11 +360,11 @@ class DataRepo @Inject constructor(private val context: Context) {
             try {
                 val response = service.acceptFriend(AcceptFriendRequestBody(friendshipId))
                 withContext(Dispatchers.Main) {
-                    Log.d("Retrofit Test", "Friendship accepted")
+                    Log.d("acceptFriendship", "Friendship accepted")
                 }
                 response
             } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to accept friendship", e)
+                Log.e("acceptFriendship", "Failed to accept friendship", e)
                 FriendshipResponse()
             }
         }
@@ -348,15 +373,17 @@ class DataRepo @Inject constructor(private val context: Context) {
     /**
      * Deletes a friendship -- für anfrage ablehnen oder freundschaft beenden
      */
-    suspend fun deleteFriendship(friendshipId: Int) {
+    suspend fun deleteFriendship(friendshipId: Int): StatusResponse {
         return withContext(Dispatchers.IO) {
             try {
                 val response = service.deleteFriend(friendshipId)
                 withContext(Dispatchers.Main) {
-                    Log.d("Retrofit Test", "Friendship deleted")
+                    Log.d("deleteFriendship", "Friendship deleted")
                 }
+                response
             } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to delete friendship", e)
+                Log.e("deleteFriendship", "Failed to delete friendship", e)
+                StatusResponse()
             }
         }
     }
@@ -369,10 +396,10 @@ class DataRepo @Inject constructor(private val context: Context) {
                 val id = sessionManager.getUserId()
                 val response = service.addChallengeForFocus(AdChallengeForFocusRequestBody(friendshipId, focusId, id))
                 withContext(Dispatchers.Main) {
-                    Log.d("Retrofit Test", "Challenge added")
+                    Log.d("addChallengeForFocus", "Challenge added")
                 }
             } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to add challenge", e)
+                Log.e("addChallengeForFocus", "Failed to add challenge", e)
             }
         }
     }
@@ -383,23 +410,25 @@ class DataRepo @Inject constructor(private val context: Context) {
                 val id = sessionManager.getUserId()
                 val response = service.addChallengeForSubject(AdChallengeForSubjectRequestBody(friendshipId, subjectId, id))
                 withContext(Dispatchers.Main) {
-                    Log.d("Retrofit Test", "Challenge added")
+                    Log.d("addChallengeForSubject", "Challenge added")
                 }
             } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to add challenge", e)
+                Log.e("addChallengeForSubject", "Failed to add challenge", e)
             }
         }
     }
 
-    suspend fun deleteChallenge(challengeId: Int) {
+    suspend fun deleteChallenge(challengeId: Int): StatusResponse {
         return withContext(Dispatchers.IO) {
             try {
                 val response = service.deleteChallenge(challengeId)
                 withContext(Dispatchers.Main) {
-                    Log.d("Retrofit Test", "Challenge deleted")
+                    Log.d("deleteChallenge", "Challenge deleted")
                 }
+                response
             } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to delete challenge", e)
+                Log.e("deleteChallenge", "Failed to delete challenge", e)
+                StatusResponse()
             }
         }
     }
@@ -409,11 +438,11 @@ class DataRepo @Inject constructor(private val context: Context) {
             try {
                 val response = service.assignResultToChallenge(AssignResultToChallengeRequestBody(challengeId, resultId))
                 withContext(Dispatchers.Main) {
-                    Log.d("Retrofit Test", "Result assigned to challenge")
+                    Log.d("assignResultToChallenge", "Result assigned to challenge")
                 }
                 response
             } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to assign result to challenge", e)
+                Log.e("assignResultToChallenge", "Failed to assign result to challenge", e)
                 AssignResultToChallengeResponse()
             }
         }
@@ -426,12 +455,12 @@ class DataRepo @Inject constructor(private val context: Context) {
                 val response = service.getChallengesOfFriendship(friendshipId, id)
                 withContext(Dispatchers.Main) {
                     for (challenge in response.openChallenges) {
-                        Log.d("Retrofit Test", challenge.challengeId.toString() + " " + challenge.focus)
+                        Log.d("getChallengesOfFriendship", challenge.challengeId.toString() + " " + challenge.focus)
                     }
                 }
                 response
             } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to fetch challenges", e)
+                Log.e("getChallengesOfFriendship", "Failed to fetch challenges", e)
                 ChallengeResponse()
             }
         }
@@ -444,12 +473,12 @@ class DataRepo @Inject constructor(private val context: Context) {
                 val response = service.getChallengesForSubject(subjectId, id)
                 withContext(Dispatchers.Main) {
                     for (challenge in response.openChallenges) {
-                        Log.d("Retrofit Test", challenge.challengeId.toString() + " " + challenge.focus)
+                        Log.d("getChallengesForSubject", challenge.challengeId.toString() + " " + challenge.focus)
                     }
                 }
                 response
             } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to fetch challenges", e)
+                Log.e("getChallengesForSubject", "Failed to fetch challenges", e)
                 ChallengeResponse()
             }
         }
@@ -462,18 +491,34 @@ class DataRepo @Inject constructor(private val context: Context) {
                 val response = service.getDoneChallenges(id)
                 withContext(Dispatchers.Main) {
                     for (challenge in response.doneChallenges) {
-                        Log.d("Retrofit Test", challenge.challengeId.toString() + " " + challenge.focus)
+                        Log.d("getDoneChallenges()", challenge.challengeId.toString() + " " + challenge.focus)
                     }
                 }
                 response
             } catch (e: Exception) {
-                Log.e("Retrofit Test", "Failed to fetch challenges", e)
+                Log.e("getDoneChallenges()", "Failed to fetch challenges", e)
                 DoneChallengesResponse()
             }
         }
     }
 
-    // TODO: all challenges for a user (all friends and subjects)
+    suspend fun fetchAllOpenChallenges(): OpenChallengesResponse {
+        return withContext(Dispatchers.IO) {
+            try {
+                val id = sessionManager.getUserId()
+                val response = service.getOpenChallenges(id)
+                withContext(Dispatchers.Main) {
+                    for (challenge in response.openChallenges) {
+                        Log.d("fetchAllOpenChallenges()", challenge.challengeId.toString() + " " + challenge.focus)
+                    }
+                }
+                response
+            } catch (e: Exception) {
+                Log.e("fetchAllOpenChallenges()", "Failed to fetch challenges", e)
+                OpenChallengesResponse()
+            }
+        }
+    }
 
 
 

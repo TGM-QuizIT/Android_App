@@ -95,7 +95,7 @@ interface Requests {
     suspend fun acceptFriend(@Body acceptFriendRequestBody: AcceptFriendRequestBody): FriendshipResponse
 
     @DELETE("friends")
-    suspend fun deleteFriend(@Query("id") friendshipId: Int?)
+    suspend fun deleteFriend(@Query("id") friendshipId: Int?): StatusResponse
 
     // ------------------- Challenge Calls -------------------
 
@@ -106,7 +106,7 @@ interface Requests {
     suspend fun addChallengeForSubject(@Body adChallengeForSubjectRequestBody: AdChallengeForSubjectRequestBody)
 
     @DELETE("challenge")
-    suspend fun deleteChallenge(@Query("id") challengeId: Int?)
+    suspend fun deleteChallenge(@Query("id") challengeId: Int?): StatusResponse
 
     @PUT("challenge")
     suspend fun assignResultToChallenge(@Body assignResultToChallengeRequestBody: AssignResultToChallengeRequestBody): AssignResultToChallengeResponse
@@ -125,5 +125,8 @@ interface Requests {
 
     @GET("challenge/done")
     suspend fun getDoneChallenges(@Query("userId") userId: Int?): DoneChallengesResponse
+
+    @GET("challenge/open")
+    suspend fun getOpenChallenges(@Query("userId") userId: Int?): OpenChallengesResponse
 
 }

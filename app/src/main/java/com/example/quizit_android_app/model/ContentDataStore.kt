@@ -51,7 +51,6 @@ class ContentDataStore @Inject constructor(private val context: Context)  {
             }.first()
     }
 
-    // TODO: fetch all focus once reconnnected
     suspend fun saveFocus(focus: List<Focus>?) {
         dataStore.edit { preferences ->
             preferences[FOCUS_KEY] = gson.toJson(focus)

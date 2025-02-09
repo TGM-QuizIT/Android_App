@@ -10,7 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.quizit_android_app.model.retrofit.Focus
 import com.example.quizit_android_app.model.retrofit.Subject
 import com.example.quizit_android_app.navigation.FocusRoute
-import com.example.quizit_android_app.usecases.focus.GetAllFocusUseCase
+import com.example.quizit_android_app.usecases.focus.GetFocusForSubjectUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -18,7 +18,7 @@ import javax.inject.Inject
 @HiltViewModel
 class FocusViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val getAllFocusUseCase: GetAllFocusUseCase
+    private val getFocusForSubjectUseCase: GetFocusForSubjectUseCase
 ): ViewModel() {
     private var _focusList by mutableStateOf(listOf<Focus>())
     val focusList: List<Focus> get() = _focusList
@@ -44,7 +44,7 @@ class FocusViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                if(_focusList.isEmpty()) _focusList = getAllFocusUseCase(id)
+                if(_focusList.isEmpty()) _focusList = getFocusForSubjectUseCase(id)
                 _overallQuestionCount.value = getQuestionCount()
 
             } catch (e: Exception) {

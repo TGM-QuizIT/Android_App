@@ -2,12 +2,19 @@ package com.example.quizit_android_app.usecases.challenge
 
 import com.example.quizit_android_app.model.retrofit.AssignResultToChallengeResponse
 import com.example.quizit_android_app.model.retrofit.DataRepo
+import com.example.quizit_android_app.usecases.localdata.challenge.SyncLocalDoneChallengesUseCase
 import javax.inject.Inject
 
 class AssignResultToChallengeUseCase @Inject constructor(
-    val dataRepo: DataRepo
+    val dataRepo: DataRepo,
+    val syncLocalDoneChallengesUseCase: SyncLocalDoneChallengesUseCase
 ) {
     suspend operator fun invoke(challengeId: Int, result: Int): AssignResultToChallengeResponse {
-        return dataRepo.assignResultToChallenge(challengeId, result)
+        val response = dataRepo.assignResultToChallenge(challengeId, result)
+        if (response.status != null) {
+            syncLocalDoneChallengesUseCase()
+        }
+        return response
+
     }
 }
