@@ -1,8 +1,8 @@
 package com.example.quizit_android_app.usecases.subjects
 
 import android.util.Log
-import com.example.quizit_android_app.model.Subject
-import com.example.quizit_android_app.model.DataRepo
+import com.example.quizit_android_app.model.retrofit.Subject
+import com.example.quizit_android_app.model.retrofit.DataRepo
 import javax.inject.Inject
 
 class GetAllSubjectsUseCase @Inject constructor(

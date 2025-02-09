@@ -47,10 +47,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.quizit_android_app.model.Focus
-import com.example.quizit_android_app.model.Options
-import com.example.quizit_android_app.model.Questions
-import com.example.quizit_android_app.model.Subject
+import com.example.quizit_android_app.model.retrofit.Options
+import com.example.quizit_android_app.model.retrofit.Questions
 import com.example.quizit_android_app.ui.theme.Typography
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")

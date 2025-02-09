@@ -1,7 +1,7 @@
 package com.example.quizit_android_app.usecases.result
 
-import com.example.quizit_android_app.model.DataRepo
-import com.example.quizit_android_app.model.Result
+import com.example.quizit_android_app.model.retrofit.DataRepo
+import com.example.quizit_android_app.model.retrofit.Result
 import javax.inject.Inject
 
 class GetResultsFocusUseCase @Inject constructor(

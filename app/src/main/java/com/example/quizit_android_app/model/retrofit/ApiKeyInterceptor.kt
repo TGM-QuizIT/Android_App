@@ -1,4 +1,4 @@
-package com.example.quizit_android_app.model
+package com.example.quizit_android_app.model.retrofit
 
 import okhttp3.Interceptor
 import okhttp3.Response

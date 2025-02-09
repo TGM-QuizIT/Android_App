@@ -1,7 +1,7 @@
 package com.example.quizit_android_app.usecases.friendship
 
-import com.example.quizit_android_app.model.AcceptedFriendships
-import com.example.quizit_android_app.model.DataRepo
+import com.example.quizit_android_app.model.retrofit.AcceptedFriendships
+import com.example.quizit_android_app.model.retrofit.DataRepo
 import javax.inject.Inject
 
 class GetAcceptedFriendships @Inject constructor(
