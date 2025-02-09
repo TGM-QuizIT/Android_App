@@ -141,7 +141,18 @@ class SocialViewModel @Inject constructor(
                 if(_users.value.isEmpty()) {
                     val user = getUserUseCase()
                     _users.value = getAllUsersUseCase()
-                    _users.value = _users.value.filter { it?.userId != user?.userId }
+
+                    val pendingIds = _pendingFriendships.value.map { it.friend?.userId }
+                    val acceptedIds = _friendships.value.map { it.friend?.userId }
+
+                    _users.value = _users.value.filter {
+                        it?.userId != user?.userId &&
+                                it?.userId !in pendingIds &&  // Entfernt Nutzer aus _pendingFriendships
+                                it?.userId !in acceptedIds
+
+                    }
+
+
                     filterUsers()
                 }
             } catch (e: Exception) {

@@ -292,7 +292,7 @@ fun ChallengeSection(
                 .padding(end = 16.dp)
         ) {
             Text(
-                "Deine Fächer",
+                "Deine Herausforderungen",
                 style = Typography.titleMedium
             )
 
