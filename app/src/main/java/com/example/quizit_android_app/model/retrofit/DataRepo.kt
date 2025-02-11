@@ -135,14 +135,17 @@ class DataRepo @Inject constructor(private val context: Context) {
                 val id = sessionManager.getUserId()
                 Log.d("fetchSubjectsOfUser", "User ID: $id")
                 val response = service.getSubjectOfUser(id)
+                Log.d("fetchSubjectsOfUser", response.subjects.toString())
                 withContext(Dispatchers.Main) {
+
                     for (subject in response.subjects) {
                         Log.d("fetchSubjectsOfUser", subject.subjectName + " " + subject.subjectId)
+
                     }
                 }
                 response.subjects
             } catch (e: Exception) {
-                Log.e("fetchSubjectsOfUser", "Failed to fetch subjects", e)
+                Log.e("fetchSubjectsOfUser",e.toString())
                 emptyList()
             }
         }
