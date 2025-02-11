@@ -8,13 +8,20 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.navigation.toRoute
 import com.example.quizit_android_app.navigation.UserDetailRoute
+import com.example.quizit_android_app.usecases.challenge.GetChallengesOfFriendshipUseCase
+import com.example.quizit_android_app.usecases.challenge.GetDoneChallengesUseCase
+import com.example.quizit_android_app.usecases.user.GetUserStatsUseCase
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @RequiresApi(Build.VERSION_CODES.O)
 class UserDetailViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val getUserStatsUseCase: GetUserStatsUseCase,
+    private val getChallengesOfFriendshipUseCase: GetChallengesOfFriendshipUseCase,
+    private val getDoneChallengesUseCase: GetDoneChallengesUseCase
+
 ): ViewModel() {
 
     // TODO Add States für User
@@ -23,7 +30,7 @@ class UserDetailViewModel @Inject constructor(
     val userResults: State<List<Result>> = _userResults
 
     init {
-        val userId: Int = savedStateHandle.toRoute<UserDetailRoute>().id
+        //val userId: Int = savedStateHandle.toRoute<UserDetailRoute>().id
         setUserResults()
     }
 

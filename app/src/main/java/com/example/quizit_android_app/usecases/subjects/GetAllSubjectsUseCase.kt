@@ -12,8 +12,10 @@ class GetAllSubjectsUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(): List<Subject> {
         val localData = contentDataStore.getSubjects()
+        Log.d("GetAllSubjectsUseCase", "localData: $localData")
         return localData.ifEmpty {
             val remoteData = dataRepo.fetchSubjectsOfUser()
+            Log.d("GetAllSubjectsUseCase", "remoteData: $remoteData")
             contentDataStore.saveSubjects(remoteData)
             remoteData
         }

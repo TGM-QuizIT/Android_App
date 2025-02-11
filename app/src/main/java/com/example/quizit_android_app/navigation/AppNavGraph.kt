@@ -12,9 +12,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.example.quizit_android_app.model.retrofit.AcceptedFriendships
 import com.example.quizit_android_app.model.retrofit.CustomNavType
 import com.example.quizit_android_app.model.retrofit.Focus
+import com.example.quizit_android_app.model.retrofit.PendingFriendships
 import com.example.quizit_android_app.model.retrofit.Subject
+import com.example.quizit_android_app.model.retrofit.User
 import com.example.quizit_android_app.ui.MainViewModel
 import com.example.quizit_android_app.ui.home.HomeScreen
 import com.example.quizit_android_app.ui.login.LoginScreen
@@ -24,6 +27,7 @@ import com.example.quizit_android_app.ui.quiz.QuizScreen
 import com.example.quizit_android_app.ui.settings.SettingsScreen
 import com.example.quizit_android_app.ui.social.SocialScreen
 import com.example.quizit_android_app.ui.social.UserDetailScreen
+import com.example.quizit_android_app.usecases.friendship.GetAcceptedFriendships
 import kotlinx.serialization.Serializable
 import kotlin.reflect.typeOf
 
@@ -74,7 +78,9 @@ data class SocialRoute(
 
 @Serializable
 data class UserDetailRoute(
-    val id: Int
+    val friendshipId: Int?,
+    val userId: Int?,
+    val actionReq: Boolean?
 )
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -166,7 +172,7 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
         composable<SocialRoute> {
             SocialScreen(
                 navigateToUserDetail = { id
-                    navController.navigate(UserDetailRoute(id))
+
                 }
             )
         }
