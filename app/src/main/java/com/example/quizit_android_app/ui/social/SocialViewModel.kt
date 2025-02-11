@@ -9,14 +9,14 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.example.quizit_android_app.model.retrofit.AcceptedFriendships
-import com.example.quizit_android_app.model.retrofit.PendingFriendships
+import com.example.quizit_android_app.model.retrofit.AcceptedFriendship
+import com.example.quizit_android_app.model.retrofit.PendingFriendship
 import com.example.quizit_android_app.model.retrofit.User
 import com.example.quizit_android_app.model.retrofit.UserStatsResponse
 import com.example.quizit_android_app.navigation.SocialRoute
 import com.example.quizit_android_app.usecases.friendship.AcceptFriendshipUseCase
 import com.example.quizit_android_app.usecases.friendship.DeleteDeclineFriendshipUseCase
-import com.example.quizit_android_app.usecases.friendship.GetAcceptedFriendships
+import com.example.quizit_android_app.usecases.friendship.GetAcceptedFriendshipsUseCase
 import com.example.quizit_android_app.usecases.friendship.GetPendingFriendshipsUseCase
 import com.example.quizit_android_app.usecases.user.GetAllUsersUseCase
 import com.example.quizit_android_app.usecases.user.GetUserStatsUseCase
@@ -31,7 +31,7 @@ import javax.inject.Inject
 @RequiresApi(Build.VERSION_CODES.O)
 class SocialViewModel @Inject constructor(
     val savedStateHandle: SavedStateHandle,
-    val getAllFriendshipsUseCase: GetAcceptedFriendships,
+    val getAllFriendshipsUseCase: GetAcceptedFriendshipsUseCase,
     val getPendingFriendshipsUseCase: GetPendingFriendshipsUseCase,
     val getAllUsersUseCase: GetAllUsersUseCase,
     val getUserStatsUseCase: GetUserStatsUseCase,
@@ -42,11 +42,11 @@ class SocialViewModel @Inject constructor(
     private val _selectedTabIndex = mutableStateOf(0)
     val selectedTabIndex: State<Int> = _selectedTabIndex
 
-    private val _friendships = mutableStateOf(listOf<AcceptedFriendships>())
-    val friendships: State<List<AcceptedFriendships>> = _friendships
+    private val _friendships = mutableStateOf(listOf<AcceptedFriendship>())
+    val friendships: State<List<AcceptedFriendship>> = _friendships
 
-    private val _pendingFriendships = mutableStateOf(listOf<PendingFriendships>())
-    val pendingFriendships: State<List<PendingFriendships>> = _pendingFriendships
+    private val _pendingFriendship = mutableStateOf(listOf<PendingFriendship>())
+    val pendingFriendship: State<List<PendingFriendship>> = _pendingFriendship
 
     private var _isLoading = mutableStateOf(false)
     val isLoading: Boolean get() = _isLoading.value
@@ -91,8 +91,8 @@ class SocialViewModel @Inject constructor(
                     _friendships.value = getAllFriendshipsUseCase()
                 }
 
-                if(_pendingFriendships.value.isEmpty()) {
-                    _pendingFriendships.value = getPendingFriendshipsUseCase()
+                if(_pendingFriendship.value.isEmpty()) {
+                    _pendingFriendship.value = getPendingFriendshipsUseCase()
                 }
                 if(_userStats.value == null) {
                     _userStats.value = getUserStatsUseCase()
@@ -140,7 +140,7 @@ class SocialViewModel @Inject constructor(
                     val user = getUserUseCase()
                     _users.value = getAllUsersUseCase()
 
-                    val pendingIds = _pendingFriendships.value.map { it.friend?.userId }
+                    val pendingIds = _pendingFriendship.value.map { it.friend?.userId }
                     val acceptedIds = _friendships.value.map { it.friend?.userId }
 
                     _users.value = _users.value.filter {
@@ -190,20 +190,20 @@ class SocialViewModel @Inject constructor(
                 val friendship = friendshipResponse.friendship
 
                 if(friendshipResponse.status == "Success") {
-                    val acceptedFriendship = AcceptedFriendships(
+                    val acceptedFriendship = AcceptedFriendship(
                         friendshipId = friendship!!.friendshipId,
                         friendshipSince = friendship.friendshipSince,
                         friend = friendship.friend,
 
                         )
                     _friendships.value = _friendships.value + acceptedFriendship
-                    _pendingFriendships.value = _pendingFriendships.value.filter { it.friendshipId != id }
+                    _pendingFriendship.value = _pendingFriendship.value.filter { it.friendshipId != id }
                 }
 
             } else {
 
                 deleteDeclineFriendshipUseCase(id)
-                _pendingFriendships.value = _pendingFriendships.value.filter { it.friendshipId != id }
+                _pendingFriendship.value = _pendingFriendship.value.filter { it.friendshipId != id }
 
 
 
