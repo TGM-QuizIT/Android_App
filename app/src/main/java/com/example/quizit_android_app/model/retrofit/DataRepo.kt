@@ -94,10 +94,10 @@ class DataRepo @Inject constructor(private val context: Context) {
         }
     }
 
-    suspend fun fetchUserStats(): UserStatsResponse {
+    suspend fun fetchUserStats(userId: Int? = null): UserStatsResponse {
         return withContext(Dispatchers.IO) {
             try {
-                val id = sessionManager.getUserId()
+                val id = userId ?: sessionManager.getUserId()
                 val response = service.getUserStats(id)
                 withContext(Dispatchers.Main) {
                     Log.d("fetchUserStats", response.stats.toString())

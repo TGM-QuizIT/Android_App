@@ -168,8 +168,8 @@ data class Friendship (
 data class AllFriendshipResponse (
     @SerializedName("status"              ) var status              : String?                        = null,
     @SerializedName("userId"              ) var userId              : Int?                           = null,
-    @SerializedName("acceptedFriendships" ) var acceptedFriendships : ArrayList<AcceptedFriendships> = arrayListOf(),
-    @SerializedName("pendingFriendships"  ) var pendingFriendships  : ArrayList<PendingFriendships>  = arrayListOf()
+    @SerializedName("acceptedFriendships" ) var acceptedFriendships : ArrayList<AcceptedFriendship> = arrayListOf(),
+    @SerializedName("pendingFriendships"  ) var pendingFriendships  : ArrayList<PendingFriendship>  = arrayListOf()
 )
 
 data class Friend (
@@ -183,13 +183,13 @@ data class Friend (
     @SerializedName("userBlocked"  ) var userBlocked  : Boolean? = null
 )
 
-data class AcceptedFriendships (
+data class AcceptedFriendship (
     @SerializedName("friendshipId"    ) var friendshipId    : Int?    = null,
     @SerializedName("friend"          ) var friend          : Friend? = Friend(),
     @SerializedName("friendshipSince" ) var friendshipSince : String? = null
 )
 
-data class PendingFriendships (
+data class PendingFriendship (
     @SerializedName("friendshipId"    ) var friendshipId    : Int?     = null,
     @SerializedName("friend"          ) var friend          : Friend?  = Friend(),
     @SerializedName("actionReq"       ) var actionReq       : Boolean? = null,

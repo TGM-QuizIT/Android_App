@@ -10,7 +10,7 @@ class GetUserStatsUseCase @Inject constructor(
     val dataRepo: DataRepo,
     val contentDataStore: ContentDataStore
 ) {
-    suspend operator fun invoke(): UserStatsResponse {
+    suspend operator fun invoke(userId: Int? = null): UserStatsResponse {
         val localData = contentDataStore.getStats()
         val allNonNull = listOf(localData.ranking, localData.avgPoints, localData.winRate).all { it != null }
 
@@ -19,7 +19,7 @@ class GetUserStatsUseCase @Inject constructor(
             UserStatsResponse("success", localData)
         } else {
             Log.d("GetUserStatsUseCase", "invoke: fetching remote data")
-            val remoteData = dataRepo.fetchUserStats()
+            val remoteData = dataRepo.fetchUserStats(userId)
             contentDataStore.saveStats(remoteData.stats)
             remoteData
         }

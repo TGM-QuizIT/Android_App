@@ -72,8 +72,8 @@ import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.window.Popup
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
-import com.example.quizit_android_app.model.retrofit.AcceptedFriendships
-import com.example.quizit_android_app.model.retrofit.PendingFriendships
+import com.example.quizit_android_app.model.retrofit.AcceptedFriendship
+import com.example.quizit_android_app.model.retrofit.PendingFriendship
 import com.example.quizit_android_app.model.retrofit.User
 import com.example.quizit_android_app.model.retrofit.UserStatsResponse
 import kotlinx.coroutines.launch
@@ -87,7 +87,7 @@ fun SocialScreen(
 
     val selectedTabIndex = viewModel.selectedTabIndex.value
     val friendships = viewModel.friendships.value
-    val pendingFriendships = viewModel.pendingFriendships.value
+    val pendingFriendships = viewModel.pendingFriendship.value
     val results = viewModel.userResults.value
 
     val searchText = viewModel.searchText.value
@@ -401,8 +401,8 @@ fun SegmentTabBar(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
 @Composable
 fun FriendsSection(
     modifier: Modifier,
-    friendships: List<AcceptedFriendships>,
-    pendingFriendships: List<PendingFriendships>,
+    friendships: List<AcceptedFriendship>,
+    pendingFriendships: List<PendingFriendship>,
     navigateToUserDetail: (Int) -> Unit,
     acceptFriendship: (Boolean, Int) -> Unit
 ) {
@@ -436,7 +436,7 @@ fun FriendsSection(
 }
 
 @Composable
-fun FriendshipCard(friendship: AcceptedFriendships, navigateToUserDetail: (Int) -> Unit) {
+fun FriendshipCard(friendship: AcceptedFriendship, navigateToUserDetail: (Int) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -493,7 +493,7 @@ fun FriendshipCard(friendship: AcceptedFriendships, navigateToUserDetail: (Int) 
 }
 
 @Composable
-fun PendingFriendshipCard(pendingFriendship: PendingFriendships, navigateToUserDetail: (Int) -> Unit, acceptFriendship: (Boolean, Int) -> Unit) {
+fun PendingFriendshipCard(pendingFriendship: PendingFriendship, navigateToUserDetail: (Int) -> Unit, acceptFriendship: (Boolean, Int) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

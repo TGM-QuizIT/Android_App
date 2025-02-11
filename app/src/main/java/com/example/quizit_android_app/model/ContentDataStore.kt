@@ -4,11 +4,11 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.example.quizit_android_app.model.retrofit.AcceptedFriendships
+import com.example.quizit_android_app.model.retrofit.AcceptedFriendship
 import com.example.quizit_android_app.model.retrofit.DoneChallenges
 import com.example.quizit_android_app.model.retrofit.Focus
 import com.example.quizit_android_app.model.retrofit.OpenChallenges
-import com.example.quizit_android_app.model.retrofit.PendingFriendships
+import com.example.quizit_android_app.model.retrofit.PendingFriendship
 import com.example.quizit_android_app.model.retrofit.Result
 import com.example.quizit_android_app.model.retrofit.Stats
 import com.example.quizit_android_app.model.retrofit.Subject
@@ -116,29 +116,29 @@ class ContentDataStore @Inject constructor(private val context: Context)  {
             }.first()
     }
 
-    suspend fun saveAcceptedFriends(friends: List<AcceptedFriendships>?) {
+    suspend fun saveAcceptedFriends(friends: List<AcceptedFriendship>?) {
         dataStore.edit { preferences ->
             preferences[ACCEPTED_FRIENDS_KEY] = gson.toJson(friends)
         }
     }
 
-    suspend fun getAcceptedFriends(): List<AcceptedFriendships> {
+    suspend fun getAcceptedFriends(): List<AcceptedFriendship> {
         return dataStore.data
             .map { preferences ->
-                preferences[ACCEPTED_FRIENDS_KEY]?.let { gson.fromJson(it, Array<AcceptedFriendships>::class.java).toList() } ?: emptyList()
+                preferences[ACCEPTED_FRIENDS_KEY]?.let { gson.fromJson(it, Array<AcceptedFriendship>::class.java).toList() } ?: emptyList()
             }.first()
     }
 
-    suspend fun savePendingFriends(friends: List<PendingFriendships>?) {
+    suspend fun savePendingFriends(friends: List<PendingFriendship>?) {
         dataStore.edit { preferences ->
             preferences[PENDING_FRIENDS_KEY] = gson.toJson(friends)
         }
     }
 
-    suspend fun getPendingFriends(): List<PendingFriendships> {
+    suspend fun getPendingFriends(): List<PendingFriendship> {
         return dataStore.data
             .map { preferences ->
-                preferences[PENDING_FRIENDS_KEY]?.let { gson.fromJson(it, Array<PendingFriendships>::class.java).toList() } ?: emptyList()
+                preferences[PENDING_FRIENDS_KEY]?.let { gson.fromJson(it, Array<PendingFriendship>::class.java).toList() } ?: emptyList()
             }.first()
     }
 
