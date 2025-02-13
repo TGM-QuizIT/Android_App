@@ -8,6 +8,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -76,9 +77,17 @@ data class SocialRoute(
 @Serializable
 data class UserDetailRoute(
     val friendshipId: Int?,
-    val userId: Int?,
-    val actionReq: Boolean?
-)
+    val user: User?,
+) {
+    companion object {
+        val typeMap = mapOf(
+            typeOf<User?>() to CustomNavType.UserType
+        )
+
+        fun from(savedStateHandle: SavedStateHandle) =
+            savedStateHandle.toRoute<UserDetailRoute>(typeMap)
+    }
+}
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -168,7 +177,9 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
 
         composable<SocialRoute> {
             SocialScreen(
-                navigateToUserDetail = { id
+                navigateToUserDetail = { id, user ->
+                    Log.d("AppNavGraph", UserDetailRoute(id, user).toString())
+                    navController.navigate(UserDetailRoute(friendshipId = id, user= user))
 
                 }
             )
@@ -176,7 +187,9 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
 
 
 
-        composable<UserDetailRoute> {
+        composable<UserDetailRoute>(
+            typeMap = UserDetailRoute.typeMap
+        ) {
             UserDetailScreen(
                 onGoBack = {
                     navController.popBackStack()

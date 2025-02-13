@@ -306,104 +306,128 @@ fun ChallengeSection(
 }
 
 @Composable
-fun ChallengeCard(type: ChallengeType, challenge: OpenChallenges) {
+fun OpenChallengeCard(type: ChallengeType, challenge: OpenChallenges) {
     Card(
         shape = RoundedCornerShape(16.dp),
-        modifier = Modifier.fillMaxWidth(0.3f),
-        colors = CardDefaults.cardColors(containerColor = if(challenge.focus == null) Color(0xFFeaf2ff) else Color(0xFFf8f9fe))
+        modifier = Modifier
+            .width(200.dp),
+        colors = CardDefaults.cardColors(containerColor = if(challenge.focus == null) Color(0xFFEAF2FF) else Color(0xFFf8f9fe))
     ) {
-        Column {
-            when (type) {
-                ChallengeType.FRIEND -> {
-                    AsyncImage(
-                        model = challenge.focus?.focusImageAddress ?: challenge.subject?.subjectImageAddress,
-                        contentDescription = "Challenge Image",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(2f/1f)
-                    )
 
-                }
-                else -> {
+        if(
+            challenge.friendScore != null
+        ) {
+            Column(
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
+                    when (type) {
+                        ChallengeType.FRIEND -> {
+                            AsyncImage(
+                                model = challenge.focus?.focusImageAddress ?: challenge.subject?.subjectImageAddress,
+                                contentDescription = "Challenge Image",
+                                contentScale = ContentScale.FillBounds,
+                                modifier = Modifier
+                                    .aspectRatio(2f/1f)
 
-                        Box(
-                            modifier = Modifier
-                                .size(45.dp)
-                                .background(Color(0xFFEAF2FF), shape = CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = "User Icon",
-                                tint = Color(0xFFB4DBFF),
-                                modifier = Modifier.size(35.dp)
                             )
+
+                        }
+                        else -> {
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+
+                                Box(
+                                    modifier = Modifier
+                                        .size(45.dp)
+                                        .background(Color(0xFFEAF2FF), shape = CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Person,
+                                        contentDescription = "User Icon",
+                                        tint = Color(0xFFB4DBFF),
+                                        modifier = Modifier.size(35.dp)
+                                    )
+                                }
+
+                                Column {
+                                    Text(
+                                        text = challenge.friendship?.friend?.userFullname!!,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                    Text(
+                                        text = challenge.friendship?.friend?.userClass!!,
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+                            }
+
                         }
 
-                        Column {
-                            Text(
-                                text = challenge.friendship?.friend?.userFullname!!,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            Text(
-                                text = challenge.friendship?.friend?.userClass!!,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
                     }
 
                 }
 
-            }
-
-
-            Spacer(modifier = Modifier.size(8.dp))
-
-            Text(
-                text = when(type) {
-                    ChallengeType.SUBJECT -> challenge.focus?.focusName ?: challenge.subject?.subjectName!!
-                    else -> challenge.focus?.focusName ?: challenge.subject?.subjectName!!
-                },
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color.Black,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-            )
-
-            Spacer(modifier = Modifier.size(8.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(24.dp)
-                    .padding(start = 16.dp, end = 16.dp)
-                    .background(Color.White, shape = RoundedCornerShape(8.dp))
-                    .border(1.dp, Color(0xFF006FFD), shape = RoundedCornerShape(8.dp)),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(challenge.friendScore!!.toFloat() / 100)
-                        .height(24.dp)
-                        .background(Color(0xFF006FFD), shape = RoundedCornerShape(8.dp))
+                Column(
+                    modifier = Modifier.fillMaxWidth().background(Color(0xFFF8F9FE))
                 ) {
+
+                    Spacer(modifier = Modifier.size(8.dp))
+
                     Text(
-                        text = "${challenge.friendScore}%",
+                        text = when(type) {
+                            ChallengeType.SUBJECT -> challenge.focus?.focusName ?: challenge.subject?.subjectName!!
+                            else -> challenge.focus?.focusName ?: challenge.subject?.subjectName!!
+                        },
+                        style = MaterialTheme.typography.bodyLarge,
                         color = Color.Black,
-                        modifier = Modifier.align(Alignment.Center),
-                        style = MaterialTheme.typography.labelLarge
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
                     )
 
+                    Spacer(modifier = Modifier.size(8.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(24.dp)
+                            .padding(start = 16.dp, end = 16.dp)
+                            .background(Color.White, shape = RoundedCornerShape(8.dp))
+                            .border(1.dp, Color(0xFF006FFD), shape = RoundedCornerShape(8.dp)),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(challenge.friendScore?.resultScore?.toFloat()?.div(100) ?: 0f)
+                                .height(24.dp)
+                                .background(Color(0xFF006FFD), shape = RoundedCornerShape(8.dp))
+                        )
+
+                        Text(
+                            text = "${challenge.friendScore?.resultScore}%",
+                            color = Color.Gray,
+                            modifier = Modifier.align(Alignment.Center),
+                            style = MaterialTheme.typography.labelLarge
+                        )
+
+                    }
+
                 }
+
+
+
 
             }
 
         }
+
 
     }
 

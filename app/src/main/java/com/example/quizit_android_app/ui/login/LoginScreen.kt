@@ -64,6 +64,7 @@ fun LoginScreen(
 
         Scaffold(
             contentWindowInsets = WindowInsets(0.dp),
+            bottomBar = {},
             content = { paddingValues ->
                 Column(
                     modifier = Modifier

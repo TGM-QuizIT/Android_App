@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.quizit_android_app.model.retrofit.Subject
 import com.example.quizit_android_app.model.retrofit.UserStatsResponse
+import com.example.quizit_android_app.usecases.localdata.friendship.SyncLocalAcceptedFriendsUseCase
 import com.example.quizit_android_app.usecases.subjects.GetAllSubjectsUseCase
 import com.example.quizit_android_app.usecases.user.GetUserStatsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,7 +19,8 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getAllSubjectsUseCase: GetAllSubjectsUseCase,
-    private val getUserStatsUseCase: GetUserStatsUseCase
+    private val getUserStatsUseCase: GetUserStatsUseCase,
+    private val syncLocalAcceptedFriendsUseCase: SyncLocalAcceptedFriendsUseCase
 ): ViewModel() {
 
     private var _subjectList by mutableStateOf(listOf<Subject>())
@@ -32,6 +34,7 @@ class HomeViewModel @Inject constructor(
 
     init {
         setContent()
+
     }
 
 
