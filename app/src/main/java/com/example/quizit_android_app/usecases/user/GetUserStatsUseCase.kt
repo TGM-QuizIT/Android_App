@@ -20,7 +20,9 @@ class GetUserStatsUseCase @Inject constructor(
         } else {
             Log.d("GetUserStatsUseCase", "invoke: fetching remote data")
             val remoteData = dataRepo.fetchUserStats(userId)
-            contentDataStore.saveStats(remoteData.stats)
+            if (userId == null) {
+                contentDataStore.saveStats(remoteData.stats)
+            }
             remoteData
         }
 

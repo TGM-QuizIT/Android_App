@@ -10,6 +10,8 @@ class SyncLocalResultsUseCase @Inject constructor(
 ){
     suspend operator fun invoke(){
         val results = dataRepo.fetchResultsOfUser()
-        contentDataStore.saveResults(results)
+        if (results.isNotEmpty()) {
+            contentDataStore.saveResults(results)
+        }
     }
 }

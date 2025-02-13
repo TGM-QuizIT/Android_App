@@ -10,6 +10,8 @@ class SyncLocalFocusUseCase @Inject constructor(
 ) {
     suspend operator fun invoke() {
         val focus = dataRepo.fetchAllFocusOfUser()
-        contentDataStore.saveFocus(focus)
+        if (focus.isNotEmpty()) {
+            contentDataStore.saveFocus(focus)
+        }
     }
 }

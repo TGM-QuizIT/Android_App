@@ -10,6 +10,8 @@ class SyncLocalOpenChallengesUseCase @Inject constructor(
 ) {
     suspend operator fun invoke() {
         val openChallenges = dataRepo.fetchAllOpenChallenges()
-        contentDataStore.saveOpenChallenges(openChallenges.openChallenges)
+        if (openChallenges.status == "Success") {
+            contentDataStore.saveOpenChallenges(openChallenges.openChallenges)
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.example.quizit_android_app.usecases.localdata.friendship
 
+import android.util.Log
 import com.example.quizit_android_app.model.ContentDataStore
 import com.example.quizit_android_app.model.retrofit.DataRepo
 import javax.inject.Inject
@@ -10,6 +11,9 @@ class SyncLocalAcceptedFriendsUseCase @Inject constructor(
 ) {
     suspend operator fun invoke() {
         val friends = dataRepo.fetchAllFriends()
-        contentDataStore.saveAcceptedFriends(friends?.acceptedFriendships)
+        Log.d("SyncLocalAcceptedFriendsUseCase", "invoke: ${friends?.acceptedFriendships}")
+        if (friends?.status == "Success") {
+            contentDataStore.saveAcceptedFriends(friends.acceptedFriendships)
+        }
     }
 }

@@ -10,6 +10,8 @@ class SyncLocalUserStatsUseCase @Inject constructor(
 ) {
     suspend operator fun invoke() {
         val stats = dataRepo.fetchUserStats()
-        contentDataStore.saveStats(stats.stats)
+        if (stats.status == "Success") {
+            contentDataStore.saveStats(stats.stats)
+        }
     }
 }
