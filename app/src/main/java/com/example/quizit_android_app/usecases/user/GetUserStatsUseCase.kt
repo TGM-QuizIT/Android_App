@@ -14,7 +14,7 @@ class GetUserStatsUseCase @Inject constructor(
         val localData = contentDataStore.getStats()
         val allNonNull = listOf(localData.ranking, localData.avgPoints, localData.winRate).all { it != null }
 
-        return if (allNonNull) {
+        return if (allNonNull && userId == null) {
             Log.d("GetUserStatsUseCase", "invoke: using local data")
             UserStatsResponse("success", localData)
         } else {

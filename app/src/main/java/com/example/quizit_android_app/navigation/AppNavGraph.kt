@@ -12,10 +12,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.example.quizit_android_app.model.retrofit.AcceptedFriendships
 import com.example.quizit_android_app.model.retrofit.CustomNavType
 import com.example.quizit_android_app.model.retrofit.Focus
-import com.example.quizit_android_app.model.retrofit.PendingFriendships
 import com.example.quizit_android_app.model.retrofit.Subject
 import com.example.quizit_android_app.model.retrofit.User
 import com.example.quizit_android_app.ui.MainViewModel
@@ -27,7 +25,6 @@ import com.example.quizit_android_app.ui.quiz.QuizScreen
 import com.example.quizit_android_app.ui.settings.SettingsScreen
 import com.example.quizit_android_app.ui.social.SocialScreen
 import com.example.quizit_android_app.ui.social.UserDetailScreen
-import com.example.quizit_android_app.usecases.friendship.GetAcceptedFriendships
 import kotlinx.serialization.Serializable
 import kotlin.reflect.typeOf
 
