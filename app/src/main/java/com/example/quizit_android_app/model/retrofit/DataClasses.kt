@@ -257,8 +257,8 @@ data class OpenChallenges (
     @SerializedName("friendship"        ) var friendship        : Friendship? = Friendship(),
     @SerializedName("focus"             ) var focus             : Focus?      = Focus(),
     @SerializedName("subject"           ) var subject           : Subject?    = null,
-    @SerializedName("score"             ) var score             : Double?     = null,
-    @SerializedName("friendScore"       ) var friendScore       : Double?     = null
+    @SerializedName("score"             ) var score             : Score?     = Score(),
+    @SerializedName("friendScore"       ) var friendScore       : FriendScore?     = FriendScore()
 )
 
 data class Score (
@@ -346,6 +346,66 @@ object CustomNavType {
             return if (value == null) "null" else encodeToBase64UrlSafe(Json.encodeToString(value))
         }
     }
+
+    val UserType = object : NavType<User?>(
+        isNullableAllowed = true,
+    ) {
+        override fun get(bundle: Bundle, key: String): User? {
+            val encoded = bundle.getString(key) ?: return null
+            if (encoded == "null") return null
+            return try {
+                Json.decodeFromString(decodeFromBase64UrlSafe(encoded))
+            } catch (e: Exception) {
+                null
+            }
+        }
+
+        override fun parseValue(value: String): User? {
+            if (value == "null") return null
+            return try {
+                Json.decodeFromString(decodeFromBase64UrlSafe(value))
+            } catch (e: Exception) {
+                null
+            }
+        }
+
+        override fun put(bundle: Bundle, key: String, value: User?) {
+            if (value == null) {
+                bundle.putString(key, "null")
+            } else {
+                bundle.putString(key, encodeToBase64UrlSafe(Json.encodeToString(value)))
+            }
+        }
+
+        override fun serializeAsValue(value: User?): String {
+            return if (value == null) "null" else encodeToBase64UrlSafe(Json.encodeToString(value))
+        }
+    }
+
+    val IntType = object : NavType<Int?>(
+        isNullableAllowed = true,
+    ) {
+        override fun get(bundle: Bundle, key: String): Int? {
+            return if (bundle.containsKey(key)) bundle.getInt(key) else null
+        }
+
+        override fun parseValue(value: String): Int? {
+            return value.toIntOrNull()
+        }
+
+        override fun put(bundle: Bundle, key: String, value: Int?) {
+            if (value != null) {
+                bundle.putInt(key, value)
+            } else {
+                bundle.remove(key) // Entfernt den Key, um null korrekt zu repräsentieren
+            }
+        }
+
+        override fun serializeAsValue(value: Int?): String {
+            return value?.toString() ?: "null"
+        }
+    }
+
 }
 
 fun encodeToBase64UrlSafe(data: String): String {

@@ -82,7 +82,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun SocialScreen(
     viewModel: SocialViewModel = hiltViewModel(),
-    navigateToUserDetail: (Int) -> Unit
+    navigateToUserDetail: (Int?, User?) -> Unit
 ) {
 
     val selectedTabIndex = viewModel.selectedTabIndex.value
@@ -111,7 +111,8 @@ fun SocialScreen(
                 searchText = searchText,
                 filteredUsers = filteredUsers,
                 onUpdate = { viewModel.updateSearchText(it) },
-                navigateToUserDetail = {navigateToUserDetail(it)},
+                navigateToUserDetail = { user ->
+                    navigateToUserDetail(null, user)},
                 isModalSheetLoading = isModalSheetLoading
             )
 
@@ -156,7 +157,8 @@ fun SocialScreen(
                                     modifier = Modifier.fillMaxSize(),
                                     friendships = friendships,
                                     pendingFriendships = pendingFriendships,
-                                    navigateToUserDetail = { navigateToUserDetail(it) },
+                                    navigateToUserDetail = { friendshipId ->
+                                        navigateToUserDetail(friendshipId, null) },
                                     acceptFriendship = { isAccept, id ->
                                         viewModel.acceptFriendship(isAccept, id)
                                     }
@@ -204,7 +206,7 @@ fun BottomSheetLayoutContent(
     searchText: String,
     filteredUsers: List<User?>,
     onUpdate: (String) -> Unit,
-    navigateToUserDetail: (Int) -> Unit,
+    navigateToUserDetail: (User?) -> Unit,
     isModalSheetLoading: Boolean
 ) {
 
@@ -284,7 +286,9 @@ fun BottomSheetLayoutContent(
 
                 LazyColumn {
                     items(filteredUsers) { user ->
-                        UserCard(user = user, navigateToUserDetail = { navigateToUserDetail(it) })
+                        UserCard(user = user, navigateToUserDetail = { user ->
+                            navigateToUserDetail(user) }
+                        )
 
                     }
                 }
@@ -296,12 +300,12 @@ fun BottomSheetLayoutContent(
 }
 
 @Composable
-fun UserCard(user: User?, navigateToUserDetail: (Int) -> Unit) {
+fun UserCard(user: User?, navigateToUserDetail: (User?) -> Unit) {
     Row(
         modifier = Modifier
             .padding(start = 16.dp, end = 16.dp, top = 20.dp)
             .fillMaxWidth()
-            .clickable { navigateToUserDetail(user?.userId!!) },
+            .clickable { navigateToUserDetail(user!!) },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -403,7 +407,7 @@ fun FriendsSection(
     modifier: Modifier,
     friendships: List<AcceptedFriendship>,
     pendingFriendships: List<PendingFriendship>,
-    navigateToUserDetail: (Int) -> Unit,
+    navigateToUserDetail: (Int?) -> Unit,
     acceptFriendship: (Boolean, Int) -> Unit
 ) {
 
@@ -414,7 +418,9 @@ fun FriendsSection(
     ) {
 
         items(friendships) { friendship ->
-            FriendshipCard(friendship, navigateToUserDetail = { navigateToUserDetail(it) })
+            FriendshipCard(friendship, navigateToUserDetail = { friendshipId ->
+                navigateToUserDetail(friendshipId) }
+            )
 
         }
 
@@ -426,9 +432,14 @@ fun FriendsSection(
         }
 
         items(pendingFriendships) { pendingFriendship ->
-            PendingFriendshipCard(pendingFriendship = pendingFriendship, navigateToUserDetail = { navigateToUserDetail(it) }, acceptFriendship = { acceptFriendship, id ->
-                acceptFriendship(acceptFriendship, id)
-            })
+            PendingFriendshipCard(
+                pendingFriendship = pendingFriendship,
+                navigateToUserDetail = { friendshipId ->
+                navigateToUserDetail(friendshipId)
+                                       },
+                acceptFriendship = { acceptFriendship, id ->
+                    acceptFriendship(acceptFriendship, id)
+                })
         }
 
 
@@ -436,12 +447,12 @@ fun FriendsSection(
 }
 
 @Composable
-fun FriendshipCard(friendship: AcceptedFriendship, navigateToUserDetail: (Int) -> Unit) {
+fun FriendshipCard(friendship: AcceptedFriendship, navigateToUserDetail: (Int?) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp, top = 24.dp)
-            .clickable { navigateToUserDetail(friendship.friend?.userId!!) },
+            .clickable { navigateToUserDetail(friendship.friendshipId) },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -493,12 +504,12 @@ fun FriendshipCard(friendship: AcceptedFriendship, navigateToUserDetail: (Int) -
 }
 
 @Composable
-fun PendingFriendshipCard(pendingFriendship: PendingFriendship, navigateToUserDetail: (Int) -> Unit, acceptFriendship: (Boolean, Int) -> Unit) {
+fun PendingFriendshipCard(pendingFriendship: PendingFriendship, navigateToUserDetail: (Int?) -> Unit, acceptFriendship: (Boolean, Int) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp, top = 24.dp)
-            .clickable { navigateToUserDetail(pendingFriendship.friend?.userId!!) },
+            .clickable { navigateToUserDetail(pendingFriendship.friendshipId) },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {

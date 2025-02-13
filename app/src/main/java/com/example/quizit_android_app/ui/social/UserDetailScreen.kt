@@ -2,11 +2,8 @@ package com.example.quizit_android_app.ui.social
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,34 +28,31 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.semantics.Role.Companion.Button
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.quizit_android_app.ui.theme.Typography
-import kotlin.Result
+import com.example.quizit_android_app.model.retrofit.DoneChallenges
+import com.example.quizit_android_app.model.retrofit.User
+import com.example.quizit_android_app.ui.home.OpenChallengeCard
+import com.example.quizit_android_app.ui.home.ChallengeType
+import com.example.quizit_android_app.usecases.friendship.FriendshipStatus
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,7 +62,14 @@ fun UserDetailScreen(
     onGoBack: () -> Unit
 ) {
 
-    val userResults = viewModel.userResults.value
+    val user = viewModel.user.value
+    val userStats = viewModel.userStats.value
+
+    val openChallenges = viewModel.openChallenges.value
+    val doneChallenges = viewModel.doneChallenges.value
+    val friendshipStatus = viewModel.friendshipStatus.value
+
+    val isLoading = viewModel.isLoading.value
 
 
     Scaffold(
@@ -77,40 +78,141 @@ fun UserDetailScreen(
             SocialTopBar(onGoBack = {onGoBack()})
         },
         content = { paddingValues->
-
-            Column(
-                Modifier
-                    .verticalScroll(rememberScrollState())
-                    .padding(paddingValues)
-                    .fillMaxSize()
+            Box (
+                modifier = Modifier.fillMaxSize()
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Box(
+                if(isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        trackColor = Color.Gray
+                    )
+
+                } else {
+
+                    Column(
                         modifier = Modifier
-                            .size(80.dp)
-                            .background(Color(0xFFEAF2FF), shape = CircleShape),
-                        contentAlignment = Alignment.Center
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                            .padding(horizontal = 16.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = "User Icon",
-                            tint = Color(0xFFB4DBFF),
-                            modifier = Modifier.size(60.dp)
+                        UserInfos(
+                            user = user,
+                            friendshipStatus = friendshipStatus
                         )
+
+                        Spacer(modifier = Modifier.size(16.dp))
+                        var showPopup: Boolean by remember { mutableStateOf(false) }
+
+                        if (showPopup) {
+                            StatisticsPopUp(onClose = { showPopup = false })
+                        }
+                        StatisticsCard(
+                            onClick = { showPopup = true },
+                            stats = userStats
+                        )
+
+                        Spacer(modifier = Modifier.size(16.dp))
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            Text("Herausforderungen von ${user?.userFullname?.split(" ")?.first()}", style = MaterialTheme.typography.titleMedium)
+
+                            Spacer(modifier = Modifier.size(16.dp))
+
+                            LazyRow(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                items(openChallenges) { challenge ->
+                                    OpenChallengeCard(
+                                        challenge = challenge,
+                                        type = ChallengeType.FRIEND
+                                    )
+                                    Spacer(modifier = Modifier.size(16.dp))
+                                }
+                            }
+
+
+                        }
+
+                    }
+                }
+            }
+        }
+    )
+}
+
+@Composable
+fun UserInfos(user: User?, friendshipStatus: FriendshipStatus) {
+
+    Column(
+        Modifier
+            .verticalScroll(rememberScrollState())
+            .fillMaxSize()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .background(Color(0xFFEAF2FF), shape = CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "User Icon",
+                    tint = Color(0xFFB4DBFF),
+                    modifier = Modifier.size(60.dp)
+                )
+            }
+
+            Text(
+                user?.userFullname?:"",
+                style = MaterialTheme.typography.titleLarge
+            )
+            Text(user?.userClass?:"", style = MaterialTheme.typography.bodyMedium)
+
+            when (friendshipStatus) {
+                FriendshipStatus.NONE -> {
+                    Button(
+                        onClick = { /*TODO*/ },
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .width(170.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White,
+                            contentColor = Color.Black
+                        ),
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(1.5.dp, Color.Black)
+                    )
+                    {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceAround,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.PersonAdd,
+                                contentDescription = "Add",
+                                modifier = Modifier
+                                    .size(20.dp)
+                            )
+
+                            Text(
+                                "anfreunden",
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+
+                        }
                     }
 
-                    Text(
-                        "Julian Stoll",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                    Text("4BHIT", style = MaterialTheme.typography.bodyMedium)
-
-
-
+                }
+                FriendshipStatus.FRIENDS -> {
                     Button(
                         onClick = { /*TODO*/ },
                         colors = ButtonDefaults.buttonColors(
@@ -145,41 +247,8 @@ fun UserDetailScreen(
 
                     }
 
-
-
-                    Button(
-                        onClick = { /*TODO*/ },
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .width(170.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.White,
-                            contentColor = Color.Black
-                        ),
-                        shape = RoundedCornerShape(16.dp),
-                        border = BorderStroke(1.5.dp, Color.Black)
-                    )
-                    {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceAround,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.PersonAdd,
-                                contentDescription = "Add",
-                                modifier = Modifier
-                                    .size(20.dp)
-                            )
-
-                            Text(
-                                "anfreunden",
-                                style = MaterialTheme.typography.titleMedium,
-                            )
-
-                        }
-                    }
-
+                }
+                FriendshipStatus.PENDING -> {
                     Button(
                         onClick = { /*TODO*/ },
                         modifier = Modifier
@@ -215,41 +284,108 @@ fun UserDetailScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.size(16.dp))
-
                 }
+                FriendshipStatus.PENDING_ACTIONREQ -> {
+                    Button(
+                        onClick = { /*TODO*/ },
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .width(170.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF0DE334),
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(1.5.dp, Color.Black)
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                ) {
-                    Text("Julians Herausforderungen", style = MaterialTheme.typography.titleMedium)
+                    )
+                    {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceAround,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.PendingActions,
+                                contentDescription = "Accept",
+                                modifier = Modifier
+                                    .size(20.dp)
+                            )
 
 
+                            Text(
+                                "annehmen",
+                                style = MaterialTheme.typography.titleMedium,
+                            )
 
-                    Spacer(modifier = Modifier.size(16.dp))
-
-                    LazyRow{
-                        items(userResults) {
-                            ResultCard(result = it)
                         }
                     }
 
-                    Spacer(modifier = Modifier.size(16.dp))
+                    Button(
+                        onClick = { /*TODO*/ },
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .width(170.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFFF3B30),
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(1.5.dp, Color.Black)
 
-                    var showPopup: Boolean by remember { mutableStateOf(false) }
+                    )
+                    {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceAround,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.PendingActions,
+                                contentDescription = "Decline",
+                                modifier = Modifier
+                                    .size(20.dp)
+                            )
 
-                    if (showPopup) {
-                        StatisticsPopUp(onClose = { showPopup = false })
+
+                            Text(
+                                "ablehnen",
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+
+                        }
                     }
-
-                    //StatisticsCard(onClick = { showPopup = true })
                 }
-            }
+
+            }            }
+
         }
-    )
+
 }
+
+@Composable
+fun DoneChallengeCard(challenge: DoneChallenges) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFEAF2FF)),
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.width(350.dp)
+
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+
+        ) {
+            Box {
+            }
+
+
+        }
+
+    }
+}
+
 
 @Composable
 fun SocialTopBar(onGoBack: () -> Unit) {

@@ -8,14 +8,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.example.quizit_android_app.model.retrofit.AcceptedFriendships
 import com.example.quizit_android_app.model.retrofit.CustomNavType
 import com.example.quizit_android_app.model.retrofit.Focus
-import com.example.quizit_android_app.model.retrofit.PendingFriendships
 import com.example.quizit_android_app.model.retrofit.Subject
 import com.example.quizit_android_app.model.retrofit.User
 import com.example.quizit_android_app.ui.MainViewModel
@@ -27,7 +26,6 @@ import com.example.quizit_android_app.ui.quiz.QuizScreen
 import com.example.quizit_android_app.ui.settings.SettingsScreen
 import com.example.quizit_android_app.ui.social.SocialScreen
 import com.example.quizit_android_app.ui.social.UserDetailScreen
-import com.example.quizit_android_app.usecases.friendship.GetAcceptedFriendships
 import kotlinx.serialization.Serializable
 import kotlin.reflect.typeOf
 
@@ -79,9 +77,17 @@ data class SocialRoute(
 @Serializable
 data class UserDetailRoute(
     val friendshipId: Int?,
-    val userId: Int?,
-    val actionReq: Boolean?
-)
+    val user: User?,
+) {
+    companion object {
+        val typeMap = mapOf(
+            typeOf<User?>() to CustomNavType.UserType
+        )
+
+        fun from(savedStateHandle: SavedStateHandle) =
+            savedStateHandle.toRoute<UserDetailRoute>(typeMap)
+    }
+}
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -171,7 +177,9 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
 
         composable<SocialRoute> {
             SocialScreen(
-                navigateToUserDetail = { id
+                navigateToUserDetail = { id, user ->
+                    Log.d("AppNavGraph", UserDetailRoute(id, user).toString())
+                    navController.navigate(UserDetailRoute(friendshipId = id, user= user))
 
                 }
             )
@@ -179,7 +187,9 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
 
 
 
-        composable<UserDetailRoute> {
+        composable<UserDetailRoute>(
+            typeMap = UserDetailRoute.typeMap
+        ) {
             UserDetailScreen(
                 onGoBack = {
                     navController.popBackStack()
