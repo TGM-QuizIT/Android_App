@@ -14,6 +14,7 @@ class SyncLocalPendingFriendsUseCase @Inject constructor(
         Log.d("SyncLocalPendingFriendsUseCase", "invoke: $pendingFriends")
         if (pendingFriends?.status == "Success") {
             contentDataStore.savePendingFriends(pendingFriends.pendingFriendships)
+            Log.d("SyncLocalPendingFriendsUseCase", "pendingFriends synced")
         }
     }
 }

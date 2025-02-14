@@ -14,6 +14,7 @@ class SyncLocalAcceptedFriendsUseCase @Inject constructor(
         Log.d("SyncLocalAcceptedFriendsUseCase", "invoke: ${friends?.acceptedFriendships}")
         if (friends?.status == "Success") {
             contentDataStore.saveAcceptedFriends(friends.acceptedFriendships)
+            Log.d("SyncLocalAcceptedFriendsUseCase", "acceptedFriendships synced")
         }
     }
 }

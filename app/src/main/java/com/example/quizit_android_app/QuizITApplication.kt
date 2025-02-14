@@ -1,6 +1,8 @@
 package com.example.quizit_android_app
 
 import android.app.Application
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.Configuration
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.quizit_android_app.model.retrofit.OpenChallenges
@@ -21,8 +23,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltAndroidApp
-class QuizITApplication: Application() {
-
+class QuizITApplication : Application(), Configuration.Provider {
     @Inject
     lateinit var syncLocalSubjectsUseCase: SyncLocalSubjectsUseCase
 
@@ -47,9 +48,22 @@ class QuizITApplication: Application() {
     @Inject
     lateinit var syncLocalUserStatsUseCase: SyncLocalUserStatsUseCase
 
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
+
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .build()
+
     override fun onCreate() {
         super.onCreate()
+        //WorkManager.initialize(this, workManagerConfiguration)
+        callSyncMethods()
+        setupPeriodicWork()
+    }
 
+    private fun callSyncMethods() {
         CoroutineScope(Dispatchers.IO).launch {
             syncLocalSubjectsUseCase()
             syncLocalOpenChallengesUseCase()
@@ -60,9 +74,8 @@ class QuizITApplication: Application() {
             syncLocalResultsUseCase()
             syncLocalUserStatsUseCase()
         }
-
-        //setupPeriodicWork()
     }
+
 
     private fun setupPeriodicWork() {
         val syncWorkRequest = PeriodicWorkRequestBuilder<DataSyncWorker>(15, TimeUnit.MINUTES).build()
