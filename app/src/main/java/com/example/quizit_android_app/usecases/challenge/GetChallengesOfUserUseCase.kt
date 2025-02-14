@@ -6,7 +6,7 @@ import com.example.quizit_android_app.model.retrofit.DataRepo
 import com.example.quizit_android_app.model.retrofit.OpenChallengesResponse
 import javax.inject.Inject
 
-class GetChallengesOfUser @Inject constructor(
+class GetChallengesOfUserUseCase @Inject constructor(
     val dataRepo: DataRepo,
     val contentDataStore: ContentDataStore
 ) {

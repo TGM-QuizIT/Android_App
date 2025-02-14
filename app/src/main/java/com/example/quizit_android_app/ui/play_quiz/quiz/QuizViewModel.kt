@@ -6,10 +6,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.quizit_android_app.model.retrofit.AcceptedFriendship
 import com.example.quizit_android_app.model.retrofit.Focus
 import com.example.quizit_android_app.model.retrofit.Questions
 import com.example.quizit_android_app.model.retrofit.Subject
 import com.example.quizit_android_app.navigation.QuizRoute
+import com.example.quizit_android_app.usecases.friendship.GetAcceptedFriendshipsUseCase
 import com.example.quizit_android_app.usecases.quiz.GetQuizOfFocusUseCase
 import com.example.quizit_android_app.usecases.quiz.GetQuizOfSubjectUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,7 +22,8 @@ import javax.inject.Inject
 class QuizViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getQuizOfSubjectUseCase: GetQuizOfSubjectUseCase,
-    private val getQuizOfFocusUseCase: GetQuizOfFocusUseCase
+    private val getQuizOfFocusUseCase: GetQuizOfFocusUseCase,
+    private val getAcceptedFriendshipsUseCase: GetAcceptedFriendshipsUseCase
 ): ViewModel() {
     private val _currentQuestionIndex = mutableStateOf(0)
     val currentQuestionIndex: State<Int> = _currentQuestionIndex
@@ -43,6 +46,12 @@ class QuizViewModel @Inject constructor(
 
     private val _isLoading = mutableStateOf(true)
     val isLoading: State<Boolean> = _isLoading
+
+    private val _isBottomSheetLoading = mutableStateOf(false)
+    val isBottomSheetLoading: State<Boolean> = _isBottomSheetLoading
+
+    private val _friendships = mutableStateOf(listOf<AcceptedFriendship>())
+    val friendships: State<List<AcceptedFriendship>> = _friendships
 
 
 
@@ -169,6 +178,25 @@ class QuizViewModel @Inject constructor(
                 isCorrect = userAnswer.containsAll(correctAnswers) && correctAnswers.containsAll(userAnswer)
             )
         }
+    }
+
+    fun getFriendships() {
+        viewModelScope.launch {
+            _isBottomSheetLoading.value = true
+            try {
+                _friendships.value = getAcceptedFriendshipsUseCase()
+
+            } catch (e: Exception) {
+                Log.e("QuizViewModel", "Error loading friendships", e)
+            } finally {
+                _isBottomSheetLoading.value = false
+            }
+        }
+
+    }
+
+    fun challengeFriend(friendshipId: Int, focus: Focus?, subject: Subject) {
+
     }
 
 

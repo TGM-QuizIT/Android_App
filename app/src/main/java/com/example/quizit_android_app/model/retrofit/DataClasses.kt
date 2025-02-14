@@ -137,9 +137,9 @@ data class Result (
     @SerializedName("resultId"    ) var resultId    : Int?    = null,
     @SerializedName("resultScore" ) var resultScore : Double?    = null,
     @SerializedName("userId"      ) var userId      : Int?    = null,
-    @SerializedName("focusId"     ) var focusId     : Int?    = null,
-    @SerializedName("subjectId"   ) var subjectId   : String? = null,
-    @SerializedName("resultDate"  ) var resultDate  : String? = null
+    @SerializedName("focus"     ) var focus     : Focus?    = null,
+    @SerializedName("subject"   ) var subject   : Subject? = null,
+    @SerializedName("resultDateTime"  ) var resultDateTime  : String? = null
 )
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -347,12 +347,11 @@ object CustomNavType {
         }
     }
 
-    val UserType = object : NavType<User?>(
-        isNullableAllowed = true,
+    val UserType = object : NavType<User>(
+        isNullableAllowed = false,
     ) {
         override fun get(bundle: Bundle, key: String): User? {
             val encoded = bundle.getString(key) ?: return null
-            if (encoded == "null") return null
             return try {
                 Json.decodeFromString(decodeFromBase64UrlSafe(encoded))
             } catch (e: Exception) {
@@ -360,25 +359,20 @@ object CustomNavType {
             }
         }
 
-        override fun parseValue(value: String): User? {
-            if (value == "null") return null
+        override fun parseValue(value: String): User {
             return try {
                 Json.decodeFromString(decodeFromBase64UrlSafe(value))
             } catch (e: Exception) {
-                null
+                throw IllegalArgumentException("Invalid User value")
             }
         }
 
-        override fun put(bundle: Bundle, key: String, value: User?) {
-            if (value == null) {
-                bundle.putString(key, "null")
-            } else {
-                bundle.putString(key, encodeToBase64UrlSafe(Json.encodeToString(value)))
-            }
+        override fun put(bundle: Bundle, key: String, value: User) {
+            bundle.putString(key, encodeToBase64UrlSafe(Json.encodeToString(value)))
         }
 
-        override fun serializeAsValue(value: User?): String {
-            return if (value == null) "null" else encodeToBase64UrlSafe(Json.encodeToString(value))
+        override fun serializeAsValue(value: User): String {
+            return encodeToBase64UrlSafe(Json.encodeToString(value))
         }
     }
 

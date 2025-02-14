@@ -73,7 +73,9 @@ import androidx.compose.ui.window.Popup
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import com.example.quizit_android_app.model.retrofit.AcceptedFriendship
+import com.example.quizit_android_app.model.retrofit.DoneChallenges
 import com.example.quizit_android_app.model.retrofit.PendingFriendship
+import com.example.quizit_android_app.model.retrofit.Result
 import com.example.quizit_android_app.model.retrofit.User
 import com.example.quizit_android_app.model.retrofit.UserStatsResponse
 import kotlinx.coroutines.launch
@@ -82,13 +84,14 @@ import kotlinx.coroutines.launch
 @Composable
 fun SocialScreen(
     viewModel: SocialViewModel = hiltViewModel(),
-    navigateToUserDetail: (Int?, User?) -> Unit
+    navigateToUserDetail: (Int?, User) -> Unit
 ) {
 
     val selectedTabIndex = viewModel.selectedTabIndex.value
     val friendships = viewModel.friendships.value
     val pendingFriendships = viewModel.pendingFriendship.value
     val results = viewModel.userResults.value
+    val doneChallenges = viewModel.doneChallenges.value
 
     val searchText = viewModel.searchText.value
     val filteredUsers = viewModel.filteredUsers.value
@@ -151,19 +154,26 @@ fun SocialScreen(
                             trackColor = Color.Gray
                         )
                     } else {
-                        Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
+                        Box(modifier = Modifier
+                            .padding(paddingValues)
+                            .fillMaxSize()) {
                             when (selectedTabIndex) {
                                 0 -> FriendsSection(
                                     modifier = Modifier.fillMaxSize(),
                                     friendships = friendships,
                                     pendingFriendships = pendingFriendships,
-                                    navigateToUserDetail = { friendshipId ->
-                                        navigateToUserDetail(friendshipId, null) },
+                                    navigateToUserDetail = { friendshipId, user ->
+                                        navigateToUserDetail(friendshipId, user) },
                                     acceptFriendship = { isAccept, id ->
                                         viewModel.acceptFriendship(isAccept, id)
                                     }
                                 )
-                                1 -> StatisticsSection(modifier = Modifier.fillMaxSize(), results = results, stats = stats)
+                                1 -> StatisticsSection(
+                                    modifier = Modifier.fillMaxSize(),
+                                    results = results,
+                                    stats = stats,
+                                    doneChallenges = doneChallenges
+                                )
                             }
 
                             if (selectedTabIndex == 0) {
@@ -206,7 +216,7 @@ fun BottomSheetLayoutContent(
     searchText: String,
     filteredUsers: List<User?>,
     onUpdate: (String) -> Unit,
-    navigateToUserDetail: (User?) -> Unit,
+    navigateToUserDetail: (User) -> Unit,
     isModalSheetLoading: Boolean
 ) {
 
@@ -300,7 +310,7 @@ fun BottomSheetLayoutContent(
 }
 
 @Composable
-fun UserCard(user: User?, navigateToUserDetail: (User?) -> Unit) {
+fun UserCard(user: User?, navigateToUserDetail: (User) -> Unit) {
     Row(
         modifier = Modifier
             .padding(start = 16.dp, end = 16.dp, top = 20.dp)
@@ -407,7 +417,7 @@ fun FriendsSection(
     modifier: Modifier,
     friendships: List<AcceptedFriendship>,
     pendingFriendships: List<PendingFriendship>,
-    navigateToUserDetail: (Int?) -> Unit,
+    navigateToUserDetail: (Int?, User) -> Unit,
     acceptFriendship: (Boolean, Int) -> Unit
 ) {
 
@@ -418,8 +428,8 @@ fun FriendsSection(
     ) {
 
         items(friendships) { friendship ->
-            FriendshipCard(friendship, navigateToUserDetail = { friendshipId ->
-                navigateToUserDetail(friendshipId) }
+            FriendshipCard(friendship, navigateToUserDetail = { friendshipId, user ->
+                navigateToUserDetail(friendshipId, user) }
             )
 
         }
@@ -434,8 +444,8 @@ fun FriendsSection(
         items(pendingFriendships) { pendingFriendship ->
             PendingFriendshipCard(
                 pendingFriendship = pendingFriendship,
-                navigateToUserDetail = { friendshipId ->
-                navigateToUserDetail(friendshipId)
+                navigateToUserDetail = { friendshipId, user  ->
+                navigateToUserDetail(friendshipId, user)
                                        },
                 acceptFriendship = { acceptFriendship, id ->
                     acceptFriendship(acceptFriendship, id)
@@ -447,12 +457,21 @@ fun FriendsSection(
 }
 
 @Composable
-fun FriendshipCard(friendship: AcceptedFriendship, navigateToUserDetail: (Int?) -> Unit) {
+fun FriendshipCard(friendship: AcceptedFriendship, navigateToUserDetail: (Int?, User) -> Unit) {
+    val user = User(
+        userId = friendship.friend?.userId,
+        userName = friendship.friend?.userName,
+        userYear = friendship.friend?.userYear,
+        userFullname = friendship.friend?.userFullname,
+        userClass = friendship.friend?.userClass,
+        userType = friendship.friend?.userType,
+        userMail = friendship.friend?.userMail,
+    )
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp, top = 24.dp)
-            .clickable { navigateToUserDetail(friendship.friendshipId) },
+            .clickable { navigateToUserDetail(friendship.friendshipId, user) },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -504,12 +523,21 @@ fun FriendshipCard(friendship: AcceptedFriendship, navigateToUserDetail: (Int?) 
 }
 
 @Composable
-fun PendingFriendshipCard(pendingFriendship: PendingFriendship, navigateToUserDetail: (Int?) -> Unit, acceptFriendship: (Boolean, Int) -> Unit) {
+fun PendingFriendshipCard(pendingFriendship: PendingFriendship, navigateToUserDetail: (Int?, User) -> Unit, acceptFriendship: (Boolean, Int) -> Unit) {
+    val user = User(
+        userId = pendingFriendship.friend?.userId,
+        userName = pendingFriendship.friend?.userName,
+        userYear = pendingFriendship.friend?.userYear,
+        userFullname = pendingFriendship.friend?.userFullname,
+        userClass = pendingFriendship.friend?.userClass,
+        userType = pendingFriendship.friend?.userType,
+        userMail = pendingFriendship.friend?.userMail,
+    )
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp, top = 24.dp)
-            .clickable { navigateToUserDetail(pendingFriendship.friendshipId) },
+            .clickable { navigateToUserDetail(pendingFriendship.friendshipId, user) },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -584,33 +612,62 @@ fun PendingFriendshipCard(pendingFriendship: PendingFriendship, navigateToUserDe
     }
 }
 @Composable
-fun StatisticsSection(modifier: Modifier, results: List<Result>,  stats: UserStatsResponse?) {
+fun StatisticsSection(modifier: Modifier, results: List<com.example.quizit_android_app.model.retrofit.Result>,  stats: UserStatsResponse?, doneChallenges: List<DoneChallenges>) {
 
     var showPopup: Boolean by remember { mutableStateOf(false) }
 
-    Column(
+   LazyColumn(
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 16.dp)
+            .padding(start = 16.dp, top = 32.dp, bottom = 16.dp)
     ) {
-        if(showPopup) {
-            StatisticsPopUp(onClose = { showPopup = false })
-        }
-        StatisticsCard(onClick = { showPopup = true }, stats = stats)
+       item {
+           if(showPopup) {
+               StatisticsPopUp(onClose = { showPopup = false })
+           }
 
-        Spacer(modifier = Modifier.size(16.dp))
-        Text("Quiz Historie", style = MaterialTheme.typography.titleMedium)
-        Spacer(modifier = Modifier.size(16.dp))
+           Box(
+               modifier = Modifier
+                   .fillMaxWidth()
+                   .padding(end = 16.dp),
+           ) {
+               StatisticsCard(onClick = { showPopup = true }, stats = stats)
 
+           }
+           Spacer(modifier = Modifier.size(32.dp))
 
-        LazyRow(
-            modifier = Modifier.padding(PaddingValues(0.dp))
-        ) {
-            items(results) { result ->
+       }
+       item {
+           Text("Quiz Historie", style = MaterialTheme.typography.titleMedium)
+           Spacer(modifier = Modifier.size(16.dp))
 
-                ResultCard(result = result)
-            }
-        }
+       }
+
+       item {
+           LazyRow(
+
+           ) {
+               items(results) { result ->
+                   ResultCard(result = result)
+                     Spacer(modifier = Modifier.size(8.dp))
+               }
+           }
+           Spacer(modifier = Modifier.size(32.dp))
+
+       }
+
+       item {
+           Text("Herausforderungen Historie", style = MaterialTheme.typography.titleMedium)
+           Spacer(modifier = Modifier.size(16.dp))
+
+           LazyRow {
+               items(doneChallenges) { doneChallenge ->
+                   DoneChallengeCard(challenge = doneChallenge)
+                   Spacer(modifier = Modifier.size(16.dp))
+               }
+           }
+
+       }
 
     }
 
@@ -693,7 +750,8 @@ fun StatisticsItem(icon: ImageVector, title: String, description: String) {
                 imageVector = icon,
                 contentDescription = title,
                 tint = Color(0xFFBAA7A7),
-                modifier = Modifier.size(35.dp)
+                modifier = Modifier
+                    .size(35.dp)
                     .align(Alignment.CenterVertically)
             )
             Spacer(modifier = Modifier.size(12.dp))
@@ -725,7 +783,7 @@ fun StatisticsCard(onClick: () -> Unit,  stats: UserStatsResponse?) {
         modifier = Modifier
             .fillMaxWidth()
             .height(110.dp)
-            .padding(end = 0.dp)
+            .padding()
             .clickable { onClick() }
     ) {
         Row(
@@ -851,54 +909,71 @@ fun ResultCard(result: Result) {
     Card(
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
-            .width(180.dp),
-        colors = CardDefaults.cardColors(Color(0xFFF8F9FE))
+            .width(200.dp),
+        colors = if(result.subject != null && result.focus == null)  CardDefaults.cardColors(Color(0xFFF8F9FE)) else CardDefaults.cardColors(Color.White)
+
     ) {
-        Column {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp)
+        ) {
             AsyncImage(
-                model = "https://placehold.co/1600x600.png",
-                contentDescription = "Result Focus",
+                model = result.focus?.focusImageAddress ?: result.subject?.subjectImageAddress,
+                contentDescription = "Result Picture",
                 contentScale = ContentScale.FillBounds,
                 modifier = Modifier
+                    .padding(horizontal = 16.dp)
                     .fillMaxWidth()
-                    .aspectRatio(8f / 3f)
-            )
+                    .aspectRatio(2f / 1f)
 
-            Spacer(modifier = Modifier.size(8.dp))
-            Text(
-                "GGP - 2. Weltkrieg "+result.resultId,
-                color = Color.Black,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.align(Alignment.CenterHorizontally),
             )
-
-            Spacer(modifier = Modifier.size(8.dp))
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(24.dp)
-                    .padding(start = 16.dp, end = 16.dp)
-                    .background(Color.White, shape = RoundedCornerShape(8.dp))
-                    .border(1.dp, Color(0xFF006FFD), shape = RoundedCornerShape(8.dp)),
-                contentAlignment = Alignment.CenterStart
+                    .background(Color.White)
+                    .padding(horizontal = 16.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f) // 80% Fortschritt
-                        .height(24.dp)
-                        .background(Color(0xFF006FFD), shape = RoundedCornerShape(8.dp))
-                )
-                Text(
-                    text = "80%",
-                    color = Color.Black,
-                    modifier = Modifier.align(Alignment.Center),
-                    style = MaterialTheme.typography.labelLarge
-                )
-            }
+                Column {
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Text(
+                        result.focus?.focusName ?: result.subject?.subjectName!!,
+                        color = Color.Black,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
 
-            Spacer(modifier = Modifier.size(8.dp))
+                    Spacer(modifier = Modifier.size(8.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(24.dp)
+                            .background(Color.White, shape = RoundedCornerShape(8.dp))
+                            .border(1.dp, Color(0xFF006FFD), shape = RoundedCornerShape(8.dp)),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.8f) // 80% Fortschritt
+                                .height(24.dp)
+                                .background(Color(0xFF006FFD), shape = RoundedCornerShape(8.dp))
+                        )
+                        Text(
+                            text = result.resultScore.toString()+"%",
+                            color = Color.Black,
+                            modifier = Modifier.align(Alignment.Center),
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.size(8.dp))
+
+                }
+
+            }
         }
     }
     Spacer(modifier = Modifier.size(8.dp))

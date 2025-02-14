@@ -60,13 +60,13 @@ class UserDetailViewModel @Inject constructor(
         Log.d("UserDetailViewModel", "FriendshipId: "+friendshipId)
 
         if(friendshipId != null) {
-            setFriendshipContent(friendshipId)
+            setFriendshipContent(friendshipId, user)
         } else {
             setUserContent(user)
         }
     }
 
-    private fun setFriendshipContent(friendshipId: Int) {
+    private fun setFriendshipContent(friendshipId: Int, user: User) {
 
         viewModelScope.launch {
 
@@ -80,18 +80,6 @@ class UserDetailViewModel @Inject constructor(
                 val openChallenges = challenges.openChallenges
                 val doneChallenges = challenges.doneChallenges
 
-                val friend = openChallenges.first().friendship?.friend
-
-                val user = User(
-                    userId = friend?.userId,
-                    userName = friend?.userName,
-                    userYear = friend?.userYear,
-                    userFullname = friend?.userFullname,
-                    userClass = friend?.userClass,
-                    userType = friend?.userType,
-                    userMail = friend?.userMail,
-
-                )
 
                 _user.value = user
                 _openChallenges.value = openChallenges

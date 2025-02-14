@@ -10,14 +10,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.example.quizit_android_app.model.retrofit.AcceptedFriendship
+import com.example.quizit_android_app.model.retrofit.DoneChallenges
 import com.example.quizit_android_app.model.retrofit.PendingFriendship
 import com.example.quizit_android_app.model.retrofit.User
 import com.example.quizit_android_app.model.retrofit.UserStatsResponse
 import com.example.quizit_android_app.navigation.SocialRoute
+import com.example.quizit_android_app.usecases.challenge.GetDoneChallengesUseCase
 import com.example.quizit_android_app.usecases.friendship.AcceptFriendshipUseCase
 import com.example.quizit_android_app.usecases.friendship.DeleteDeclineFriendshipUseCase
 import com.example.quizit_android_app.usecases.friendship.GetAcceptedFriendshipsUseCase
 import com.example.quizit_android_app.usecases.friendship.GetPendingFriendshipsUseCase
+import com.example.quizit_android_app.usecases.result.GetResultsUserUseCase
 import com.example.quizit_android_app.usecases.user.GetAllUsersUseCase
 import com.example.quizit_android_app.usecases.user.GetUserStatsUseCase
 import com.example.quizit_android_app.usecases.user.GetUserUseCase
@@ -36,8 +39,11 @@ class SocialViewModel @Inject constructor(
     val getAllUsersUseCase: GetAllUsersUseCase,
     val getUserStatsUseCase: GetUserStatsUseCase,
     val getUserUseCase: GetUserUseCase,
+    val getResultsUserUseCase: GetResultsUserUseCase,
+    val getDoneChallengesUseCase: GetDoneChallengesUseCase,
     val acceptFriendshipUseCase: AcceptFriendshipUseCase,
-    val deleteDeclineFriendshipUseCase: DeleteDeclineFriendshipUseCase
+    val deleteDeclineFriendshipUseCase: DeleteDeclineFriendshipUseCase,
+
 ): ViewModel() {
     private val _selectedTabIndex = mutableStateOf(0)
     val selectedTabIndex: State<Int> = _selectedTabIndex
@@ -59,8 +65,11 @@ class SocialViewModel @Inject constructor(
 
     //TODO States & Abfrage für Punkte,Level,Score
 
-    private val _userResults = mutableStateOf(listOf<Result>())
-    val userResults: State<List<Result>> = _userResults
+    private val _userResults = mutableStateOf(listOf<com.example.quizit_android_app.model.retrofit.Result>())
+    val userResults: State<List<com.example.quizit_android_app.model.retrofit.Result>> = _userResults
+
+    private val _doneChallenges = mutableStateOf(listOf<DoneChallenges>())
+    val doneChallenges: State<List<DoneChallenges>> = _doneChallenges
 
     private val _users = mutableStateOf(listOf<User?>())
     val users : State<List<User?>> = _users
@@ -79,7 +88,6 @@ class SocialViewModel @Inject constructor(
             updateTabIndex(1)
         }
         setContent()
-        setUserResults()
     }
 
     private fun setContent() {
@@ -97,6 +105,12 @@ class SocialViewModel @Inject constructor(
                 if(_userStats.value == null) {
                     _userStats.value = getUserStatsUseCase()
                 }
+                if(_userResults.value.isEmpty()) {
+                    _userResults.value = getResultsUserUseCase()
+                }
+                if(_doneChallenges.value.isEmpty()) {
+                    _doneChallenges.value = getDoneChallengesUseCase().doneChallenges
+                }
             } catch (e: Exception) {
                 //TODO Error handling
             } finally {
@@ -105,21 +119,6 @@ class SocialViewModel @Inject constructor(
         }
 
 
-    }
-
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun setUserResults() {
-        _userResults.value = listOf(
-            Result(1, 0.85f, 1, 101, "01.01.2022"),
-            Result(2, 0.90f, 2, 102, "02.01.2022"),
-            Result(3, 0.78f, 3, 103, "03.01.2022"),
-            Result(4, 0.92f, 4, 104, "04.01.2022"),
-            Result(5, 0.88f, 5, 105, "05.01.2022")
-        ).sortedByDescending { result ->
-            // Datum in ein LocalDate umwandeln, um es korrekt zu vergleichen
-            LocalDate.parse(result.resultDate, DateTimeFormatter.ofPattern("dd.MM.yyyy"))
-        }
     }
 
     fun updateTabIndex(index: Int) {
@@ -213,15 +212,3 @@ class SocialViewModel @Inject constructor(
 
     }
 }
-
-//Helper classes
-
-
-data class Result(
-    val resultId: Int,
-    val resultScore: Float,
-    val userId: Int,
-    val focusId: Int,
-    val resultDate: String
-)
-
