@@ -77,11 +77,11 @@ data class SocialRoute(
 @Serializable
 data class UserDetailRoute(
     val friendshipId: Int?,
-    val user: User?,
+    val user: User,
 ) {
     companion object {
         val typeMap = mapOf(
-            typeOf<User?>() to CustomNavType.UserType
+            typeOf<User>() to CustomNavType.UserType
         )
 
         fun from(savedStateHandle: SavedStateHandle) =

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -23,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.PendingActions
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
@@ -71,56 +73,61 @@ fun UserDetailScreen(
 
     val isLoading = viewModel.isLoading.value
 
-
     Scaffold(
-        contentWindowInsets = WindowInsets(0.dp),
         topBar = {
-            SocialTopBar(onGoBack = {onGoBack()})
+            SocialTopBar(onGoBack = { onGoBack() })
         },
-        content = { paddingValues->
-            Box (
-                modifier = Modifier.fillMaxSize()
-            ) {
-                if(isLoading) {
+        contentWindowInsets = WindowInsets(0.dp),
+        content = { paddingValues ->
+            if (isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
                     CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
                         trackColor = Color.Gray
                     )
+                }
+            } else {
+                var showPopup by remember { mutableStateOf(false) }
 
-                } else {
+                if (showPopup) {
+                    StatisticsPopUp(onClose = { showPopup = false })
+                }
 
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues)
-                            .padding(horizontal = 16.dp)
-                    ) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(start = 16.dp)
+                        .padding(bottom = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    item {
                         UserInfos(
                             user = user,
                             friendshipStatus = friendshipStatus
                         )
+                    }
 
-                        Spacer(modifier = Modifier.size(16.dp))
-                        var showPopup: Boolean by remember { mutableStateOf(false) }
-
-                        if (showPopup) {
-                            StatisticsPopUp(onClose = { showPopup = false })
-                        }
+                    item {
                         StatisticsCard(
                             onClick = { showPopup = true },
                             stats = userStats
                         )
+                    }
 
-                        Spacer(modifier = Modifier.size(16.dp))
+                    if (openChallenges.isNotEmpty()) {
+                        item {
+                            Text(
+                                "Herausforderungen von ${user?.userFullname?.split(" ")?.first()}",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
 
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        ) {
-                            Text("Herausforderungen von ${user?.userFullname?.split(" ")?.first()}", style = MaterialTheme.typography.titleMedium)
-
-                            Spacer(modifier = Modifier.size(16.dp))
-
+                        item {
                             LazyRow(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
@@ -132,10 +139,27 @@ fun UserDetailScreen(
                                     Spacer(modifier = Modifier.size(16.dp))
                                 }
                             }
+                        }
+                    }
 
-
+                    if (doneChallenges.isNotEmpty()) {
+                        item {
+                            Text(
+                                "Herausforderungen Historie",
+                                style = MaterialTheme.typography.titleMedium
+                            )
                         }
 
+                        item {
+                            LazyRow(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                items(doneChallenges) { challenge ->
+                                    DoneChallengeCard(challenge = challenge)
+                                    Spacer(modifier = Modifier.size(16.dp))
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -143,13 +167,14 @@ fun UserDetailScreen(
     )
 }
 
+
 @Composable
 fun UserInfos(user: User?, friendshipStatus: FriendshipStatus) {
 
     Column(
         Modifier
-            .verticalScroll(rememberScrollState())
             .fillMaxSize()
+            .padding(end = 16.dp)
     ) {
         Column(
             modifier = Modifier
@@ -368,19 +393,117 @@ fun DoneChallengeCard(challenge: DoneChallenges) {
     Card(
         colors = CardDefaults.cardColors(containerColor = Color(0xFFEAF2FF)),
         shape = RoundedCornerShape(16.dp),
-        modifier = Modifier.width(350.dp)
+        modifier = Modifier.width(300.dp)
 
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(top = 16.dp, bottom  = 16.dp),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
 
         ) {
             Box {
+                CircularProgressIndicator(
+                    progress = { (challenge.score?.resultScore!! / 100f).toFloat() },
+                    color = Color(0xFF006FFD),
+                    strokeWidth = 10.dp,
+                    trackColor = Color(0xFFF4F3F6),
+                    modifier = Modifier.size(80.dp)
+                )
+
+                Text(
+                    text = "${(challenge.score?.resultScore?.toInt() ?: 0)}%",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Black,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+
+            if (challenge.score?.resultScore!! >= challenge.friendScore?.resultScore!!) {
+                Icon(
+                    imageVector = Icons.Filled.EmojiEvents,
+                    tint = Color(0xFFFF9913),
+                    contentDescription = "Winner",
+                    modifier = Modifier.size(45.dp)
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Filled.EmojiEvents,
+                    tint = Color(0xFFC7C1BA),
+                    modifier = Modifier.size(45.dp),
+                    contentDescription = "Loser",
+                )
+
+            }
+
+            Box {
+                CircularProgressIndicator(
+                    progress = { (challenge.friendScore?.resultScore!! / 100f).toFloat() },
+                    color = Color(0xFFFB6E5C),
+                    strokeWidth = 10.dp,
+                    trackColor = Color(0xFFF4F3F6),
+                    modifier = Modifier.size(80.dp)
+                )
+
+                Text(
+                    text = "${(challenge.friendScore?.resultScore?.toInt() ?: 0)}%",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Black,
+                    modifier = Modifier.align(Alignment.Center)
+                )
             }
 
 
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.White)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(50.dp)
+                        .background(Color(0xFFEAF2FF), shape = CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "User Icon",
+                        tint = Color(0xFFB4DBFF),
+                        modifier = Modifier.size(70.dp)
+                    )
+                }
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                ) {
+                    Text(
+                        text = challenge.friendship?.friend?.userFullname ?: "",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Black
+                    )
+                    Text(
+                        text = challenge.focus?.focusName ?: challenge.subject?.subjectName ?: "",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Black
+                    )
+                }
+
+                Box(
+                    modifier = Modifier.size(50.dp),
+                )
+            }
         }
 
     }

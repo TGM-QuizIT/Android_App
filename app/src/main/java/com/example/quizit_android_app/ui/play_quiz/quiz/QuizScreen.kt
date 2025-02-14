@@ -446,7 +446,7 @@ fun QuizResult(focus: String?, subject: String?, score: Float, results: List<Res
                             modifier = Modifier.fillMaxSize(),
                             color = Color(0xFF006FFD),
                             strokeWidth = 13.dp,
-                            trackColor = Color.LightGray,
+                            trackColor = Color(0xFFF4F3F6)
 
                             )
                         Text(

@@ -20,7 +20,6 @@ class HomeViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getAllSubjectsUseCase: GetAllSubjectsUseCase,
     private val getUserStatsUseCase: GetUserStatsUseCase,
-    private val syncLocalAcceptedFriendsUseCase: SyncLocalAcceptedFriendsUseCase
 ): ViewModel() {
 
     private var _subjectList by mutableStateOf(listOf<Subject>())
