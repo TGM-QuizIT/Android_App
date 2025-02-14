@@ -113,10 +113,17 @@ fun UserDetailScreen(
                     }
 
                     item {
-                        StatisticsCard(
-                            onClick = { showPopup = true },
-                            stats = userStats
-                        )
+
+                        Box(
+                            modifier = Modifier.fillMaxWidth().padding(end = 16.dp)
+                        ) {
+                            StatisticsCard(
+                                onClick = { showPopup = true },
+                                stats = userStats
+                            )
+
+                        }
+
                     }
 
                     if (openChallenges.isNotEmpty()) {
@@ -128,13 +135,17 @@ fun UserDetailScreen(
                         }
 
                         item {
+                            var showPopup: Boolean by remember { mutableStateOf(false) }
                             LazyRow(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 items(openChallenges) { challenge ->
                                     OpenChallengeCard(
                                         challenge = challenge,
-                                        type = ChallengeType.FRIEND
+                                        type = ChallengeType.FRIEND,
+                                        showPopup = showPopup,
+                                        onClick = { showPopup = true },
+                                        onPopupClose = { showPopup = false }
                                     )
                                     Spacer(modifier = Modifier.size(16.dp))
                                 }

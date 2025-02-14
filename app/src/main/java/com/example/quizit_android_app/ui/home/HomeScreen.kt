@@ -69,6 +69,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.quizit_android_app.ui.play_quiz.quiz.ChallengePopUp
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
@@ -315,9 +316,11 @@ fun ChallengeSection(
 
         Spacer(modifier = Modifier.size(16.dp))
 
+        var showPopup: Boolean by remember { mutableStateOf(false) }
+
         LazyRow {
             items(challenges) { challenge ->
-                OpenChallengeCard(ChallengeType.OVERALL, challenge)
+                OpenChallengeCard(ChallengeType.OVERALL, challenge, onClick = { showPopup = true }, showPopup  = showPopup, onPopupClose = { showPopup = false })
                 Spacer(modifier = Modifier.width(16.dp))
             }
         }
@@ -329,12 +332,16 @@ fun ChallengeSection(
 }
 
 @Composable
-fun OpenChallengeCard(type: ChallengeType, challenge: OpenChallenges) {
+fun OpenChallengeCard(type: ChallengeType, challenge: OpenChallenges, onClick : () -> Unit, showPopup: Boolean, onPopupClose : () -> Unit) {
 
+    if(showPopup) {
+        ChallengePopUp(onClose = { onPopupClose()  }, challenge = challenge)
+    }
     Card(
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
-            .width(200.dp),
+            .width(200.dp)
+            .clickable { onClick() },
         colors =  when (type) {
             ChallengeType.FRIEND -> { CardDefaults.cardColors(containerColor = if(challenge.focus == null) Color(0xFFEAF2FF) else Color(0xFFf8f9fe))}
             else -> { CardDefaults.cardColors(containerColor = Color(0xFFEAF2FF)) }

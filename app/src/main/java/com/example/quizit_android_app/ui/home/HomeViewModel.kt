@@ -10,8 +10,11 @@ import com.example.quizit_android_app.model.retrofit.OpenChallenges
 import com.example.quizit_android_app.model.retrofit.Subject
 import com.example.quizit_android_app.model.retrofit.UserStatsResponse
 import com.example.quizit_android_app.usecases.challenge.GetChallengesOfUserUseCase
+import com.example.quizit_android_app.usecases.localdata.challenge.SyncLocalDoneChallengesUseCase
 import com.example.quizit_android_app.usecases.localdata.challenge.SyncLocalOpenChallengesUseCase
 import com.example.quizit_android_app.usecases.localdata.focus.SyncLocalFocusUseCase
+import com.example.quizit_android_app.usecases.localdata.friendship.SyncLocalAcceptedFriendsUseCase
+import com.example.quizit_android_app.usecases.localdata.friendship.SyncLocalPendingFriendsUseCase
 import com.example.quizit_android_app.usecases.localdata.subjects.SyncLocalSubjectsUseCase
 import com.example.quizit_android_app.usecases.localdata.userstats.SyncLocalUserStatsUseCase
 import com.example.quizit_android_app.usecases.subjects.GetAllSubjectsUseCase
@@ -29,6 +32,9 @@ class HomeViewModel @Inject constructor(
     private val syncSubjectsUseCase: SyncLocalSubjectsUseCase,
     private val syncFocusUseCase: SyncLocalFocusUseCase,
     private val syncChallengesOfUserUseCase: SyncLocalOpenChallengesUseCase,
+    private val syncLocalDoneChallengesUseCase: SyncLocalDoneChallengesUseCase,
+    private val syncLocalAcceptedFriendsUseCase: SyncLocalAcceptedFriendsUseCase,
+    private val syncLocalPendingFriendsUseCase: SyncLocalPendingFriendsUseCase,
     private val syncUserStatsUseCase: SyncLocalUserStatsUseCase
 ): ViewModel() {
 
@@ -82,6 +88,9 @@ class HomeViewModel @Inject constructor(
                 syncFocusUseCase()
                 syncChallengesOfUserUseCase()
                 syncUserStatsUseCase()
+                syncLocalDoneChallengesUseCase()
+                syncLocalAcceptedFriendsUseCase()
+                syncLocalPendingFriendsUseCase()
 
             } catch (e: Exception) {
                 e.printStackTrace()

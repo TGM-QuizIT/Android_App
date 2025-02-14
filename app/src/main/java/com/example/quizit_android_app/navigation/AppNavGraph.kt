@@ -138,7 +138,7 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
                     navController.navigate(FocusRoute(subject))
                 },
                 navigateToChallenge = {
-                    navController.navigate(SocialRoute())
+                    navController.navigate(SocialRoute(false))
                 },
                 navigateToStatistics = {
                     navController.navigate(SocialRoute(true))
@@ -191,6 +191,9 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
                 navigateBack = {
                     navController.popBackStack()
                 },
+                navigateToQuizDetail = { subject, focus ->
+                    navController.navigate(QuizDetailRoute(focus = focus, subject = subject))
+                }
             )
         }
 
@@ -202,6 +205,9 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
                 navigateBack = {
                     navController.popBackStack()
                 },
+                navigateToQuiz = { subject, focus ->
+                    navController.navigate(QuizRoute(focus, subject))
+                }
             )
         }
 
