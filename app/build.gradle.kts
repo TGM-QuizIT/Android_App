@@ -108,4 +108,5 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.0")
 
     implementation(libs.kotlinx.serialization.json)
+    implementation("androidx.compose.material3:material3:1.3.1")
 }

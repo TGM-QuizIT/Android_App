@@ -137,9 +137,9 @@ data class Result (
     @SerializedName("resultId"    ) var resultId    : Int?    = null,
     @SerializedName("resultScore" ) var resultScore : Double?    = null,
     @SerializedName("userId"      ) var userId      : Int?    = null,
-    @SerializedName("focusId"     ) var focusId     : Int?    = null,
-    @SerializedName("subjectId"   ) var subjectId   : String? = null,
-    @SerializedName("resultDate"  ) var resultDate  : String? = null
+    @SerializedName("focus"     ) var focus     : Focus?    = null,
+    @SerializedName("subject"   ) var subject   : Subject? = null,
+    @SerializedName("resultDateTime"  ) var resultDateTime  : String? = null
 )
 
 @JsonInclude(JsonInclude.Include.NON_NULL)

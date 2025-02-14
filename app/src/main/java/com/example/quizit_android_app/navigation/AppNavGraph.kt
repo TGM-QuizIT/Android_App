@@ -21,6 +21,7 @@ import com.example.quizit_android_app.ui.MainViewModel
 import com.example.quizit_android_app.ui.home.HomeScreen
 import com.example.quizit_android_app.ui.login.LoginScreen
 import com.example.quizit_android_app.ui.play_quiz.focus.FocusScreen
+import com.example.quizit_android_app.ui.play_quiz.quiz.QuizDetailScreen
 import com.example.quizit_android_app.ui.play_quiz.subject.SubjectScreen
 import com.example.quizit_android_app.ui.quiz.QuizScreen
 import com.example.quizit_android_app.ui.settings.SettingsScreen
@@ -70,6 +71,23 @@ data class QuizRoute(
 }
 
 @Serializable
+data class QuizDetailRoute(
+    val focus: Focus?,
+    val subject: Subject
+) {
+    companion object {
+        val typeMap = mapOf(
+            typeOf<Focus?>() to CustomNavType.FocusType,
+            typeOf<Subject>() to CustomNavType.SubjectType
+        )
+
+        fun from(savedStateHandle: SavedStateHandle) =
+            savedStateHandle.toRoute<QuizDetailRoute>(typeMap)
+    }
+}
+
+
+@Serializable
 data class SocialRoute(
     val showStatistics: Boolean = false
 )
@@ -88,6 +106,8 @@ data class UserDetailRoute(
             savedStateHandle.toRoute<UserDetailRoute>(typeMap)
     }
 }
+
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -156,7 +176,8 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
                     navController.popBackStack()
                 },
                 navigateToQuizDetail = { subject, focus ->
-                    //TODO
+                    Log.d("AppNavGraph", QuizDetailRoute(focus, subject).toString())
+                    navController.navigate(QuizDetailRoute(focus, subject))
                 },
 
 
@@ -172,6 +193,18 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
                 },
             )
         }
+
+        composable<QuizDetailRoute>(
+            typeMap = QuizDetailRoute.typeMap
+        ) {
+            Log.d("AppNavGraph", "QuizDetailRoute")
+            QuizDetailScreen(
+                navigateBack = {
+                    navController.popBackStack()
+                },
+            )
+        }
+
 
 
 

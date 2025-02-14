@@ -18,12 +18,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -39,8 +45,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -57,10 +61,16 @@ import com.example.quizit_android_app.model.retrofit.UserStatsResponse
 import com.example.quizit_android_app.ui.social.StatisticsCard
 import com.example.quizit_android_app.ui.social.StatisticsPopUp
 import com.example.quizit_android_app.ui.theme.Typography
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 
-
-
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun HomeScreen(
     navigateToSubject: () -> Unit,
@@ -68,19 +78,28 @@ fun HomeScreen(
     navigateToChallenge: () -> Unit,
     navigateToStatistics: () -> Unit,
     homeViewModel: HomeViewModel = hiltViewModel()
-
 ) {
-
-
     val subjectList = homeViewModel.subjectList
     val stats = homeViewModel.stats
     val isLoading = homeViewModel.isLoading
+    val challenges = homeViewModel.challenges
 
+    var isRefreshing by remember { mutableStateOf(false) }
+
+    // Pull to Refresh State
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isRefreshing,
+        onRefresh = {
+            isRefreshing = true
+            homeViewModel.refreshData {
+                isRefreshing = false
+            }
+        }
+    )
 
     Scaffold(
         contentWindowInsets = WindowInsets(0.dp),
         topBar = {
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -88,9 +107,7 @@ fun HomeScreen(
                     .padding(top = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
-
             ) {
-
                 Image(
                     painter = painterResource(id = R.drawable.logo_lightmode),
                     contentDescription = "QuizIT Logo",
@@ -98,64 +115,62 @@ fun HomeScreen(
                         .width(125.dp)
                         .aspectRatio(975f / 337f),
                     contentScale = ContentScale.FillBounds
-
                 )
-
-
             }
-
-
-
-
         },
         content = { paddingValues ->
-            if(isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize()
-                ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pullRefresh(pullRefreshState)
+                    .padding(paddingValues)
+            ) {
+                if (isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center),
                         trackColor = Color.Gray
                     )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(vertical = 16.dp)
+                            .padding(start = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        item {
+                            SubjectSection(
+                                subjects = subjectList,
+                                navigateToSubjects = { navigateToSubject() },
+                                navigateToFocus = { subject -> navigateToFocus(subject) }
+                            )
+                        }
+                        item {
+                            ChallengeSection(
+                                navigateToChallenge = { navigateToChallenge() },
+                                challenges = challenges
+                            )
+                        }
+                        item {
+                            StatisticsSection(
+                                navigateToStatistics = { navigateToStatistics() },
+                                stats = stats
+                            )
+                        }
+                    }
                 }
-            } else {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)
-                ) {
 
-                    SubjectSection(subjects = subjectList, navigateToSubjects = {
-                        navigateToSubject()
-                    }, navigateToFocus = { subject ->
-                        navigateToFocus(subject)
-                    })
-
-                    Spacer(modifier = Modifier.size(16.dp))
-
-                    ChallengeSection(navigateToChallenge = {
-                        navigateToChallenge()
-                    })
-
-                    Spacer(modifier = Modifier.size(16.dp))
-
-                    StatisticsSection(
-                        navigateToStatistics = {
-                            navigateToStatistics()
-                        },
-                        stats = stats
-                    )
-                }
-
+                PullRefreshIndicator(
+                    refreshing = isRefreshing,
+                    state = pullRefreshState,
+                    modifier = Modifier.align(Alignment.TopCenter)
+                )
             }
-
-
-        },
+        }
     )
-
-
 }
+
+
 
 
 
@@ -272,7 +287,8 @@ fun SubjectCard(subject: Subject, width: Dp, navigateToFocus: (Subject) -> Unit)
 
 @Composable
 fun ChallengeSection(
-    navigateToChallenge: () -> Unit
+    navigateToChallenge: () -> Unit,
+    challenges: List<OpenChallenges>
 ) {
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -299,6 +315,13 @@ fun ChallengeSection(
 
         Spacer(modifier = Modifier.size(16.dp))
 
+        LazyRow {
+            items(challenges) { challenge ->
+                OpenChallengeCard(ChallengeType.OVERALL, challenge)
+                Spacer(modifier = Modifier.width(16.dp))
+            }
+        }
+
 
     }
 
@@ -307,21 +330,29 @@ fun ChallengeSection(
 
 @Composable
 fun OpenChallengeCard(type: ChallengeType, challenge: OpenChallenges) {
+
     Card(
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .width(200.dp),
-        colors = CardDefaults.cardColors(containerColor = if(challenge.focus == null) Color(0xFFEAF2FF) else Color(0xFFf8f9fe))
+        colors =  when (type) {
+            ChallengeType.FRIEND -> { CardDefaults.cardColors(containerColor = if(challenge.focus == null) Color(0xFFEAF2FF) else Color(0xFFf8f9fe))}
+            else -> { CardDefaults.cardColors(containerColor = Color(0xFFEAF2FF)) }
+        }
+
+
     ) {
 
         if(
-            challenge.friendScore != null
+            challenge.friendScore?.resultScore != null
         ) {
             Column(
-                modifier = Modifier.padding(8.dp)
             ) {
                 Box(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp)
+                        .padding(top = 12.dp, bottom = 8.dp)
                 ) {
 
                     when (type) {
@@ -339,7 +370,9 @@ fun OpenChallengeCard(type: ChallengeType, challenge: OpenChallenges) {
                         else -> {
 
                             Row(
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceAround
                             ) {
 
                                 Box(
@@ -356,14 +389,21 @@ fun OpenChallengeCard(type: ChallengeType, challenge: OpenChallenges) {
                                     )
                                 }
 
-                                Column {
+
+
+                                Column(
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
                                     Text(
                                         text = challenge.friendship?.friend?.userFullname!!,
-                                        style = MaterialTheme.typography.bodyMedium
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = Color.Black
                                     )
                                     Text(
                                         text = challenge.friendship?.friend?.userClass!!,
-                                        style = MaterialTheme.typography.bodySmall
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color.Black
                                     )
                                 }
                             }
@@ -374,56 +414,65 @@ fun OpenChallengeCard(type: ChallengeType, challenge: OpenChallenges) {
 
                 }
 
-                Column(
-                    modifier = Modifier.fillMaxWidth().background(Color(0xFFF8F9FE))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFF8F9FE))
+                        .padding(horizontal = 8.dp)
+                        .padding(bottom = 8.dp)
                 ) {
-
-                    Spacer(modifier = Modifier.size(8.dp))
-
-                    Text(
-                        text = when(type) {
-                            ChallengeType.SUBJECT -> challenge.focus?.focusName ?: challenge.subject?.subjectName!!
-                            else -> challenge.focus?.focusName ?: challenge.subject?.subjectName!!
-                        },
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Color.Black,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                    )
-
-                    Spacer(modifier = Modifier.size(8.dp))
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(24.dp)
-                            .padding(start = 16.dp, end = 16.dp)
-                            .background(Color.White, shape = RoundedCornerShape(8.dp))
-                            .border(1.dp, Color(0xFF006FFD), shape = RoundedCornerShape(8.dp)),
-                        contentAlignment = Alignment.CenterStart
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(challenge.friendScore?.resultScore?.toFloat()?.div(100) ?: 0f)
-                                .height(24.dp)
-                                .background(Color(0xFF006FFD), shape = RoundedCornerShape(8.dp))
-                        )
+
+                        Spacer(modifier = Modifier.size(8.dp))
 
                         Text(
-                            text = "${challenge.friendScore?.resultScore}%",
-                            color = Color.Gray,
-                            modifier = Modifier.align(Alignment.Center),
-                            style = MaterialTheme.typography.labelLarge
+                            text = when(type) {
+                                ChallengeType.SUBJECT -> challenge.focus?.focusName ?: challenge.subject?.subjectName!!
+                                else -> challenge.focus?.focusName ?: challenge.subject?.subjectName!!
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
                         )
+
+                        Spacer(modifier = Modifier.size(8.dp))
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(30.dp)
+                                .background(Color.White, shape = RoundedCornerShape(8.dp))
+                                .border(1.dp, Color(0xFF006FFD), shape = RoundedCornerShape(8.dp)),
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(
+                                        challenge.friendScore?.resultScore
+                                            ?.toFloat()
+                                            ?.div(100) ?: 0f
+                                    )
+                                    .height(30.dp)
+                                    .background(Color(0xFF006FFD), shape = RoundedCornerShape(8.dp))
+                            )
+
+                            Text(
+                                text = "${challenge.friendScore?.resultScore}%",
+                                color = Color.Black,
+                                modifier = Modifier.align(Alignment.Center),
+                                style = MaterialTheme.typography.labelLarge
+                            )
+
+                        }
 
                     }
 
                 }
-
-
-
-
             }
 
         }
@@ -450,6 +499,7 @@ fun StatisticsSection(navigateToStatistics: () -> Unit, stats: UserStatsResponse
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
+
 
         ) {
 
