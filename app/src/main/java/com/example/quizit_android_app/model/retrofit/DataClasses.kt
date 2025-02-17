@@ -69,8 +69,8 @@ data class Subject (
 ): Parcelable
 
 data class SubjectsResponse(
-    @SerializedName("status") val status: String,
-    @SerializedName("subjects") val subjects: List<Subject>
+    @SerializedName("status") val status: String? = null,
+    @SerializedName("subjects") val subjects: List<Subject> = emptyList()
 )
 
 data class NewSubjectRequest(

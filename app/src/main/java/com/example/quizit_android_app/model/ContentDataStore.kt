@@ -38,7 +38,7 @@ class ContentDataStore @Inject constructor(private val context: Context)  {
     }
 
     // ------------------- Local UI Elements -------------------
-    suspend fun saveSubjects(subjects: List<Subject>?) {
+    suspend fun saveSubjects(subjects: List<Subject?>) {
         dataStore.edit { preferences ->
             preferences[SUBJECTS_KEY] = gson.toJson(subjects)
         }
