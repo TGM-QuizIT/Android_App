@@ -366,7 +366,7 @@ fun UserInfos(user: User?, friendshipStatus: FriendshipStatus, addFriend: (Int) 
                     }
 
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = { removeFriendship() },
                         modifier = Modifier
                             .padding(8.dp)
                             .width(170.dp),
