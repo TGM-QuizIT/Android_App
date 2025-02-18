@@ -320,8 +320,13 @@ fun ChallengeSection(
 
         LazyRow {
             items(challenges) { challenge ->
-                OpenChallengeCard(ChallengeType.OVERALL, challenge, onClick = { showPopup = true }, showPopup  = showPopup, onPopupClose = { showPopup = false })
-                Spacer(modifier = Modifier.width(16.dp))
+
+                if(challenge.friendScore?.resultScore != null) {
+                    OpenChallengeCard(ChallengeType.OVERALL, challenge, onClick = { showPopup = true }, showPopup  = showPopup, onPopupClose = { showPopup = false })
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                }
+
             }
         }
 
@@ -349,144 +354,133 @@ fun OpenChallengeCard(type: ChallengeType, challenge: OpenChallenges, onClick : 
 
 
     ) {
-
-        if(
-            challenge.friendScore?.resultScore != null
+        Column(
         ) {
-            Column(
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp)
+                    .padding(top = 12.dp, bottom = 8.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp)
-                        .padding(top = 12.dp, bottom = 8.dp)
-                ) {
 
-                    when (type) {
-                        ChallengeType.FRIEND -> {
-                            AsyncImage(
-                                model = challenge.focus?.focusImageAddress ?: challenge.subject?.subjectImageAddress,
-                                contentDescription = "Challenge Image",
-                                contentScale = ContentScale.FillBounds,
-                                modifier = Modifier
-                                    .aspectRatio(2f/1f)
-
-                            )
-
-                        }
-                        else -> {
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceAround
-                            ) {
-
-                                Box(
-                                    modifier = Modifier
-                                        .size(45.dp)
-                                        .background(Color(0xFFEAF2FF), shape = CircleShape),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Person,
-                                        contentDescription = "User Icon",
-                                        tint = Color(0xFFB4DBFF),
-                                        modifier = Modifier.size(35.dp)
-                                    )
-                                }
-
-
-
-                                Column(
-                                    verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Text(
-                                        text = challenge.friendship?.friend?.userFullname!!,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = Color.Black
-                                    )
-                                    Text(
-                                        text = challenge.friendship?.friend?.userClass!!,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color.Black
-                                    )
-                                }
-                            }
-
-                        }
-
-                    }
-
-                }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(0xFFF8F9FE))
-                        .padding(horizontal = 8.dp)
-                        .padding(bottom = 8.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-
-                        Spacer(modifier = Modifier.size(8.dp))
-
-                        Text(
-                            text = when(type) {
-                                ChallengeType.SUBJECT -> challenge.focus?.focusName ?: challenge.subject?.subjectName!!
-                                else -> challenge.focus?.focusName ?: challenge.subject?.subjectName!!
-                            },
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black,
-                            textAlign = TextAlign.Center,
+                when (type) {
+                    ChallengeType.FRIEND -> {
+                        AsyncImage(
+                            model = challenge.focus?.focusImageAddress ?: challenge.subject?.subjectImageAddress,
+                            contentDescription = "Challenge Image",
+                            contentScale = ContentScale.FillBounds,
                             modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
+                                .aspectRatio(2f/1f)
+
                         )
 
-                        Spacer(modifier = Modifier.size(8.dp))
+                    }
+                    else -> {
 
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(30.dp)
-                                .background(Color.White, shape = RoundedCornerShape(8.dp))
-                                .border(1.dp, Color(0xFF006FFD), shape = RoundedCornerShape(8.dp)),
-                            contentAlignment = Alignment.CenterStart
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceAround
                         ) {
+
                             Box(
                                 modifier = Modifier
-                                    .fillMaxWidth(
-                                        challenge.friendScore?.resultScore
-                                            ?.toFloat()
-                                            ?.div(100) ?: 0f
-                                    )
-                                    .height(30.dp)
-                                    .background(Color(0xFF006FFD), shape = RoundedCornerShape(8.dp))
-                            )
+                                    .size(45.dp)
+                                    .background(Color(0xFFEAF2FF), shape = CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Person,
+                                    contentDescription = "User Icon",
+                                    tint = Color(0xFFB4DBFF),
+                                    modifier = Modifier.size(35.dp)
+                                )
+                            }
 
-                            Text(
-                                text = "${challenge.friendScore?.resultScore}%",
-                                color = Color.Black,
-                                modifier = Modifier.align(Alignment.Center),
-                                style = MaterialTheme.typography.labelLarge
-                            )
 
+
+                            Column(
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = challenge.friendship?.friend?.userFullname!!,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.Black
+                                )
+                                Text(
+                                    text = challenge.friendship?.friend?.userClass!!,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color.Black
+                                )
+                            }
                         }
 
                     }
 
                 }
+
             }
 
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFFF8F9FE))
+                    .padding(horizontal = 8.dp)
+                    .padding(bottom = 8.dp)
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+
+                    Spacer(modifier = Modifier.size(8.dp))
+
+                    Text(
+                        text = when(type) {
+                            ChallengeType.SUBJECT -> challenge.focus?.focusName ?: challenge.subject?.subjectName!!
+                            else -> challenge.focus?.focusName ?: challenge.subject?.subjectName!!
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                    )
+
+                    Spacer(modifier = Modifier.size(8.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(30.dp)
+                            .background(Color.White, shape = RoundedCornerShape(8.dp))
+                            .border(1.dp, Color(0xFF006FFD), shape = RoundedCornerShape(8.dp)),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(
+                                    challenge.friendScore?.resultScore
+                                        ?.toFloat()
+                                        ?.div(100) ?: 0f
+                                )
+                                .height(30.dp)
+                                .background(Color(0xFF006FFD), shape = RoundedCornerShape(8.dp))
+                        )
+
+                        Text(
+                            text = "${challenge.friendScore?.resultScore}%",
+                            color = Color.Black,
+                            modifier = Modifier.align(Alignment.Center),
+                            style = MaterialTheme.typography.labelLarge
+                        )
+
+                    }
+                }
+            }
         }
-
-
     }
-
 }
 
 enum class ChallengeType {

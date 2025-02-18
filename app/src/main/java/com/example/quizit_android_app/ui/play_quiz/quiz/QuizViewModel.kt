@@ -64,7 +64,10 @@ class QuizViewModel @Inject constructor(
 
 
         val id = _focus.value?.focusId ?: _subject.value?.subjectId
-        val isQuizOfSubject = _focus.value == null
+        var isQuizOfSubject = false
+        if(_focus.value == null) {
+            isQuizOfSubject = true
+        }
 
 
         setQuestions(id, isQuizOfSubject)
@@ -192,6 +195,13 @@ class QuizViewModel @Inject constructor(
                 _isBottomSheetLoading.value = false
             }
         }
+
+    }
+
+    fun resetQuiz() {
+        _currentQuestionIndex.value = 0
+        _selectedAnswers.value = emptyList()
+        _userAnswers.value = mutableMapOf()
 
     }
 

@@ -131,8 +131,11 @@ fun QuizDetailScreen(
                             var showPopup: Boolean by remember { mutableStateOf(false) }
                             LazyRow {
                                 items(openChallenges) { openChallenge ->
-                                    OpenChallengeCard(type = ChallengeType.SUBJECT, challenge = openChallenge, onClick = { showPopup = true }, showPopup = showPopup, onPopupClose = { showPopup = false })
-                                    Spacer(modifier = Modifier.width(16.dp))
+
+                                    if(openChallenge.friendScore?.resultScore != null)  {
+                                        OpenChallengeCard(type = ChallengeType.SUBJECT, challenge = openChallenge, onClick = { showPopup = true }, showPopup = showPopup, onPopupClose = { showPopup = false })
+                                        Spacer(modifier = Modifier.width(16.dp))
+                                    }
                                 }
                             }
                         }
@@ -315,7 +318,7 @@ fun ChallengePopUp(onClose: () -> Unit, challenge: OpenChallenges) {
 
                     Box {
                         CircularProgressIndicator(
-                            progress = { (challenge.friendScore?.resultScore!! / 100f).toFloat() },
+                            progress = { (challenge.friendScore?.resultScore?.div(100))?.toFloat() ?: 0f },
                             trackColor = Color(0xFFF4F3F6),
                             color = Color(0xFFFB6E5C),
                             strokeWidth = 8.dp,
@@ -323,7 +326,7 @@ fun ChallengePopUp(onClose: () -> Unit, challenge: OpenChallenges) {
                         )
 
                         Text(
-                            text = "${challenge.friendScore?.resultScore!!.toInt()}%",
+                            text = "${challenge.friendScore?.resultScore?.toInt()}%",
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.align(Alignment.Center)
                         )

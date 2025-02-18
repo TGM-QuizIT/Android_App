@@ -140,14 +140,19 @@ fun UserDetailScreen(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 items(openChallenges) { challenge ->
-                                    OpenChallengeCard(
-                                        challenge = challenge,
-                                        type = ChallengeType.FRIEND,
-                                        showPopup = showPopup,
-                                        onClick = { showPopup = true },
-                                        onPopupClose = { showPopup = false }
-                                    )
-                                    Spacer(modifier = Modifier.size(16.dp))
+
+                                    if(challenge.friendScore?.resultScore != null ) {
+                                        OpenChallengeCard(
+                                            challenge = challenge,
+                                            type = ChallengeType.FRIEND,
+                                            showPopup = showPopup,
+                                            onClick = { showPopup = true },
+                                            onPopupClose = { showPopup = false }
+                                        )
+                                        Spacer(modifier = Modifier.size(16.dp))
+
+                                    }
+
                                 }
                             }
                         }

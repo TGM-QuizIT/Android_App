@@ -14,6 +14,8 @@ class GetChallengesOfUserUseCase @Inject constructor(
         val localData = contentDataStore.getOpenChallenges()
         return if (localData.isNotEmpty()) {
             Log.d("GetChallengesOfUser", "Local data")
+
+            Log.d("GetChallengesOfUser - local data", localData.toString())
             OpenChallengesResponse("success", ArrayList(localData))
         } else {
             val remoteData = dataRepo.fetchAllOpenChallenges()
