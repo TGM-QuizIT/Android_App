@@ -11,8 +11,8 @@ class SyncLocalSubjectsUseCase @Inject constructor(
 ) {
     suspend operator fun invoke() {
         val subjects = dataRepo.fetchSubjectsOfUser()
-        if (subjects.isNotEmpty()) {
-            contentDataStore.saveSubjects(subjects)
+        if (subjects.status == "Success") {
+            contentDataStore.saveSubjects(subjects.subjects)
             Log.d("SyncLocalSubjectsUseCase", "Subjects synced")
         }
     }

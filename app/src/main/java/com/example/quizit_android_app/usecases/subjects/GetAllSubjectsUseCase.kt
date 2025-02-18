@@ -16,8 +16,8 @@ class GetAllSubjectsUseCase @Inject constructor(
         return localData.ifEmpty {
             val remoteData = dataRepo.fetchSubjectsOfUser()
             Log.d("GetAllSubjectsUseCase", "remoteData: $remoteData")
-            contentDataStore.saveSubjects(remoteData)
-            remoteData
+            contentDataStore.saveSubjects(remoteData.subjects)
+            remoteData.subjects
         }
     }
 }

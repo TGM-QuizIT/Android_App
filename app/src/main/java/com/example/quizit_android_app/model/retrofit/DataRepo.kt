@@ -112,24 +112,24 @@ class DataRepo @Inject constructor(private val context: Context) {
 
 
     // ------------------- Subject Calls -------------------
-    suspend fun fetchSubjects(): List<Subject> {
+    suspend fun fetchSubjects(): SubjectsResponse {
         return withContext(Dispatchers.IO) {
             try {
                 val response = service.getSubjects()
                 withContext(Dispatchers.Main) {
                     for (subject in response.subjects) {
-                        Log.d("fetchSubjects", subject.subjectName + " " + subject.subjectId)
+                        Log.d("fetchSubjects", subject?.subjectName + " " + subject?.subjectId)
                     }
                 }
-                response.subjects
+                response
             } catch (e: Exception) {
                 Log.e("fetchSubjects", "Failed to fetch subjects", e)
-                emptyList()
+                SubjectsResponse()
             }
         }
     }
 
-    suspend fun fetchSubjectsOfUser(): List<Subject> {
+    suspend fun fetchSubjectsOfUser(): SubjectsResponse {
         return withContext(Dispatchers.IO) {
             try {
                 val id = sessionManager.getUserId()
@@ -139,30 +139,32 @@ class DataRepo @Inject constructor(private val context: Context) {
                 withContext(Dispatchers.Main) {
 
                     for (subject in response.subjects) {
-                        Log.d("fetchSubjectsOfUser", subject.subjectName + " " + subject.subjectId)
+                        Log.d("fetchSubjectsOfUser", subject?.subjectName + " " + subject?.subjectId)
 
                     }
                 }
-                response.subjects
+                response
             } catch (e: Exception) {
                 Log.e("fetchSubjectsOfUser",e.toString())
-                emptyList()
+                SubjectsResponse()
             }
         }
     }
 
     // ------------------- Focus Calls -------------------
 
-    suspend fun fetchAllFocusOfUser(): List<Focus> {
+    suspend fun fetchAllFocusOfUser(): FocusResponse {
         return withContext(Dispatchers.IO) {
             try {
                 val subjects = fetchSubjectsOfUser()
                 val allFocuses = mutableListOf<Focus>()
 
-                for (subject in subjects) {
+                for (subject in subjects.subjects) {
                     subject.subjectId.let { subjectId ->
-                        val focuses = fetchFocusForSubject(subjectId, active = 1)
-                        allFocuses.addAll(focuses)
+                        val focusResponse = fetchFocusForSubject(subjectId, active = 1)
+                        focusResponse.focus.let { focuses ->
+                            allFocuses.addAll(focuses)
+                        }
                     }
                 }
 
@@ -171,15 +173,15 @@ class DataRepo @Inject constructor(private val context: Context) {
                         Log.d("fetchAllFocusOfUser", focus.focusName + " " + focus.focusId)
                     }
                 }
-                allFocuses
+                FocusResponse("Success", allFocuses)
             } catch (e: Exception) {
                 Log.e("fetchAllFocusOfUser", "Failed to fetch focus", e)
-                emptyList()
+                FocusResponse()
             }
         }
     }
 
-    suspend fun fetchFocusForSubject(subjectId: Int, active: Int): List<Focus> {
+    suspend fun fetchFocusForSubject(subjectId: Int, active: Int): FocusResponse {
         return withContext(Dispatchers.IO) {
             try {
                 val userYear = sessionManager.getUserYear()
@@ -191,10 +193,10 @@ class DataRepo @Inject constructor(private val context: Context) {
                         Log.d("fetchFocusForSubject", focus.focusName + " " + focus.focusId)
                     }
                 }
-                response.focus
+                response
             } catch (e: Exception) {
                 Log.e("Retrofit Test FetchFocus", "Failed to fetch focus", e)
-                emptyList()
+                FocusResponse()
             }
         }
     }
@@ -205,6 +207,7 @@ class DataRepo @Inject constructor(private val context: Context) {
         return withContext(Dispatchers.IO) {
             try {
                 val userYear = sessionManager.getUserYear()
+                Log.d("fetchQuizOfSubject", "User Year: $userYear Subject ID: $subjectId")
                 val response = service.getQuizOfSubject(subjectId, userYear)
                 withContext(Dispatchers.Main) {
                     for (question in response.questions) {

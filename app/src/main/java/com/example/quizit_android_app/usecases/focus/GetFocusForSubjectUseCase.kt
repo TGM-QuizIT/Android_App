@@ -13,8 +13,8 @@ class GetFocusForSubjectUseCase @Inject constructor(
         val localData = contentDataStore.getFocus().filter { it.subjectId == subjectId }
         return localData.ifEmpty {
             val remoteData = dataRepo.fetchFocusForSubject(subjectId, active)
-            contentDataStore.saveFocus(remoteData)
-            remoteData
+            contentDataStore.saveFocus(remoteData.focus)
+            remoteData.focus
         }
     }
 }
