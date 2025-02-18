@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.toRoute
 import com.example.quizit_android_app.model.retrofit.AcceptedFriendship
 import com.example.quizit_android_app.model.retrofit.DoneChallenges
@@ -20,6 +21,8 @@ import com.example.quizit_android_app.usecases.friendship.AcceptFriendshipUseCas
 import com.example.quizit_android_app.usecases.friendship.DeleteDeclineFriendshipUseCase
 import com.example.quizit_android_app.usecases.friendship.GetAcceptedFriendshipsUseCase
 import com.example.quizit_android_app.usecases.friendship.GetPendingFriendshipsUseCase
+import com.example.quizit_android_app.usecases.localdata.friendship.SyncLocalAcceptedFriendsUseCase
+import com.example.quizit_android_app.usecases.localdata.friendship.SyncLocalPendingFriendsUseCase
 import com.example.quizit_android_app.usecases.result.GetResultsUserUseCase
 import com.example.quizit_android_app.usecases.user.GetAllUsersUseCase
 import com.example.quizit_android_app.usecases.user.GetUserStatsUseCase
@@ -43,6 +46,8 @@ class SocialViewModel @Inject constructor(
     val getDoneChallengesUseCase: GetDoneChallengesUseCase,
     val acceptFriendshipUseCase: AcceptFriendshipUseCase,
     val deleteDeclineFriendshipUseCase: DeleteDeclineFriendshipUseCase,
+    val syncLocalPendingFriendsUseCase: SyncLocalPendingFriendsUseCase,
+    val syncLocalAcceptedFriendsUseCase: SyncLocalAcceptedFriendsUseCase
 
 ): ViewModel() {
     private val _selectedTabIndex = mutableStateOf(0)
@@ -95,13 +100,13 @@ class SocialViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                if(_friendships.value.isEmpty()) {
-                    _friendships.value = getAllFriendshipsUseCase()
-                }
 
-                if(_pendingFriendship.value.isEmpty()) {
-                    _pendingFriendship.value = getPendingFriendshipsUseCase()
-                }
+                _friendships.value = getAllFriendshipsUseCase()
+
+
+
+                _pendingFriendship.value = getPendingFriendshipsUseCase()
+
                 if(_userStats.value == null) {
                     _userStats.value = getUserStatsUseCase()
                 }
@@ -135,23 +140,23 @@ class SocialViewModel @Inject constructor(
             _isModalSheetLoading.value = true
             try {
 
-                if(_users.value.isEmpty()) {
-                    val user = getUserUseCase()
-                    _users.value = getAllUsersUseCase()
 
-                    val pendingIds = _pendingFriendship.value.map { it.friend?.userId }
-                    val acceptedIds = _friendships.value.map { it.friend?.userId }
+                val user = getUserUseCase()
+                _users.value = getAllUsersUseCase()
 
-                    _users.value = _users.value.filter {
-                        it?.userId != user?.userId &&
-                                it?.userId !in pendingIds &&  // Entfernt Nutzer aus _pendingFriendships
-                                it?.userId !in acceptedIds
+                val pendingIds = _pendingFriendship.value.map { it.friend?.userId }
+                val acceptedIds = _friendships.value.map { it.friend?.userId }
 
-                    }
+                _users.value = _users.value.filter {
+                    it?.userId != user?.userId &&
+                            it?.userId !in pendingIds &&  // Entfernt Nutzer aus _pendingFriendships
+                            it?.userId !in acceptedIds
 
-
-                    filterUsers()
                 }
+
+
+                filterUsers()
+
             } catch (e: Exception) {
                 //TODO Error handling
             } finally {
@@ -209,6 +214,21 @@ class SocialViewModel @Inject constructor(
             }
 
         }
+
+    }
+
+    fun refreshData(onComplete: () -> Unit) {
+        viewModelScope.launch {
+            try {
+                syncLocalPendingFriendsUseCase()
+                syncLocalAcceptedFriendsUseCase()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                onComplete()
+            }
+        }
+
 
     }
 }

@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
@@ -39,6 +40,9 @@ import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SportsScore
 import androidx.compose.material.icons.outlined.SportsScore
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -80,6 +84,7 @@ import com.example.quizit_android_app.model.retrofit.User
 import com.example.quizit_android_app.model.retrofit.UserStatsResponse
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterialApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SocialScreen(
@@ -104,6 +109,19 @@ fun SocialScreen(
     val sheetState = androidx.compose.material.rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
     val coroutineScope = rememberCoroutineScope()
 
+    var isRefreshing by remember { mutableStateOf(false) }
+
+    // Pull to Refresh State
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isRefreshing,
+        onRefresh = {
+            isRefreshing = true
+            viewModel.refreshData {
+                isRefreshing = false
+            }
+        }
+    )
+
     ModalBottomSheetLayout(
         sheetState = sheetState,
         sheetContent = {
@@ -115,6 +133,8 @@ fun SocialScreen(
                 filteredUsers = filteredUsers,
                 onUpdate = { viewModel.updateSearchText(it) },
                 navigateToUserDetail = { user ->
+                    coroutineScope.launch {  sheetState.hide() }
+
                     navigateToUserDetail(null, user)},
                 isModalSheetLoading = isModalSheetLoading
             )
@@ -146,8 +166,14 @@ fun SocialScreen(
             content = { paddingValues ->
 
                 Box(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize().pullRefresh(pullRefreshState)
                 ) {
+                    PullRefreshIndicator(
+                        refreshing = isRefreshing,
+                        state = pullRefreshState,
+                        modifier = Modifier.align(Alignment.TopCenter)
+                    )
+
                     if(isLoading) {
                         CircularProgressIndicator(
                             modifier = Modifier.align(Alignment.Center),
