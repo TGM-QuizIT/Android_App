@@ -13,7 +13,7 @@ class DeleteDeclineFriendshipUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(friendshipId: Int): StatusResponse {
         val response = dataRepo.deleteFriendship(friendshipId)
-        if (response.status != null) {
+        if (response.status == "Success") {
             syncLocalPendingFriendsUseCase()
             syncLocalAcceptedFriendsUseCase()
         }

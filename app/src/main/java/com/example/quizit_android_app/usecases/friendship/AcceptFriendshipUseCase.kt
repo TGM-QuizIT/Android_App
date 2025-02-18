@@ -13,7 +13,7 @@ class AcceptFriendshipUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(friendId: Int): FriendshipResponse {
         val response = dataRepo.acceptFriendship(friendId)
-        if (response.status != null) {
+        if (response.status == "Success") {
             syncLocalAcceptedFriendsUseCase()
             syncLocalPendingFriendsUseCase()
         }
