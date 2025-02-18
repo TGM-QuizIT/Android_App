@@ -16,6 +16,9 @@ import com.example.quizit_android_app.model.retrofit.UserStatsResponse
 import com.example.quizit_android_app.navigation.UserDetailRoute
 import com.example.quizit_android_app.usecases.challenge.GetChallengesOfFriendshipUseCase
 import com.example.quizit_android_app.usecases.challenge.GetDoneChallengesUseCase
+import com.example.quizit_android_app.usecases.friendship.AcceptFriendshipUseCase
+import com.example.quizit_android_app.usecases.friendship.AddFriendshipUseCase
+import com.example.quizit_android_app.usecases.friendship.DeleteDeclineFriendshipUseCase
 import com.example.quizit_android_app.usecases.friendship.FriendshipStatus
 import com.example.quizit_android_app.usecases.friendship.GetFriendshipStatusUseCase
 import com.example.quizit_android_app.usecases.user.GetUserStatsUseCase
@@ -31,7 +34,10 @@ class UserDetailViewModel @Inject constructor(
     private val getUserStatsUseCase: GetUserStatsUseCase,
     private val getChallengesOfFriendshipUseCase: GetChallengesOfFriendshipUseCase,
     private val getDoneChallengesUseCase: GetDoneChallengesUseCase,
-    private val getFriendshipStatusUseCase: GetFriendshipStatusUseCase
+    private val getFriendshipStatusUseCase: GetFriendshipStatusUseCase,
+    private val addFriendshipUseCase: AddFriendshipUseCase,
+    private val deleteDeclineFriendshipUseCase: DeleteDeclineFriendshipUseCase,
+    private val acceptFriendshipUseCase: AcceptFriendshipUseCase
 
 ): ViewModel() {
 
@@ -53,6 +59,8 @@ class UserDetailViewModel @Inject constructor(
     private val _doneChallenges = mutableStateOf(listOf<DoneChallenges>())
     val doneChallenges: State<List<DoneChallenges>> = _doneChallenges
 
+    private val _friendshipId = mutableStateOf<Int?>(null)
+    val friendshipId: State<Int?> = _friendshipId
     init {
         val friendshipId = UserDetailRoute.from(savedStateHandle).friendshipId
         val user = UserDetailRoute.from(savedStateHandle).user
@@ -67,6 +75,8 @@ class UserDetailViewModel @Inject constructor(
     }
 
     private fun setFriendshipContent(friendshipId: Int, user: User) {
+
+        _friendshipId.value = friendshipId
 
         viewModelScope.launch {
 
@@ -112,6 +122,88 @@ class UserDetailViewModel @Inject constructor(
         }
 
 
+
+    }
+
+    fun addFriend(id: Int) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = addFriendshipUseCase(id)
+
+                _user.value = User(
+                    userId = response.friendship?.friend?.userId,
+                    userName = response.friendship?.friend?.userName,
+                    userFullname = response.friendship?.friend?.userFullname,
+                    userType = response.friendship?.friend?.userType,
+                    userYear = response.friendship?.friend?.userYear,
+                    userClass = response.friendship?.friend?.userClass,
+                    userMail = response.friendship?.friend?.userMail,
+                )
+
+                _friendshipStatus.value = getFriendshipStatusUseCase(response.friendship?.friendshipId!!)
+                _friendshipId.value = response.friendship?.friendshipId
+                _userStats.value = getUserStatsUseCase(_user.value?.userId)
+                val challenges = getChallengesOfFriendshipUseCase(response.friendship?.friendshipId!!)
+                _openChallenges.value = challenges.openChallenges
+                _doneChallenges.value = challenges.doneChallenges
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun acceptFriendship() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = acceptFriendshipUseCase(friendshipId.value!!)
+
+                _friendshipStatus.value = getFriendshipStatusUseCase(friendshipId.value!!)
+                _user.value = User(
+                    userId = response.friendship?.friend?.userId,
+                    userName = response.friendship?.friend?.userName,
+                    userFullname = response.friendship?.friend?.userFullname,
+                    userType = response.friendship?.friend?.userType,
+                    userYear = response.friendship?.friend?.userYear,
+                    userClass = response.friendship?.friend?.userClass,
+                    userMail = response.friendship?.friend?.userMail,
+                )
+
+                _friendshipId.value = response.friendship?.friendshipId
+                _userStats.value = getUserStatsUseCase(_user.value?.userId)
+                val challenges = getChallengesOfFriendshipUseCase(response.friendship?.friendshipId!!)
+                _openChallenges.value = challenges.openChallenges
+                _doneChallenges.value = challenges.doneChallenges
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                _isLoading.value = false
+            }
+        }
+
+    }
+
+    fun removeFriendship() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = deleteDeclineFriendshipUseCase(friendshipId.value!!)
+
+                if(response.status == "Success") {
+                    _friendshipStatus.value = FriendshipStatus.NONE
+                    _openChallenges.value = listOf()
+                    _doneChallenges.value = listOf()
+
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                _isLoading.value = false
+            }
+        }
 
     }
 

@@ -108,7 +108,10 @@ fun UserDetailScreen(
                     item {
                         UserInfos(
                             user = user,
-                            friendshipStatus = friendshipStatus
+                            friendshipStatus = friendshipStatus,
+                            addFriend = { userId -> viewModel.addFriend(userId) },
+                            acceptFriendship = { viewModel.acceptFriendship() },
+                            removeFriendship = { viewModel.removeFriendship() }
                         )
                     }
 
@@ -185,7 +188,7 @@ fun UserDetailScreen(
 
 
 @Composable
-fun UserInfos(user: User?, friendshipStatus: FriendshipStatus) {
+fun UserInfos(user: User?, friendshipStatus: FriendshipStatus, addFriend: (Int) -> Unit, acceptFriendship: () -> Unit, removeFriendship: () -> Unit) {
 
     Column(
         Modifier
@@ -220,7 +223,7 @@ fun UserInfos(user: User?, friendshipStatus: FriendshipStatus) {
             when (friendshipStatus) {
                 FriendshipStatus.NONE -> {
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = { addFriend(user?.userId!!) },
                         modifier = Modifier
                             .padding(8.dp)
                             .width(170.dp),
@@ -255,7 +258,7 @@ fun UserInfos(user: User?, friendshipStatus: FriendshipStatus) {
                 }
                 FriendshipStatus.FRIENDS -> {
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = { removeFriendship() },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF009DE0),
                             contentColor = Color.White
@@ -291,7 +294,7 @@ fun UserInfos(user: User?, friendshipStatus: FriendshipStatus) {
                 }
                 FriendshipStatus.PENDING -> {
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = {  },
                         modifier = Modifier
                             .padding(8.dp)
                             .width(170.dp),
@@ -328,7 +331,7 @@ fun UserInfos(user: User?, friendshipStatus: FriendshipStatus) {
                 }
                 FriendshipStatus.PENDING_ACTIONREQ -> {
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = { acceptFriendship() },
                         modifier = Modifier
                             .padding(8.dp)
                             .width(170.dp),
