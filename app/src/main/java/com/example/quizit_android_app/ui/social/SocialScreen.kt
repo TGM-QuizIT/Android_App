@@ -575,40 +575,44 @@ fun PendingFriendshipCard(pendingFriendship: PendingFriendship, navigateToUserDe
             }
         }
 
-        Row {
-            IconButton(
-                onClick = {
-                    acceptFriendship(true, pendingFriendship.friendshipId!!)
-                },
-                modifier = Modifier
-                    .background(Color(0xFF0DE334), shape = CircleShape)
-                    .size(30.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = "Approve",
-                    tint = Color.White
-                )
+        if(pendingFriendship.actionReq == true ) {
+            Row {
+                IconButton(
+                    onClick = {
+                        acceptFriendship(true, pendingFriendship.friendshipId!!)
+                    },
+                    modifier = Modifier
+                        .background(Color(0xFF0DE334), shape = CircleShape)
+                        .size(30.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Approve",
+                        tint = Color.White
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+
+                IconButton(
+                    onClick = {
+                        acceptFriendship(false, pendingFriendship.friendshipId!!)
+                    },
+                    modifier = Modifier
+                        .background(Color(0xFFFF3B30), shape = CircleShape)
+                        .size(30.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Reject",
+                        tint = Color.White
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
-
-
-            IconButton(
-                onClick = {
-                    acceptFriendship(false, pendingFriendship.friendshipId!!)
-                },
-                modifier = Modifier
-                    .background(Color(0xFFFF3B30), shape = CircleShape)
-                    .size(30.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Reject",
-                    tint = Color.White
-                )
-            }
         }
+
     }
 }
 @Composable
