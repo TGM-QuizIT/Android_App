@@ -15,6 +15,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.quizit_android_app.model.retrofit.CustomNavType
 import com.example.quizit_android_app.model.retrofit.Focus
+import com.example.quizit_android_app.model.retrofit.OpenChallenges
 import com.example.quizit_android_app.model.retrofit.Subject
 import com.example.quizit_android_app.model.retrofit.User
 import com.example.quizit_android_app.ui.MainViewModel
@@ -57,12 +58,14 @@ data class FocusRoute(val subject: Subject) {
 @Serializable
 data class QuizRoute(
     val focus: Focus?,
-    val subject: Subject
+    val subject: Subject,
+    val challenge: OpenChallenges? = null
 ) {
     companion object {
         val typeMap = mapOf(
             typeOf<Focus?>() to CustomNavType.FocusType,
-            typeOf<Subject>() to CustomNavType.SubjectType
+            typeOf<Subject>() to CustomNavType.SubjectType,
+            typeOf<OpenChallenges?>() to CustomNavType.OpenChallengeType
         )
 
         fun from(savedStateHandle: SavedStateHandle) =
@@ -142,7 +145,8 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
                 },
                 navigateToStatistics = {
                     navController.navigate(SocialRoute(true))
-                }
+                },
+
             )
         }
         composable<com.example.quizit_android_app.navigation.SubjectRoute> {
@@ -207,7 +211,7 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
                 },
                 navigateToQuiz = { subject, focus ->
                     navController.navigate(QuizRoute(focus, subject))
-                }
+                },
             )
         }
 
@@ -219,7 +223,6 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
                 navigateToUserDetail = { id, user ->
                     Log.d("AppNavGraph", UserDetailRoute(id, user).toString())
                     navController.navigate(UserDetailRoute(friendshipId = id, user= user))
-
                 }
             )
         }
@@ -232,7 +235,8 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
             UserDetailScreen(
                 onGoBack = {
                     navController.popBackStack()
-                }
+                },
+
             )
 
         }

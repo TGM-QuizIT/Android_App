@@ -7,6 +7,7 @@ import androidx.navigation.NavType
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -157,13 +158,15 @@ data class FriendshipResponse (
     @SerializedName("friendship" ) var friendship : Friendship? = Friendship()
 )
 
+@Serializable
+@Parcelize
 data class Friendship (
     @SerializedName("friendshipId"      ) var friendshipId      : Int?     = null,
     @SerializedName("friend"            ) var friend            : Friend?  = Friend(),
     @SerializedName("friendshipPending" ) var friendshipPending : Boolean? = null,
     @SerializedName("friendshipSince"   ) var friendshipSince   : String?  = null,
     @SerializedName("actionReq"         ) var actionReq         : Boolean? = null
-)
+) : Parcelable
 
 data class AllFriendshipResponse (
     @SerializedName("status"              ) var status              : String?                        = null,
@@ -172,6 +175,8 @@ data class AllFriendshipResponse (
     @SerializedName("pendingFriendships"  ) var pendingFriendships  : ArrayList<PendingFriendship>  = arrayListOf()
 )
 
+@Serializable
+@Parcelize
 data class Friend (
     @SerializedName("userId"       ) var userId       : Int?     = null,
     @SerializedName("userName"     ) var userName     : String?  = null,
@@ -181,7 +186,7 @@ data class Friend (
     @SerializedName("userType"     ) var userType     : String?  = null,
     @SerializedName("userMail"     ) var userMail     : String?  = null,
     @SerializedName("userBlocked"  ) var userBlocked  : Boolean? = null
-)
+) : Parcelable
 
 data class AcceptedFriendship (
     @SerializedName("friendshipId"    ) var friendshipId    : Int?    = null,
@@ -229,13 +234,15 @@ data class AssignResultToChallengeResponse (
     @SerializedName("challenge" ) var challenge : Challenge? = Challenge()
 )
 
+@Serializable
+@Parcelize
 data class FriendScore (
     @SerializedName("resultId"       ) var resultId       : Int?    = null,
     @SerializedName("resultScore"    ) var resultScore    : Double? = null,
     @SerializedName("userId"         ) var userId         : Int?    = null,
     @SerializedName("focus"          ) var focus          : Focus?  = Focus(),
     @SerializedName("resultDateTime" ) var resultDateTime : String? = null
-)
+): Parcelable
 
 data class Challenge (
     @SerializedName("challengeId"       ) var challengeId       : Int?         = null,
@@ -251,6 +258,8 @@ data class ChallengeResponse (
     @SerializedName("doneChallenges" ) var doneChallenges : ArrayList<DoneChallenges> = arrayListOf()
 )
 
+@Serializable
+@Parcelize
 data class OpenChallenges (
     @SerializedName("challengeId"       ) var challengeId       : Int?        = null,
     @SerializedName("challengeDateTime" ) var challengeDateTime : String?     = null,
@@ -259,15 +268,17 @@ data class OpenChallenges (
     @SerializedName("subject"           ) var subject           : Subject?    = null,
     @SerializedName("score"             ) var score             : Score?     = Score(),
     @SerializedName("friendScore"       ) var friendScore       : FriendScore?     = FriendScore()
-)
+): Parcelable
 
+@Serializable
+@Parcelize
 data class Score (
     @SerializedName("resultId"       ) var resultId       : Int?    = null,
     @SerializedName("resultScore"    ) var resultScore    : Double? = null,
     @SerializedName("userId"         ) var userId         : Int?    = null,
     @SerializedName("focus"          ) var focus          : Focus?  = Focus(),
     @SerializedName("resultDateTime" ) var resultDateTime : String? = null
-)
+): Parcelable
 
 data class DoneChallenges (
     @SerializedName("challengeId"       ) var challengeId       : Int?         = null,
@@ -376,27 +387,38 @@ object CustomNavType {
         }
     }
 
-    val IntType = object : NavType<Int?>(
+    val OpenChallengeType = object : NavType<OpenChallenges?> (
         isNullableAllowed = true,
     ) {
-        override fun get(bundle: Bundle, key: String): Int? {
-            return if (bundle.containsKey(key)) bundle.getInt(key) else null
-        }
-
-        override fun parseValue(value: String): Int? {
-            return value.toIntOrNull()
-        }
-
-        override fun put(bundle: Bundle, key: String, value: Int?) {
-            if (value != null) {
-                bundle.putInt(key, value)
-            } else {
-                bundle.remove(key) // Entfernt den Key, um null korrekt zu repräsentieren
+        override fun get(bundle: Bundle, key: String): OpenChallenges? {
+            val encoded = bundle.getString(key) ?: return null
+            if (encoded == "null") return null
+            return try {
+                Json.decodeFromString(decodeFromBase64UrlSafe(encoded))
+            } catch (e: Exception) {
+                null
             }
         }
 
-        override fun serializeAsValue(value: Int?): String {
-            return value?.toString() ?: "null"
+        override fun parseValue(value: String): OpenChallenges? {
+            if (value == "null") return null
+            return try {
+                Json.decodeFromString(decodeFromBase64UrlSafe(value))
+            } catch (e: Exception) {
+                null
+            }
+        }
+
+        override fun put(bundle: Bundle, key: String, value: OpenChallenges?) {
+            if (value == null) {
+                bundle.putString(key, "null")
+            } else {
+                bundle.putString(key, encodeToBase64UrlSafe(Json.encodeToString(value)))
+            }
+        }
+
+        override fun serializeAsValue(value: OpenChallenges?): String {
+            return if (value == null) "null" else encodeToBase64UrlSafe(Json.encodeToString(value))
         }
     }
 

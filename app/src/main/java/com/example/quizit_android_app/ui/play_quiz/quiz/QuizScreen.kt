@@ -87,6 +87,7 @@ fun QuizScreen(
         topBar = {
             if (currentQuestionIndex < questions.size) {
                 QuizTopBar(currentQuestionIndex + 1, questions.size, focus?.focusName, subject?.subjectName, onClick = {
+                    quizViewModel.resetQuiz()
                     navigateBack()
                 })
             }

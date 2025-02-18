@@ -16,6 +16,7 @@ import com.example.quizit_android_app.model.retrofit.Subject
 import com.example.quizit_android_app.navigation.QuizDetailRoute
 import com.example.quizit_android_app.usecases.challenge.GetChallengesForSubjectUseCase
 import com.example.quizit_android_app.usecases.quiz.GetQuizOfSubjectUseCase
+import com.example.quizit_android_app.usecases.result.GetResultsFocusUseCase
 import com.example.quizit_android_app.usecases.result.GetResultsSubjectUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -25,7 +26,8 @@ import javax.inject.Inject
 class QuizDetailViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     val getChallengesForSubjectUseCase: GetChallengesForSubjectUseCase,
-    val getResultsSubjectUseCase: GetResultsSubjectUseCase
+    val getResultsSubjectUseCase: GetResultsSubjectUseCase,
+    val getResultsFocusUseCase: GetResultsFocusUseCase
 ): ViewModel() {
 
     private var _subject by mutableStateOf<Subject?>(null)
@@ -72,7 +74,14 @@ class QuizDetailViewModel @Inject constructor(
                 val challenges = getChallengesForSubjectUseCase(subject.subjectId)
                 _openChallenges = challenges.openChallenges
                 _doneChallenges = challenges.doneChallenges
-                _results = getResultsSubjectUseCase(subject.subjectId)
+
+                if(focus==null) {
+                    _results = getResultsSubjectUseCase(subject.subjectId)
+                }
+                else {
+                    _results = getResultsFocusUseCase(focus.focusId!!)
+                }
+
 
 
             } catch (e: Exception) {
