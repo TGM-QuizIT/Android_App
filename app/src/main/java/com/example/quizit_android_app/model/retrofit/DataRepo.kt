@@ -347,7 +347,7 @@ class DataRepo @Inject constructor(private val context: Context) {
         }
     }
 
-    suspend fun addFriendship(friendId: Int): String {
+    suspend fun addFriendship(friendId: Int): FriendshipResponse {
         return withContext(Dispatchers.IO) {
             try {
                 val id = sessionManager.getUserId()
@@ -355,9 +355,11 @@ class DataRepo @Inject constructor(private val context: Context) {
                 withContext(Dispatchers.Main) {
                     Log.d("addFriendship", "Friendship added")
                 }
+                response
             } catch (e: Exception) {
                 Log.e("addFriendship", "Failed to add friendship", e)
-            }.toString()
+                FriendshipResponse()
+            }
         }
     }
 
