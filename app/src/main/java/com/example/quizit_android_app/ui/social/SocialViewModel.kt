@@ -21,8 +21,11 @@ import com.example.quizit_android_app.usecases.friendship.AcceptFriendshipUseCas
 import com.example.quizit_android_app.usecases.friendship.DeleteDeclineFriendshipUseCase
 import com.example.quizit_android_app.usecases.friendship.GetAcceptedFriendshipsUseCase
 import com.example.quizit_android_app.usecases.friendship.GetPendingFriendshipsUseCase
+import com.example.quizit_android_app.usecases.localdata.challenge.SyncLocalDoneChallengesUseCase
 import com.example.quizit_android_app.usecases.localdata.friendship.SyncLocalAcceptedFriendsUseCase
 import com.example.quizit_android_app.usecases.localdata.friendship.SyncLocalPendingFriendsUseCase
+import com.example.quizit_android_app.usecases.localdata.result.SyncLocalResultsUseCase
+import com.example.quizit_android_app.usecases.localdata.userstats.SyncLocalUserStatsUseCase
 import com.example.quizit_android_app.usecases.result.GetResultsUserUseCase
 import com.example.quizit_android_app.usecases.user.GetAllUsersUseCase
 import com.example.quizit_android_app.usecases.user.GetUserStatsUseCase
@@ -47,7 +50,10 @@ class SocialViewModel @Inject constructor(
     val acceptFriendshipUseCase: AcceptFriendshipUseCase,
     val deleteDeclineFriendshipUseCase: DeleteDeclineFriendshipUseCase,
     val syncLocalPendingFriendsUseCase: SyncLocalPendingFriendsUseCase,
-    val syncLocalAcceptedFriendsUseCase: SyncLocalAcceptedFriendsUseCase
+    val syncLocalAcceptedFriendsUseCase: SyncLocalAcceptedFriendsUseCase,
+    val syncLocalUserStatsUseCase: SyncLocalUserStatsUseCase,
+    val syncLocalResultsUseCase: SyncLocalResultsUseCase,
+    val syncLocalDoneChallengesUseCase: SyncLocalDoneChallengesUseCase
 
 ): ViewModel() {
     private val _selectedTabIndex = mutableStateOf(0)
@@ -229,6 +235,15 @@ class SocialViewModel @Inject constructor(
                     _friendships.value = getAllFriendshipsUseCase()
                     _pendingFriendship.value = getPendingFriendshipsUseCase()
                 } else {
+
+                    syncLocalResultsUseCase()
+                    syncLocalDoneChallengesUseCase()
+                    syncLocalUserStatsUseCase()
+
+                    _userResults.value = getResultsUserUseCase()
+                    _doneChallenges.value = getDoneChallengesUseCase().doneChallenges
+                    _userStats.value = getUserStatsUseCase()
+
 
                 }
 

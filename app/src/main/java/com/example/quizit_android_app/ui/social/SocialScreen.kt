@@ -176,11 +176,6 @@ fun SocialScreen(
                         .fillMaxSize()
                         .pullRefresh(pullRefreshState)
                 ) {
-                    PullRefreshIndicator(
-                        refreshing = isRefreshing,
-                        state = pullRefreshState,
-                        modifier = Modifier.align(Alignment.TopCenter)
-                    )
 
                     if(isLoading) {
                         CircularProgressIndicator(
@@ -232,6 +227,12 @@ fun SocialScreen(
                                     )
                                 }
                             }
+
+                            PullRefreshIndicator(
+                                refreshing = isRefreshing,
+                                state = pullRefreshState,
+                                modifier = Modifier.align(Alignment.TopCenter)
+                            )
                         }
 
                     }
@@ -995,7 +996,7 @@ fun ResultCard(result: Result) {
                     ) {
                         Box(
                             modifier = Modifier
-                                .fillMaxWidth(0.8f) // 80% Fortschritt
+                                .fillMaxWidth(result.resultScore?.toFloat()?.div(100f) ?: 0f)
                                 .height(24.dp)
                                 .background(Color(0xFF006FFD), shape = RoundedCornerShape(8.dp))
                         )
