@@ -57,6 +57,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -91,6 +92,11 @@ fun SocialScreen(
     viewModel: SocialViewModel = hiltViewModel(),
     navigateToUserDetail: (Int?, User) -> Unit
 ) {
+
+    LaunchedEffect(Unit) {
+        viewModel.setContent()
+
+    }
 
     val selectedTabIndex = viewModel.selectedTabIndex.value
     val friendships = viewModel.friendships.value
@@ -166,7 +172,9 @@ fun SocialScreen(
             content = { paddingValues ->
 
                 Box(
-                    modifier = Modifier.fillMaxSize().pullRefresh(pullRefreshState)
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .pullRefresh(pullRefreshState)
                 ) {
                     PullRefreshIndicator(
                         refreshing = isRefreshing,

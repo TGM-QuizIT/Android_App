@@ -95,12 +95,13 @@ class SocialViewModel @Inject constructor(
         setContent()
     }
 
-    private fun setContent() {
+    fun setContent() {
 
         viewModelScope.launch {
             _isLoading.value = true
             try {
 
+                Log.d("SocialViewModel", "setContent: ")
                 _friendships.value = getAllFriendshipsUseCase()
 
 
@@ -220,8 +221,17 @@ class SocialViewModel @Inject constructor(
     fun refreshData(onComplete: () -> Unit) {
         viewModelScope.launch {
             try {
-                syncLocalPendingFriendsUseCase()
-                syncLocalAcceptedFriendsUseCase()
+
+                if(_selectedTabIndex.value == 0) {
+                    syncLocalPendingFriendsUseCase()
+                    syncLocalAcceptedFriendsUseCase()
+
+                    _friendships.value = getAllFriendshipsUseCase()
+                    _pendingFriendship.value = getPendingFriendshipsUseCase()
+                } else {
+
+                }
+
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {

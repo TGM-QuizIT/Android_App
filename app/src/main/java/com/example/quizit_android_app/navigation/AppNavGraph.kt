@@ -234,7 +234,7 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
         ) {
             UserDetailScreen(
                 onGoBack = {
-                    navController.popBackStack()
+                    navController.navigate(SocialRoute(showStatistics = false))
                 },
 
             )
