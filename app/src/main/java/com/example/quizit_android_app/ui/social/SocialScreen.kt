@@ -77,12 +77,14 @@ import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.window.Popup
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
+import com.example.quizit_android_app.R
 import com.example.quizit_android_app.model.retrofit.AcceptedFriendship
 import com.example.quizit_android_app.model.retrofit.DoneChallenges
 import com.example.quizit_android_app.model.retrofit.PendingFriendship
 import com.example.quizit_android_app.model.retrofit.Result
 import com.example.quizit_android_app.model.retrofit.User
 import com.example.quizit_android_app.model.retrofit.UserStatsResponse
+import com.example.quizit_android_app.ui.home.NoContentPlaceholder
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -113,6 +115,7 @@ fun SocialScreen(
     val stats = viewModel.userStats.value
 
     val sheetState = androidx.compose.material.rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
+    val statisticsSheetState = androidx.compose.material.rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
     val coroutineScope = rememberCoroutineScope()
 
     var isRefreshing by remember { mutableStateOf(false) }
@@ -149,98 +152,114 @@ fun SocialScreen(
 
         }
     ) {
-        Scaffold(
-            contentWindowInsets = WindowInsets(0.dp),
-            topBar = {
-                Column {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Text("Social", textAlign = TextAlign.Center, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+
+        ModalBottomSheetLayout(
+            sheetState = statisticsSheetState,
+            sheetContent = {
+                StatisticsBottomSheet(
+                    onClose = {
+                        coroutineScope.launch { statisticsSheetState.hide() }
                     }
+                )
+            }
 
-                    Spacer(modifier = Modifier.size(16.dp))
-                    SegmentTabBar(
-                        selectedTabIndex = selectedTabIndex,
-                        onTabSelected = { viewModel.updateTabIndex(it) }
-                    )
-                }
-            },
-            content = { paddingValues ->
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .pullRefresh(pullRefreshState)
-                ) {
+        ) {
+            Scaffold(
+                contentWindowInsets = WindowInsets(0.dp),
+                topBar = {
+                    Column {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 16.dp),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text("Social", textAlign = TextAlign.Center, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+                        }
 
-                    if(isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center),
-                            trackColor = Color.Gray
+                        Spacer(modifier = Modifier.size(16.dp))
+                        SegmentTabBar(
+                            selectedTabIndex = selectedTabIndex,
+                            onTabSelected = { viewModel.updateTabIndex(it) }
                         )
-                    } else {
-                        Box(modifier = Modifier
-                            .padding(paddingValues)
-                            .fillMaxSize()) {
-                            when (selectedTabIndex) {
-                                0 -> FriendsSection(
-                                    modifier = Modifier.fillMaxSize(),
-                                    friendships = friendships,
-                                    pendingFriendships = pendingFriendships,
-                                    navigateToUserDetail = { friendshipId, user ->
-                                        navigateToUserDetail(friendshipId, user) },
-                                    acceptFriendship = { isAccept, id ->
-                                        viewModel.acceptFriendship(isAccept, id)
-                                    }
-                                )
-                                1 -> StatisticsSection(
-                                    modifier = Modifier.fillMaxSize(),
-                                    results = results,
-                                    stats = stats,
-                                    doneChallenges = doneChallenges
-                                )
-                            }
+                    }
+                },
+                content = { paddingValues ->
 
-                            if (selectedTabIndex == 0) {
-                                FloatingActionButton(
-                                    onClick = {
-                                        coroutineScope.launch {
-                                            sheetState.show()
-                                            viewModel.setUsers()
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .pullRefresh(pullRefreshState)
+                    ) {
+
+                        if(isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.align(Alignment.Center),
+                                trackColor = Color.Gray
+                            )
+                        } else {
+                            Box(modifier = Modifier
+                                .padding(paddingValues)
+                                .fillMaxSize()) {
+                                when (selectedTabIndex) {
+                                    0 -> FriendsSection(
+                                        modifier = Modifier.fillMaxSize(),
+                                        friendships = friendships,
+                                        pendingFriendships = pendingFriendships,
+                                        navigateToUserDetail = { friendshipId, user ->
+                                            navigateToUserDetail(friendshipId, user) },
+                                        acceptFriendship = { isAccept, id ->
+                                            viewModel.acceptFriendship(isAccept, id)
                                         }
-                                    },
-                                    modifier = Modifier
-                                        .align(Alignment.BottomEnd)
-                                        .padding(16.dp)
-                                        .size(52.dp),
-                                    shape = CircleShape,
-                                    containerColor = Color(0xFF006FFD),
-                                    contentColor = Color.White
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Add,
-                                        contentDescription = "Add",
+                                    )
+                                    1 -> StatisticsSection(
+                                        modifier = Modifier.fillMaxSize(),
+                                        results = results,
+                                        stats = stats,
+                                        doneChallenges = doneChallenges,
+                                        onStatisticsCardClick = { coroutineScope.launch { statisticsSheetState.show() } }
                                     )
                                 }
+
+                                if (selectedTabIndex == 0) {
+                                    FloatingActionButton(
+                                        onClick = {
+                                            coroutineScope.launch {
+                                                sheetState.show()
+                                                viewModel.setUsers()
+                                            }
+                                        },
+                                        modifier = Modifier
+                                            .align(Alignment.BottomEnd)
+                                            .padding(16.dp)
+                                            .size(52.dp),
+                                        shape = CircleShape,
+                                        containerColor = Color(0xFF006FFD),
+                                        contentColor = Color.White
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Add,
+                                            contentDescription = "Add",
+                                        )
+                                    }
+                                }
+
+                                PullRefreshIndicator(
+                                    refreshing = isRefreshing,
+                                    state = pullRefreshState,
+                                    modifier = Modifier.align(Alignment.TopCenter)
+                                )
                             }
 
-                            PullRefreshIndicator(
-                                refreshing = isRefreshing,
-                                state = pullRefreshState,
-                                modifier = Modifier.align(Alignment.TopCenter)
-                            )
                         }
 
                     }
 
                 }
+            )
+        }
 
-            }
-        )
     }
 }
 
@@ -462,12 +481,22 @@ fun FriendsSection(
             .padding(top = 16.dp, bottom = 16.dp)
     ) {
 
-        items(friendships) { friendship ->
-            FriendshipCard(friendship, navigateToUserDetail = { friendshipId, user ->
-                navigateToUserDetail(friendshipId, user) }
-            )
+        if(friendships.isEmpty()) {
+            item {
+                NoContentPlaceholder(id = R.drawable.no_friends_placeholder)
+            }
 
         }
+        else {
+            items(friendships) { friendship ->
+                FriendshipCard(friendship, navigateToUserDetail = { friendshipId, user ->
+                    navigateToUserDetail(friendshipId, user) }
+                )
+
+            }
+        }
+
+
 
         item {
             Spacer(modifier = Modifier.size(32.dp))
@@ -476,16 +505,26 @@ fun FriendsSection(
 
         }
 
-        items(pendingFriendships) { pendingFriendship ->
-            PendingFriendshipCard(
-                pendingFriendship = pendingFriendship,
-                navigateToUserDetail = { friendshipId, user  ->
-                navigateToUserDetail(friendshipId, user)
-                                       },
-                acceptFriendship = { acceptFriendship, id ->
-                    acceptFriendship(acceptFriendship, id)
-                })
+        if(pendingFriendships.isEmpty()) {
+            item {
+                NoContentPlaceholder(id = R.drawable.no_pending_friends_placeholder)
+            }
+
+        } else {
+            items(pendingFriendships) { pendingFriendship ->
+                PendingFriendshipCard(
+                    pendingFriendship = pendingFriendship,
+                    navigateToUserDetail = { friendshipId, user  ->
+                        navigateToUserDetail(friendshipId, user)
+                    },
+                    acceptFriendship = { acceptFriendship, id ->
+                        acceptFriendship(acceptFriendship, id)
+                    })
+            }
+
         }
+
+
 
 
     }
@@ -651,9 +690,8 @@ fun PendingFriendshipCard(pendingFriendship: PendingFriendship, navigateToUserDe
     }
 }
 @Composable
-fun StatisticsSection(modifier: Modifier, results: List<com.example.quizit_android_app.model.retrofit.Result>,  stats: UserStatsResponse?, doneChallenges: List<DoneChallenges>) {
+fun StatisticsSection(modifier: Modifier, results: List<com.example.quizit_android_app.model.retrofit.Result>,  stats: UserStatsResponse?, doneChallenges: List<DoneChallenges>, onStatisticsCardClick: () -> Unit) {
 
-    var showPopup: Boolean by remember { mutableStateOf(false) }
 
    LazyColumn(
         modifier = modifier
@@ -661,16 +699,14 @@ fun StatisticsSection(modifier: Modifier, results: List<com.example.quizit_andro
             .padding(start = 16.dp, top = 32.dp, bottom = 16.dp)
     ) {
        item {
-           if(showPopup) {
-               StatisticsPopUp(onClose = { showPopup = false })
-           }
+
 
            Box(
                modifier = Modifier
                    .fillMaxWidth()
                    .padding(end = 16.dp),
            ) {
-               StatisticsCard(onClick = { showPopup = true }, stats = stats)
+               StatisticsCard(onClick = { onStatisticsCardClick() }, stats = stats)
 
            }
            Spacer(modifier = Modifier.size(32.dp))
@@ -683,15 +719,22 @@ fun StatisticsSection(modifier: Modifier, results: List<com.example.quizit_andro
        }
 
        item {
-           LazyRow(
 
-           ) {
-               items(results) { result ->
-                   ResultCard(result = result)
-                     Spacer(modifier = Modifier.size(8.dp))
+           if(results.isEmpty()) {
+               NoContentPlaceholder(id = R.drawable.no_results_placeholder)
+           } else {
+               LazyRow(
+
+               ) {
+                   items(results) { result ->
+                       ResultCard(result = result)
+                       Spacer(modifier = Modifier.size(8.dp))
+                   }
                }
+               Spacer(modifier = Modifier.size(32.dp))
+
            }
-           Spacer(modifier = Modifier.size(32.dp))
+
 
        }
 
@@ -699,12 +742,19 @@ fun StatisticsSection(modifier: Modifier, results: List<com.example.quizit_andro
            Text("Herausforderungen Historie", style = MaterialTheme.typography.titleMedium)
            Spacer(modifier = Modifier.size(16.dp))
 
-           LazyRow {
-               items(doneChallenges) { doneChallenge ->
-                   DoneChallengeCard(challenge = doneChallenge)
-                   Spacer(modifier = Modifier.size(16.dp))
+           if(doneChallenges.isEmpty()) {
+               NoContentPlaceholder(id = R.drawable.no_done_challenges_placeholder)
+           } else {
+               LazyRow {
+                   items(doneChallenges) { doneChallenge ->
+                       DoneChallengeCard(challenge = doneChallenge)
+                       Spacer(modifier = Modifier.size(16.dp))
+                   }
                }
+
            }
+
+
 
        }
 
@@ -713,68 +763,64 @@ fun StatisticsSection(modifier: Modifier, results: List<com.example.quizit_andro
 }
 
 @Composable
-fun StatisticsPopUp(onClose: () -> Unit) {
-    Popup(
-        onDismissRequest = onClose,
-        alignment = Alignment.Center,
+fun StatisticsBottomSheet(onClose: () -> Unit) {
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(0.5f)
+            .background(color = Color(0xFFF8F9FE), shape = RoundedCornerShape(16.dp))
+            .padding(16.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .fillMaxSize()
-                .wrapContentHeight()
-                .background(color = Color(0xFFF8F9FE), shape = RoundedCornerShape(16.dp))
-                .padding(16.dp)
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+
         ) {
-            Column(
+            // Header
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Header
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Statistiken Info",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = Color.Black
+                Text(
+                    text = "Statistiken Info",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = Color.Black
+                )
+                IconButton(onClick = onClose) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Close",
+                        tint = Color.Black
                     )
-                    IconButton(onClick = onClose) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Close",
-                            tint = Color.Black
-                        )
-                    }
                 }
-
-                Spacer(modifier = Modifier.size(16.dp))
-
-                // Statistics Items
-                StatisticsItem(
-                    icon = Icons.Default.EmojiEvents, // Example icon
-                    title = "Challenges",
-                    description = "Der Prozentsatz der gewonnenen Herausforderungen."
-                )
-                Spacer(modifier = Modifier.size(12.dp))
-                StatisticsItem(
-                    icon = Icons.Default.School, // Example icon
-                    title = "TGM -Level",
-                    description = "Die Platzierung im Vergleich zu anderen Schüler:innen sortiert nach dem Durchschnittsscore."
-                )
-                Spacer(modifier = Modifier.size(12.dp))
-                StatisticsItem(
-                    icon = Icons.Default.SportsScore, // Example icon
-                    title = "Score",
-                    description = "Der Durchschnittsscore deiner abgeschlossenen Quizze."
-                )
             }
+
+            Spacer(modifier = Modifier.size(16.dp))
+
+            // Statistics Items
+            StatisticsItem(
+                icon = Icons.Default.EmojiEvents, // Example icon
+                title = "Challenges",
+                description = "Der Prozentsatz der gewonnenen Herausforderungen."
+            )
+            Spacer(modifier = Modifier.size(12.dp))
+            StatisticsItem(
+                icon = Icons.Default.School, // Example icon
+                title = "TGM -Level",
+                description = "Die Platzierung im Vergleich zu anderen Schüler:innen sortiert nach dem Durchschnittsscore."
+            )
+            Spacer(modifier = Modifier.size(12.dp))
+            StatisticsItem(
+                icon = Icons.Default.SportsScore, // Example icon
+                title = "Score",
+                description = "Der Durchschnittsscore deiner abgeschlossenen Quizze."
+            )
         }
     }
+
 }
 
 @Composable
@@ -996,7 +1042,11 @@ fun ResultCard(result: Result) {
                     ) {
                         Box(
                             modifier = Modifier
-                                .fillMaxWidth(result.resultScore?.toFloat()?.div(100f) ?: 0f)
+                                .fillMaxWidth(
+                                    result.resultScore
+                                        ?.toFloat()
+                                        ?.div(100f) ?: 0f
+                                )
                                 .height(24.dp)
                                 .background(Color(0xFF006FFD), shape = RoundedCornerShape(8.dp))
                         )

@@ -66,11 +66,13 @@ class HomeViewModel @Inject constructor(
                 if(_subjectList.isEmpty()) {
                     _subjectList = getAllSubjectsUseCase()
 
+
                 }
                 if(_stats == null) _stats = getUserStatsUseCase()
 
                 if(_challenges.isEmpty()) {
                     _challenges = getChallengesOfUserUseCase().openChallenges
+
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -88,9 +90,10 @@ class HomeViewModel @Inject constructor(
                 syncFocusUseCase()
                 syncChallengesOfUserUseCase()
                 syncUserStatsUseCase()
-                syncLocalDoneChallengesUseCase()
-                syncLocalAcceptedFriendsUseCase()
-                syncLocalPendingFriendsUseCase()
+
+                _stats = getUserStatsUseCase()
+                _subjectList = getAllSubjectsUseCase()
+                _challenges = getChallengesOfUserUseCase().openChallenges
 
             } catch (e: Exception) {
                 e.printStackTrace()

@@ -22,6 +22,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.EmojiEvents
@@ -44,6 +46,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,10 +54,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.quizit_android_app.model.retrofit.DoneChallenges
+import com.example.quizit_android_app.model.retrofit.OpenChallenges
 import com.example.quizit_android_app.model.retrofit.User
 import com.example.quizit_android_app.ui.home.OpenChallengeCard
 import com.example.quizit_android_app.ui.home.ChallengeType
+import com.example.quizit_android_app.ui.play_quiz.quiz.ChallengeBottomSheet
 import com.example.quizit_android_app.usecases.friendship.FriendshipStatus
+import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,117 +79,147 @@ fun UserDetailScreen(
 
     val isLoading = viewModel.isLoading.value
 
-    Scaffold(
-        topBar = {
-            SocialTopBar(onGoBack = { onGoBack() })
-        },
-        contentWindowInsets = WindowInsets(0.dp),
-        content = { paddingValues ->
-            if (isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(
-                        trackColor = Color.Gray
-                    )
-                }
-            } else {
-                var showPopup by remember { mutableStateOf(false) }
+    val statisticsSheetState = androidx.compose.material.rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
+    val coroutineScope = rememberCoroutineScope()
 
-                if (showPopup) {
-                    StatisticsPopUp(onClose = { showPopup = false })
-                }
-
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(start = 16.dp)
-                        .padding(bottom = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    item {
-                        UserInfos(
-                            user = user,
-                            friendshipStatus = friendshipStatus,
-                            addFriend = { userId -> viewModel.addFriend(userId) },
-                            acceptFriendship = { viewModel.acceptFriendship() },
-                            removeFriendship = { viewModel.removeFriendship() }
-                        )
-                    }
-
-                    item {
-
-                        Box(
-                            modifier = Modifier.fillMaxWidth().padding(end = 16.dp)
-                        ) {
-                            StatisticsCard(
-                                onClick = { showPopup = true },
-                                stats = userStats
-                            )
-
-                        }
-
-                    }
-
-                    if (openChallenges.isNotEmpty()) {
-                        item {
-                            Text(
-                                "Herausforderungen von ${user?.userFullname?.split(" ")?.first()}",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                        }
-
-                        item {
-                            var showPopup: Boolean by remember { mutableStateOf(false) }
-                            LazyRow(
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                items(openChallenges) { challenge ->
-
-                                    if(challenge.friendScore?.resultScore != null ) {
-                                        OpenChallengeCard(
-                                            challenge = challenge,
-                                            type = ChallengeType.FRIEND,
-                                            showPopup = showPopup,
-                                            onClick = { showPopup = true },
-                                            onPopupClose = { showPopup = false }
-                                        )
-                                        Spacer(modifier = Modifier.size(16.dp))
-
-                                    }
-
-                                }
-                            }
-                        }
-                    }
-
-                    if (doneChallenges.isNotEmpty()) {
-                        item {
-                            Text(
-                                "Herausforderungen Historie",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                        }
-
-                        item {
-                            LazyRow(
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                items(doneChallenges) { challenge ->
-                                    DoneChallengeCard(challenge = challenge)
-                                    Spacer(modifier = Modifier.size(16.dp))
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    var selectedChallenge by remember { mutableStateOf<OpenChallenges?>(null) }
+    val challengeSheetState = androidx.compose.material.rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
     )
+
+
+
+
+    ModalBottomSheetLayout(
+        sheetContent =  { StatisticsBottomSheet {
+            coroutineScope.launch {
+                statisticsSheetState.hide()
+            }
+        } },
+        sheetState = statisticsSheetState,
+    ) {
+        ModalBottomSheetLayout(
+            sheetState = challengeSheetState,
+            sheetContent = {
+                selectedChallenge.let { challenge ->
+                    ChallengeBottomSheet(
+                        onClose = { coroutineScope.launch { challengeSheetState.hide() } },
+                        challenge = challenge
+                    )
+                } ?: Box(modifier = Modifier.size(1.dp))
+            }
+        ) {
+            Scaffold(
+                topBar = {
+                    SocialTopBar(onGoBack = { onGoBack() })
+                },
+                contentWindowInsets = WindowInsets(0.dp),
+                content = { paddingValues ->
+                    if (isLoading) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                trackColor = Color.Gray
+                            )
+                        }
+                    } else {
+
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues)
+                                .padding(start = 16.dp)
+                                .padding(bottom = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            item {
+                                UserInfos(
+                                    user = user,
+                                    friendshipStatus = friendshipStatus,
+                                    addFriend = { userId -> viewModel.addFriend(userId) },
+                                    acceptFriendship = { viewModel.acceptFriendship() },
+                                    removeFriendship = { viewModel.removeFriendship() }
+                                )
+                            }
+
+                            item {
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(end = 16.dp)
+                                ) {
+                                    StatisticsCard(
+                                        onClick = { coroutineScope.launch { statisticsSheetState.show() } },
+                                        stats = userStats
+                                    )
+
+                                }
+
+                            }
+
+                            if (openChallenges.isNotEmpty()) {
+                                item {
+                                    Text(
+                                        "Herausforderungen von ${user?.userFullname?.split(" ")?.first()}",
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                }
+
+                                item {
+                                    LazyRow(
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        items(openChallenges) { challenge ->
+
+                                            if(challenge.friendScore?.resultScore != null ) {
+                                                OpenChallengeCard(
+                                                    challenge = challenge,
+                                                    type = ChallengeType.FRIEND,
+                                                    onClick = {
+                                                        selectedChallenge = challenge
+                                                        coroutineScope.launch { challengeSheetState.show() }
+                                                    },
+
+                                                )
+                                                Spacer(modifier = Modifier.size(16.dp))
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (doneChallenges.isNotEmpty()) {
+                                item {
+                                    Text(
+                                        "Herausforderungen Historie",
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                }
+
+                                item {
+                                    LazyRow(
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        items(doneChallenges) { challenge ->
+                                            DoneChallengeCard(challenge = challenge)
+                                            Spacer(modifier = Modifier.size(16.dp))
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            )
+
+        }
+    }
 }
 
 
@@ -418,7 +454,7 @@ fun DoneChallengeCard(challenge: DoneChallenges) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp, bottom  = 16.dp),
+                .padding(top = 16.dp, bottom = 16.dp),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
 

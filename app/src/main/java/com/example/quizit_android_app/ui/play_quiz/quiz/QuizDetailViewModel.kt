@@ -75,6 +75,7 @@ class QuizDetailViewModel @Inject constructor(
                 _openChallenges = challenges.openChallenges
                 _doneChallenges = challenges.doneChallenges
 
+
                 if(focus==null) {
                     _results = getResultsSubjectUseCase(subject.subjectId)
                 }

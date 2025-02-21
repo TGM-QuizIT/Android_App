@@ -59,17 +59,22 @@ import com.example.quizit_android_app.model.retrofit.OpenChallenges
 import com.example.quizit_android_app.model.retrofit.Subject
 import com.example.quizit_android_app.model.retrofit.UserStatsResponse
 import com.example.quizit_android_app.ui.social.StatisticsCard
-import com.example.quizit_android_app.ui.social.StatisticsPopUp
 import com.example.quizit_android_app.ui.theme.Typography
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import com.example.quizit_android_app.ui.play_quiz.quiz.ChallengePopUp
+import coil3.compose.rememberAsyncImagePainter
+import com.example.quizit_android_app.ui.play_quiz.quiz.ChallengeBottomSheet
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
@@ -98,77 +103,103 @@ fun HomeScreen(
         }
     )
 
-    Scaffold(
-        contentWindowInsets = WindowInsets(0.dp),
-        topBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 32.dp)
-                    .padding(top = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.logo_lightmode),
-                    contentDescription = "QuizIT Logo",
-                    modifier = Modifier
-                        .width(125.dp)
-                        .aspectRatio(975f / 337f),
-                    contentScale = ContentScale.FillBounds
+    var selectedChallenge by remember { mutableStateOf<OpenChallenges?>(null) }
+    val challengeSheetState = androidx.compose.material.rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
+    )
+    val coroutineScope = rememberCoroutineScope()
+
+    ModalBottomSheetLayout(
+        sheetState = challengeSheetState,
+        sheetContent = {
+            selectedChallenge.let { challenge ->
+                ChallengeBottomSheet(
+                    onClose = { coroutineScope.launch { challengeSheetState.hide() } },
+                    challenge = challenge
                 )
-            }
-        },
-        content = { paddingValues ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .pullRefresh(pullRefreshState)
-                    .padding(paddingValues)
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        trackColor = Color.Gray
-                    )
-                } else {
-                    LazyColumn(
+            } ?: Box(modifier = Modifier.size(1.dp))
+        }
+    ) {
+        Scaffold(
+            contentWindowInsets = WindowInsets(0.dp),
+            topBar = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 32.dp)
+                        .padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.logo_lightmode),
+                        contentDescription = "QuizIT Logo",
                         modifier = Modifier
-                            .fillMaxSize()
-                            .padding(vertical = 16.dp)
-                            .padding(start = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        item {
-                            SubjectSection(
-                                subjects = subjectList,
-                                navigateToSubjects = { navigateToSubject() },
-                                navigateToFocus = { subject -> navigateToFocus(subject) }
-                            )
-                        }
-                        item {
-                            ChallengeSection(
-                                navigateToChallenge = { navigateToChallenge() },
-                                challenges = challenges
-                            )
-                        }
-                        item {
-                            StatisticsSection(
-                                navigateToStatistics = { navigateToStatistics() },
-                                stats = stats
-                            )
+                            .width(125.dp)
+                            .aspectRatio(975f / 337f),
+                        contentScale = ContentScale.FillBounds
+                    )
+                }
+            },
+            content = { paddingValues ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .pullRefresh(pullRefreshState)
+                        .padding(paddingValues)
+                ) {
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center),
+                            trackColor = Color.Gray
+                        )
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(vertical = 16.dp)
+                                .padding(start = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            item {
+                                SubjectSection(
+                                    subjects = subjectList,
+                                    navigateToSubjects = { navigateToSubject() },
+                                    navigateToFocus = { subject -> navigateToFocus(subject) }
+                                )
+                            }
+                            item {
+                                ChallengeSection(
+                                    navigateToChallenge = { navigateToChallenge() },
+                                    challenges = challenges,
+                                    onChallengeCardClick = { challenge ->
+                                        selectedChallenge = challenge
+                                        coroutineScope.launch { challengeSheetState.show() }
+                                    }
+                                )
+                            }
+                            item {
+                                StatisticsSection(
+                                    navigateToStatistics = { navigateToStatistics() },
+                                    stats = stats
+                                )
+                            }
                         }
                     }
-                }
 
-                PullRefreshIndicator(
-                    refreshing = isRefreshing,
-                    state = pullRefreshState,
-                    modifier = Modifier.align(Alignment.TopCenter)
-                )
+                    PullRefreshIndicator(
+                        refreshing = isRefreshing,
+                        state = pullRefreshState,
+                        modifier = Modifier.align(Alignment.TopCenter)
+                    )
+                }
             }
-        }
-    )
+        )
+
+    }
+
+
 }
 
 
@@ -203,16 +234,23 @@ fun SubjectSection(subjects: List<Subject>, navigateToSubjects: () -> Unit, navi
         }
 
         Spacer(modifier = Modifier.size(16.dp))
-        LazyRow(
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            itemsIndexed(subjects) { index, subject ->
-                SubjectCard(subject = subject, 250.dp, navigateToFocus = { subject ->
-                    navigateToFocus(subject)
-                })
-                Spacer(modifier = Modifier.width(16.dp))
+
+        if(subjects.isEmpty()) {
+            NoContentPlaceholder(id = R.drawable.no_subject_placeholder)
+        } else {
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                itemsIndexed(subjects) { index, subject ->
+                    SubjectCard(subject = subject, 250.dp, navigateToFocus = { subject ->
+                        navigateToFocus(subject)
+                    })
+                    Spacer(modifier = Modifier.width(16.dp))
+                }
             }
+
         }
+
 
     }
 
@@ -227,9 +265,9 @@ fun SubjectCard(subject: Subject, width: Dp, navigateToFocus: (Subject) -> Unit)
         modifier = Modifier
             .then(
                 if (width == 0.dp) {
-                    Modifier.fillMaxWidth()
+                    Modifier.fillMaxWidth().clickable { navigateToFocus(subject) }
                 } else {
-                    Modifier.width(width)
+                    Modifier.width(width).clickable { navigateToFocus(subject) }
                 }
             ),
 
@@ -289,6 +327,7 @@ fun SubjectCard(subject: Subject, width: Dp, navigateToFocus: (Subject) -> Unit)
 @Composable
 fun ChallengeSection(
     navigateToChallenge: () -> Unit,
+    onChallengeCardClick: (OpenChallenges) -> Unit,
     challenges: List<OpenChallenges>
 ) {
     Column(
@@ -316,19 +355,23 @@ fun ChallengeSection(
 
         Spacer(modifier = Modifier.size(16.dp))
 
-        var showPopup: Boolean by remember { mutableStateOf(false) }
+        if(challenges.isEmpty()) {
+            NoContentPlaceholder(id = R.drawable.no_open_challenges_placeholder)
+        } else {
+            LazyRow {
+                items(challenges) { challenge ->
 
-        LazyRow {
-            items(challenges) { challenge ->
+                    if(challenge.friendScore?.resultScore != null) {
+                        OpenChallengeCard(ChallengeType.OVERALL, challenge, onClick = { onChallengeCardClick(challenge)  }, )
+                        Spacer(modifier = Modifier.width(16.dp))
 
-                if(challenge.friendScore?.resultScore != null) {
-                    OpenChallengeCard(ChallengeType.OVERALL, challenge, onClick = { showPopup = true }, showPopup  = showPopup, onPopupClose = { showPopup = false })
-                    Spacer(modifier = Modifier.width(16.dp))
+                    }
 
                 }
-
             }
         }
+
+
 
 
     }
@@ -337,11 +380,9 @@ fun ChallengeSection(
 }
 
 @Composable
-fun OpenChallengeCard(type: ChallengeType, challenge: OpenChallenges, onClick : () -> Unit, showPopup: Boolean, onPopupClose : () -> Unit) {
+fun OpenChallengeCard(type: ChallengeType, challenge: OpenChallenges, onClick : () -> Unit) {
 
-    if(showPopup) {
-        ChallengePopUp(onClose = { onPopupClose()  }, challenge = challenge)
-    }
+
     Card(
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
@@ -495,39 +536,53 @@ fun StatisticsSection(navigateToStatistics: () -> Unit, stats: UserStatsResponse
             .fillMaxWidth()
             .padding(end = 16.dp)
     ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
+
+        if(stats!=null) {
 
 
-        ) {
-
-            Text(
-                "Statistiken",
-                style = Typography.titleMedium
-
-            )
-
-            Text(
-                text = "mehr anzeigen",
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .clickable { navigateToStatistics() },
-                style = Typography.titleSmall
-            )
+                    .fillMaxWidth()
 
 
+            ) {
+
+                Text(
+                    "Statistiken",
+                    style = Typography.titleMedium
+
+                )
+
+                Text(
+                    text = "mehr anzeigen",
+                    modifier = Modifier
+                        .clickable { navigateToStatistics() },
+                    style = Typography.titleSmall
+                )
+            }
+
+            Spacer(modifier = Modifier.size(16.dp))
+
+
+            StatisticsCard(onClick = { navigateToStatistics() }, stats = stats)
         }
 
-        Spacer(modifier = Modifier.size(16.dp))
-        var showPopup: Boolean by remember { mutableStateOf(false) }
 
-        if(showPopup) {
-            StatisticsPopUp(onClose = { showPopup = false })
-        }
-
-        StatisticsCard(onClick = { showPopup = true }, stats = stats)
     }
+}
+
+@Composable
+fun NoContentPlaceholder(id: Int) {
+    Image(
+        painter = painterResource(id = id),
+        contentDescription = "No Content Placeholder",
+        contentScale = ContentScale.FillBounds,
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(4800f/2000f)
+    )
+
 }
 

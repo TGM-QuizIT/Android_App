@@ -44,7 +44,9 @@ class FocusViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                if(_focusList.isEmpty()) _focusList = getFocusForSubjectUseCase(id)
+                if(_focusList.isEmpty()) {
+                    _focusList = getFocusForSubjectUseCase(id)
+                }
                 _overallQuestionCount.value = getQuestionCount()
 
             } catch (e: Exception) {

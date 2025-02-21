@@ -32,7 +32,10 @@ class SubjectViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                if(_subjectList.value.isEmpty()) _subjectList.value = getAllSubjectsUseCase()
+                if(_subjectList.value.isEmpty()) {
+                    _subjectList.value = getAllSubjectsUseCase()
+                }
+
                 Log.d("SubjectViewModel", "setSubjects: ${_subjectList.value}")
             } catch (e: Exception) {
                 Log.e("SubjectViewModel", "Error fetching subjects", e)

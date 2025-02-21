@@ -24,7 +24,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.quizit_android_app.R
 import com.example.quizit_android_app.model.retrofit.Subject
+import com.example.quizit_android_app.ui.home.NoContentPlaceholder
 import com.example.quizit_android_app.ui.home.SubjectCard
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,7 +46,8 @@ fun SubjectScreen(
         topBar = {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth().padding(top = 16.dp)
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
             ) {
                 IconButton(
                     onClick = { navigateBack() },
@@ -73,21 +76,34 @@ fun SubjectScreen(
                 if(isLoading) {
                     CircularProgressIndicator( modifier = Modifier.align(Alignment.Center),trackColor = Color.Gray )
                 } else {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues)
-                            .padding(horizontal = 16.dp, vertical = 16.dp),
-                    ) {
 
-                        items(subjectList) { subject ->
-                            SubjectCard(subject = subject, width = 0.dp, navigateToFocus = { subject ->
-                                navigateToFocus(subject)
-                            })
+                    if(subjectList.isEmpty()) {
+                        Box(
+                            modifier = Modifier.align(Alignment.Center)
+                        ) {
+                            NoContentPlaceholder(id = R.drawable.no_subject_placeholder)
 
-                            Spacer(modifier = Modifier.height(16.dp))
                         }
+
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues)
+                                .padding(horizontal = 16.dp, vertical = 16.dp),
+                        ) {
+
+                            items(subjectList) { subject ->
+                                SubjectCard(subject = subject, width = 0.dp, navigateToFocus = { subject ->
+                                    navigateToFocus(subject)
+                                })
+
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
+                        }
+
                     }
+
 
                 }
 

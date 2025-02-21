@@ -110,8 +110,6 @@ class SocialViewModel @Inject constructor(
                 Log.d("SocialViewModel", "setContent: ")
                 _friendships.value = getAllFriendshipsUseCase()
 
-
-
                 _pendingFriendship.value = getPendingFriendshipsUseCase()
 
                 if(_userStats.value == null) {

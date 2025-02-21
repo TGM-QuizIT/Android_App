@@ -39,8 +39,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
+import com.example.quizit_android_app.R
 import com.example.quizit_android_app.model.retrofit.Subject
 import com.example.quizit_android_app.model.retrofit.Focus
+import com.example.quizit_android_app.ui.home.NoContentPlaceholder
 import com.example.quizit_android_app.ui.theme.Typography
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,7 +89,7 @@ fun FocusScreen(
                             style = Typography.titleLarge
                         )
                         Text(
-                            text = subject!!.subjectName,
+                            text = subject?.subjectName ?: "",
                             style = Typography.titleLarge
                         )
                     }
@@ -128,19 +130,27 @@ fun FocusScreen(
                                     }
                                 )
                             }
-                            items(focusList) {
-                                FocusCard(
-                                    type = CardType.Focus,
-                                    focus = it,
-                                    subject = subject!!,
-                                    overallQuestionCount = overallQuestionCount,
-                                    onQuizStart = {subject, focus ->
-                                        navigateToQuiz(subject, focus)
-                                    },
-                                    navigateToQuizDetail = {  subject, focus ->
-                                        navigateToQuizDetail(subject, focus)
-                                    }
-                                )
+
+                            if(focusList.isEmpty()) {
+                                item {
+                                    NoContentPlaceholder(id = R.drawable.no_focus_placeholder)
+
+                                }
+                            } else {
+                                items(focusList) {
+                                    FocusCard(
+                                        type = CardType.Focus,
+                                        focus = it,
+                                        subject = subject!!,
+                                        overallQuestionCount = overallQuestionCount,
+                                        onQuizStart = {subject, focus ->
+                                            navigateToQuiz(subject, focus)
+                                        },
+                                        navigateToQuizDetail = {  subject, focus ->
+                                            navigateToQuizDetail(subject, focus)
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
@@ -165,7 +175,7 @@ fun FocusCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp, horizontal = 16.dp)
-            .clickable {navigateToQuizDetail(subject, focus) },
+            .clickable { navigateToQuizDetail(subject, focus) },
         colors = CardDefaults.cardColors(
             containerColor = if (type == CardType.Subject) Color(0xFFEAF2FF) else Color(0xFFF8F9FE),
             contentColor = Color.Black
@@ -196,7 +206,9 @@ fun FocusCard(
 
 
                 Column(
-                    modifier = Modifier.weight(1f).align(Alignment.CenterVertically)
+                    modifier = Modifier
+                        .weight(1f)
+                        .align(Alignment.CenterVertically)
                 ) {
 
                     Text(
