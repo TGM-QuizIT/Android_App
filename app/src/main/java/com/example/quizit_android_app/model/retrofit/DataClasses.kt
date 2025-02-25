@@ -136,7 +136,7 @@ data class GetResultsResponse (
 
 data class GetSingleResultsResponse (
     @SerializedName("status"  ) var status  : String?            = null,
-    @SerializedName("results" ) var results : Result? = null
+    @SerializedName("result" ) var result : Result? = null
 )
 
 data class Result (
