@@ -15,7 +15,7 @@ class ChangeUserYearUseCase @Inject constructor(
     suspend operator fun invoke(newUserYear: Int) {
         val response = dataRepo.changeUserYear(newUserYear)
         Log.d("ChangeUserYearUseCase", "invoke: $newUserYear")
-        if (response.status != null) {
+        if (response.status == "Success") {
             syncLocalSubjectsUseCase()
             syncLocalFocusUseCase()
         }
