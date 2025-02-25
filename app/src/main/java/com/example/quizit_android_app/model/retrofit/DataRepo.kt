@@ -241,7 +241,7 @@ class DataRepo @Inject constructor(private val context: Context) {
 
     // ------------------- Result Calls -------------------
 
-    suspend fun postResultOfFocus(focusId: Int, score: Double): GetResultsResponse {
+    suspend fun postResultOfFocus(focusId: Int, score: Double): GetSingleResultsResponse {
         return withContext(Dispatchers.IO) {
             try {
                 val id = sessionManager.getUserId()
@@ -252,12 +252,12 @@ class DataRepo @Inject constructor(private val context: Context) {
                 response
             } catch (e: Exception) {
                 Log.e("postResultOfFocus", "Failed to post focus result", e)
-                GetResultsResponse()
+                GetSingleResultsResponse()
             }
         }
     }
 
-    suspend fun postResultOfSubject(subjectID: Int, score: Double): GetResultsResponse {
+    suspend fun postResultOfSubject(subjectID: Int, score: Double): GetSingleResultsResponse {
         return withContext(Dispatchers.IO) {
             try {
                 val id = sessionManager.getUserId()
@@ -268,7 +268,7 @@ class DataRepo @Inject constructor(private val context: Context) {
                 response
             } catch (e: Exception) {
                 Log.e("postResultOfSubject", "Failed to post Subject result", e)
-                GetResultsResponse()
+                GetSingleResultsResponse()
             }
         }
     }

@@ -134,6 +134,11 @@ data class GetResultsResponse (
     @SerializedName("results" ) var results : ArrayList<Result> = arrayListOf()
 )
 
+data class GetSingleResultsResponse (
+    @SerializedName("status"  ) var status  : String?            = null,
+    @SerializedName("results" ) var results : Result? = null
+)
+
 data class Result (
     @SerializedName("resultId"    ) var resultId    : Int?    = null,
     @SerializedName("resultScore" ) var resultScore : Double?    = null,

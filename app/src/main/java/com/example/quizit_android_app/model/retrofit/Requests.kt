@@ -59,10 +59,10 @@ interface Requests {
     // ------------------- Result Calls -------------------
 
     @POST("result")
-    suspend fun postResultOfFocus(@Body result: PostResultRequestBody): GetResultsResponse
+    suspend fun postResultOfFocus(@Body result: PostResultRequestBody): GetSingleResultsResponse
 
     @POST("result/subject")
-    suspend fun postResultOfSubject(@Body result: PostResultRequestBody): GetResultsResponse
+    suspend fun postResultOfSubject(@Body result: PostResultRequestBody): GetSingleResultsResponse
 
     @GET("result")
     suspend fun getResultsOfUser(

@@ -10,10 +10,10 @@ class GetResultsUserUseCase @Inject constructor(
     val contentDataStore: ContentDataStore
 ){
     suspend operator fun invoke(amount: Int? = null) : List<Result> {
-        val localData = contentDataStore.getResults()
+        val localData = contentDataStore.getResults().sortedBy { it.resultDateTime }
         return localData.ifEmpty {
             val remoteData = dataRepo.fetchResultsOfUser(amount)
-            contentDataStore.saveResults(remoteData)
+            contentDataStore.saveResults(remoteData.sortedBy { it.resultDateTime })
             remoteData
         }
     }

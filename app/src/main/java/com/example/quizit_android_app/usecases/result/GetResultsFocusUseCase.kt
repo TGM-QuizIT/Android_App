@@ -8,6 +8,9 @@ class GetResultsFocusUseCase @Inject constructor(
     val dataRepo: DataRepo
 ) {
     suspend operator fun invoke(focusId: Int, amount: Int? = null) : List<Result> {
-        return dataRepo.fetchResultsOfFocus(focusId, amount)
+        val response = dataRepo.fetchResultsOfFocus(focusId, amount)
+        val sorted = response.sortedWith(compareByDescending<Result> { it.resultScore}
+            .thenByDescending { it.resultDateTime })
+        return sorted
     }
 }

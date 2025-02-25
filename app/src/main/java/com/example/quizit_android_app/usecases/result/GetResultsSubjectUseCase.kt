@@ -8,6 +8,9 @@ class GetResultsSubjectUseCase @Inject constructor(
     val dataRepo: DataRepo
 ) {
     suspend operator fun invoke(subjectId: Int, amount: Int? = null): List<Result> {
-        return dataRepo.fetchResultsOfSubject(subjectId, amount)
+        val response = dataRepo.fetchResultsOfSubject(subjectId, amount)
+        val sorted = response.sortedWith(compareByDescending<Result> { it.resultScore}
+            .thenByDescending { it.resultDateTime })
+        return sorted
     }
 }
