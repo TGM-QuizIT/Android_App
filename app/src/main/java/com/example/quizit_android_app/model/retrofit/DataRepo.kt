@@ -261,7 +261,7 @@ class DataRepo @Inject constructor(private val context: Context) {
         return withContext(Dispatchers.IO) {
             try {
                 val id = sessionManager.getUserId()
-                val response = service.postResultOfSubject(PostResultRequestBody(score, id, subjectID))
+                val response = service.postResultOfSubject(PostResultRequestBodyForSubject(score, id, subjectID))
                 withContext(Dispatchers.Main) {
                     Log.d("postResultOfSubject", "Subject Result posted")
                 }

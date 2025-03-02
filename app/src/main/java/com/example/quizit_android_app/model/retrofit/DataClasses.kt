@@ -148,12 +148,16 @@ data class Result (
     @SerializedName("resultDateTime"  ) var resultDateTime  : String? = null
 )
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 data class PostResultRequestBody (
     @SerializedName("resultScore") val resultScore: Double,
     @SerializedName("userId") val userId: Int?,
-    @SerializedName("focusId") val focusId: Int? = null,
-    @SerializedName("subjectId") val subjectId: Int? = null
+    @SerializedName("focusId") val focusId: Int?
+)
+
+data class PostResultRequestBodyForSubject (
+    @SerializedName("resultScore") val resultScore: Double,
+    @SerializedName("userId") val userId: Int?,
+    @SerializedName("subjectId") val subjectId: Int?
 )
 
 // ------------------- Friendship Dataclasses -------------------
