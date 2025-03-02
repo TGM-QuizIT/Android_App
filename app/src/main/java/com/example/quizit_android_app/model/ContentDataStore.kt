@@ -142,6 +142,12 @@ class ContentDataStore @Inject constructor(private val context: Context)  {
             }.first()
     }
 
+    suspend fun clearData() {
+        dataStore.edit { preferences ->
+            preferences.clear()
+        }
+    }
+
     // ------------------- Local User Inputs -------------------
     suspend fun savePendingResult(result: Result?) {
         dataStore.edit { preferences ->

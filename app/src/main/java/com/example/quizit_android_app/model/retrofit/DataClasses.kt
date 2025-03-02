@@ -249,7 +249,8 @@ data class FriendScore (
     @SerializedName("resultId"       ) var resultId       : Int?    = null,
     @SerializedName("resultScore"    ) var resultScore    : Double? = null,
     @SerializedName("userId"         ) var userId         : Int?    = null,
-    @SerializedName("focus"          ) var focus          : Focus?  = Focus(),
+    @SerializedName("focus"          ) var focus          : Focus?  = null,
+    @SerializedName("subject"        ) var subject        : Subject? = null,
     @SerializedName("resultDateTime" ) var resultDateTime : String? = null
 ): Parcelable
 
@@ -257,7 +258,8 @@ data class Challenge (
     @SerializedName("challengeId"       ) var challengeId       : Int?         = null,
     @SerializedName("challengeDateTime" ) var challengeDateTime : String?      = null,
     @SerializedName("friendship"        ) var friendship        : Friendship?  = Friendship(),
-    @SerializedName("focus"             ) var focus             : Focus?       = Focus(),
+    @SerializedName("focus"             ) var focus             : Focus?       = null,
+    @SerializedName("subject"           ) var subject           : Subject?    = null,
     @SerializedName("friendScore"       ) var friendScore       : FriendScore? = FriendScore()
 )
 
@@ -273,7 +275,7 @@ data class OpenChallenges (
     @SerializedName("challengeId"       ) var challengeId       : Int?        = null,
     @SerializedName("challengeDateTime" ) var challengeDateTime : String?     = null,
     @SerializedName("friendship"        ) var friendship        : Friendship? = Friendship(),
-    @SerializedName("focus"             ) var focus             : Focus?      = Focus(),
+    @SerializedName("focus"             ) var focus             : Focus?      = null,
     @SerializedName("subject"           ) var subject           : Subject?    = null,
     @SerializedName("score"             ) var score             : Score?     = Score(),
     @SerializedName("friendScore"       ) var friendScore       : FriendScore?     = FriendScore()
@@ -285,7 +287,8 @@ data class Score (
     @SerializedName("resultId"       ) var resultId       : Int?    = null,
     @SerializedName("resultScore"    ) var resultScore    : Double? = null,
     @SerializedName("userId"         ) var userId         : Int?    = null,
-    @SerializedName("focus"          ) var focus          : Focus?  = Focus(),
+    @SerializedName("focus"          ) var focus          : Focus?  = null,
+    @SerializedName("subject"        ) var subject        : Subject? = null,
     @SerializedName("resultDateTime" ) var resultDateTime : String? = null
 ): Parcelable
 
@@ -293,7 +296,7 @@ data class DoneChallenges (
     @SerializedName("challengeId"       ) var challengeId       : Int?         = null,
     @SerializedName("challengeDateTime" ) var challengeDateTime : String?      = null,
     @SerializedName("friendship"        ) var friendship        : Friendship?  = Friendship(),
-    @SerializedName("focus"             ) var focus             : Focus?       = Focus(),
+    @SerializedName("focus"             ) var focus             : Focus?       = null,
     @SerializedName("subject"           ) var subject           : Subject?    = null,
     @SerializedName("score"             ) var score             : Score?       = Score(),
     @SerializedName("friendScore"       ) var friendScore       : FriendScore? = FriendScore()
