@@ -1,5 +1,7 @@
 package com.example.quizit_android_app.ui.settings
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -45,6 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -61,6 +64,7 @@ fun SettingsScreen(
 
     val user: User? = viewModel.user
     val isLoading: Boolean = viewModel.isLoading
+    val context = LocalContext.current
 
 
 
@@ -129,9 +133,16 @@ fun SettingsScreen(
                         viewModel.updateUserYear(it)
                     })
 
-                    SettingsListItem(title = "Kontaktiere uns", imageVector = Icons.Default.Mail, onClick = {})
+                    SettingsListItem(title = "Kontaktiere uns", imageVector = Icons.Default.Mail, onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("mailto:khoeher@tgm.ac.at"))
+                        context.startActivity(intent)
+                    })
 
-                    SettingsListItem(title = "Über uns", imageVector = Icons.Outlined.Info, onClick = {})
+                    SettingsListItem(title = "Über uns", imageVector = Icons.Outlined.Info, onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://projekte.tgm.ac.at/quizit"))
+                        context.startActivity(intent)
+
+                    })
 
                     SettingsListItem(
                         title = "Abmelden",

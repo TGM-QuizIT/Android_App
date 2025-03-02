@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -62,6 +63,7 @@ import com.example.quizit_android_app.ui.theme.Typography
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import kotlin.math.roundToInt
 
 @Composable
 fun QuizDetailScreen(
@@ -90,7 +92,19 @@ fun QuizDetailScreen(
             selectedChallenge.let { challenge ->
                 ChallengeBottomSheet(
                     onClose = { coroutineScope.launch { challengeSheetState.hide() } },
-                    challenge = challenge
+                    challenge = challenge,
+                    onChallengeDecline = {
+                        coroutineScope.launch {
+                            //viewModel.declineChallenge(challenge!!)
+                            challengeSheetState.hide()
+                        }
+                    },
+                    onChallengeAccept = {
+                        coroutineScope.launch {
+                            //viewModel.acceptChallenge(challenge!!)
+                            challengeSheetState.hide()
+                        }
+                    }
                 )
             } ?: Box(modifier = Modifier.size(1.dp))
         }
@@ -286,7 +300,7 @@ fun SubjectResultCard(result: Result, index: Int) {
                 )
 
                 Text(
-                    text = "${result.resultScore?.toInt()}%",
+                    text = "${result.resultScore?.roundToInt()}%",
                     style = MaterialTheme.typography.labelSmall,
                     modifier = Modifier.align(Alignment.Center)
                 )
@@ -306,41 +320,28 @@ fun formatDate(input: String): String {
 }
 
 @Composable
-fun ChallengeBottomSheet(onClose: () -> Unit, challenge: OpenChallenges?) {
+fun ChallengeBottomSheet(onClose: () -> Unit, challenge: OpenChallenges?, onChallengeDecline: () -> Unit, onChallengeAccept: () -> Unit) {
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight(0.5f)
+            .wrapContentHeight()
             .background(color = Color(0xFFF8F9FE), shape = RoundedCornerShape(16.dp))
             .padding(16.dp),
         contentAlignment = Alignment.TopCenter
     ) {
         Column {
+            Text(challenge?.focus?.focusName ?: challenge?.subject?.subjectName ?: "", style = MaterialTheme.typography.titleLarge)
+
+            Spacer(modifier = Modifier.height(32.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(challenge?.focus?.focusName ?: challenge?.subject?.subjectName ?: "", style = MaterialTheme.typography.titleLarge)
-
-                IconButton(onClick = onClose, colors = IconButtonDefaults.iconButtonColors(containerColor = Color.White)) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Close",
-                        tint = Color.Black
-                    )
-                }
-
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
 
                     Box(
                         modifier = Modifier
@@ -356,7 +357,7 @@ fun ChallengeBottomSheet(onClose: () -> Unit, challenge: OpenChallenges?) {
                         )
                     }
 
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
 
                     Column(
                         verticalArrangement = Arrangement.Center
@@ -377,7 +378,7 @@ fun ChallengeBottomSheet(onClose: () -> Unit, challenge: OpenChallenges?) {
                     )
 
                     Text(
-                        text = "${challenge?.friendScore?.resultScore?.toInt()}%",
+                        text = "${challenge?.friendScore?.resultScore?.roundToInt()}%",
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.align(Alignment.Center)
                     )
@@ -393,7 +394,7 @@ fun ChallengeBottomSheet(onClose: () -> Unit, challenge: OpenChallenges?) {
             ) {
 
                 Button(
-                    onClick = { /*TODO*/ },
+                    onClick = { onChallengeDecline() },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.White
                     ),
@@ -417,7 +418,7 @@ fun ChallengeBottomSheet(onClose: () -> Unit, challenge: OpenChallenges?) {
                 }
 
                 Button(
-                    onClick = { /*TODO*/ },
+                    onClick = { onChallengeAccept() },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.White
                     ),

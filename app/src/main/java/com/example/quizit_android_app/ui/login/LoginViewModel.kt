@@ -27,6 +27,9 @@ class LoginViewModel @Inject constructor(
     private var _isLogInSuccess  = mutableStateOf(false)
     val isLogInSuccess: State<Boolean> = _isLogInSuccess
 
+    private var _errorMessage = mutableStateOf("")
+    val errorMessage: State<String> = _errorMessage
+
 
     public fun setPasswordVisibility() {
         _passwordVisibility.value = !_passwordVisibility.value
@@ -41,12 +44,19 @@ class LoginViewModel @Inject constructor(
     }
     public fun login() {
         viewModelScope.launch {
-            val user  = loginUseCase(_username.value, _password.value)
-            if(user != null) {
-                _isLogInSuccess.value = true
 
+            try {
+                val user  = loginUseCase(_username.value, _password.value)
+                if(user != null) {
+                    _isLogInSuccess.value = true
+
+                } else {
+                    _errorMessage.value = "Login fehlgeschlagen. Überprüfe deine Eingaben"
+                }
+
+            } catch (e: Exception) {
+                _errorMessage.value = "Login fehlgeschlagen. Überprüfe deine Eingaben"
             }
-
         }
 
     }

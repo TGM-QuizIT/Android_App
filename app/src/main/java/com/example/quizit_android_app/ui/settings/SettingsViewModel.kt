@@ -1,6 +1,7 @@
 package com.example.quizit_android_app.ui.settings
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.quizit_android_app.model.retrofit.User
@@ -70,5 +71,6 @@ class SettingsViewModel @Inject constructor(
         }
 
     }
+
 
 }

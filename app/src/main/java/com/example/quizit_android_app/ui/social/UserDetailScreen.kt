@@ -26,11 +26,15 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ChildFriendly
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.PendingActions
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -61,13 +65,15 @@ import com.example.quizit_android_app.ui.home.ChallengeType
 import com.example.quizit_android_app.ui.play_quiz.quiz.ChallengeBottomSheet
 import com.example.quizit_android_app.usecases.friendship.FriendshipStatus
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserDetailScreen(
     viewModel: UserDetailViewModel = hiltViewModel(),
-    onGoBack: () -> Unit
+    onGoBack: () -> Unit,
+    navigateToPlayChallenge: (OpenChallenges?) -> Unit
 ) {
 
     val user = viewModel.user.value
@@ -82,6 +88,8 @@ fun UserDetailScreen(
     val statisticsSheetState = androidx.compose.material.rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
     val coroutineScope = rememberCoroutineScope()
 
+    val deleteFriendshipSheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
+
     var selectedChallenge by remember { mutableStateOf<OpenChallenges?>(null) }
     val challengeSheetState = androidx.compose.material.rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
@@ -89,137 +97,267 @@ fun UserDetailScreen(
     )
 
 
-
-
     ModalBottomSheetLayout(
-        sheetContent =  { StatisticsBottomSheet {
-            coroutineScope.launch {
-                statisticsSheetState.hide()
-            }
-        } },
-        sheetState = statisticsSheetState,
+        sheetContent = {
+            DeleteFriendshipBottomSheet(
+                onClose = { coroutineScope.launch { deleteFriendshipSheetState.hide() } },
+                onDelete = {
+                    viewModel.removeFriendship()
+                    coroutineScope.launch { deleteFriendshipSheetState.hide() }
+                           },
+                user = user
+            )
+        },
+        sheetState = deleteFriendshipSheetState,
     ) {
         ModalBottomSheetLayout(
-            sheetState = challengeSheetState,
-            sheetContent = {
-                selectedChallenge.let { challenge ->
-                    ChallengeBottomSheet(
-                        onClose = { coroutineScope.launch { challengeSheetState.hide() } },
-                        challenge = challenge
-                    )
-                } ?: Box(modifier = Modifier.size(1.dp))
-            }
+            sheetContent =  { StatisticsBottomSheet {
+                coroutineScope.launch {
+                    statisticsSheetState.hide()
+                }
+            } },
+            sheetState = statisticsSheetState,
         ) {
-            Scaffold(
-                topBar = {
-                    SocialTopBar(onGoBack = { onGoBack() })
-                },
-                contentWindowInsets = WindowInsets(0.dp),
-                content = { paddingValues ->
-                    if (isLoading) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(paddingValues),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(
-                                trackColor = Color.Gray
-                            )
-                        }
-                    } else {
+            ModalBottomSheetLayout(
+                sheetState = challengeSheetState,
+                sheetContent = {
+                    selectedChallenge.let { challenge ->
+                        ChallengeBottomSheet(
+                            onClose = { coroutineScope.launch { challengeSheetState.hide() } },
+                            challenge = challenge,
+                            onChallengeAccept = {
+                                navigateToPlayChallenge(challenge)
 
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(paddingValues)
-                                .padding(start = 16.dp)
-                                .padding(bottom = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            item {
-                                UserInfos(
-                                    user = user,
-                                    friendshipStatus = friendshipStatus,
-                                    addFriend = { userId -> viewModel.addFriend(userId) },
-                                    acceptFriendship = { viewModel.acceptFriendship() },
-                                    removeFriendship = { viewModel.removeFriendship() }
+                                coroutineScope.launch {
+                                    challengeSheetState.hide()
+                                }
+
+                            },
+                            onChallengeDecline = {
+                                viewModel.declineChallenge(challenge?.challengeId!!)
+                                coroutineScope.launch {
+                                    challengeSheetState.hide()
+                                }
+                            }
+                        )
+                    } ?: Box(modifier = Modifier.size(1.dp))
+                }
+            ) {
+                Scaffold(
+                    topBar = {
+                        SocialTopBar(onGoBack = { onGoBack() })
+                    },
+                    contentWindowInsets = WindowInsets(0.dp),
+                    content = { paddingValues ->
+                        if (isLoading) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(paddingValues),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(
+                                    trackColor = Color.Gray
                                 )
                             }
+                        } else {
 
-                            item {
-
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(end = 16.dp)
-                                ) {
-                                    StatisticsCard(
-                                        onClick = { coroutineScope.launch { statisticsSheetState.show() } },
-                                        stats = userStats
-                                    )
-
-                                }
-
-                            }
-
-                            if (openChallenges.isNotEmpty()) {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(paddingValues)
+                                    .padding(start = 16.dp),
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
                                 item {
-                                    Text(
-                                        "Herausforderungen von ${user?.userFullname?.split(" ")?.first()}",
-                                        style = MaterialTheme.typography.titleMedium
+                                    UserInfos(
+                                        user = user,
+                                        friendshipStatus = friendshipStatus,
+                                        addFriend = { userId -> viewModel.addFriend(userId) },
+                                        acceptFriendship = { viewModel.acceptFriendship() },
+                                        removeFriendship = { coroutineScope.launch { deleteFriendshipSheetState.show() } }
                                     )
                                 }
 
                                 item {
-                                    LazyRow(
-                                        modifier = Modifier.fillMaxWidth()
+
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(end = 16.dp)
                                     ) {
-                                        items(openChallenges) { challenge ->
+                                        StatisticsCard(
+                                            onClick = { coroutineScope.launch { statisticsSheetState.show() } },
+                                            stats = userStats
+                                        )
 
-                                            if(challenge.friendScore?.resultScore != null ) {
-                                                OpenChallengeCard(
-                                                    challenge = challenge,
-                                                    type = ChallengeType.FRIEND,
-                                                    onClick = {
-                                                        selectedChallenge = challenge
-                                                        coroutineScope.launch { challengeSheetState.show() }
-                                                    },
+                                    }
 
-                                                )
-                                                Spacer(modifier = Modifier.size(16.dp))
+                                }
+
+                                if (openChallenges.isNotEmpty()) {
+                                    item {
+                                        Text(
+                                            "Herausforderungen von ${
+                                                user?.userFullname?.split(" ")?.first()
+                                            }",
+                                            style = MaterialTheme.typography.titleMedium
+                                        )
+                                    }
+
+                                    item {
+                                        LazyRow(
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            items(openChallenges) { challenge ->
+
+                                                if (challenge.friendScore?.resultScore != null) {
+                                                    OpenChallengeCard(
+                                                        challenge = challenge,
+                                                        type = ChallengeType.FRIEND,
+                                                        onClick = {
+                                                            selectedChallenge = challenge
+                                                            coroutineScope.launch { challengeSheetState.show() }
+                                                        },
+
+                                                        )
+                                                    Spacer(modifier = Modifier.size(16.dp))
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            }
 
-                            if (doneChallenges.isNotEmpty()) {
-                                item {
-                                    Text(
-                                        "Herausforderungen Historie",
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
-                                }
+                                if (doneChallenges.isNotEmpty()) {
+                                    item {
+                                        Text(
+                                            "Herausforderungen Historie",
+                                            style = MaterialTheme.typography.titleMedium
+                                        )
+                                    }
 
-                                item {
-                                    LazyRow(
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
-                                        items(doneChallenges) { challenge ->
-                                            DoneChallengeCard(challenge = challenge)
-                                            Spacer(modifier = Modifier.size(16.dp))
+                                    item {
+                                        LazyRow(
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            items(doneChallenges) { challenge ->
+                                                DoneChallengeCard(challenge = challenge)
+                                                Spacer(modifier = Modifier.size(16.dp))
+                                            }
                                         }
+
+                                        Spacer(modifier = Modifier.size(16.dp))
                                     }
                                 }
                             }
                         }
                     }
-                }
-            )
+                )
+            }
 
         }
+
     }
+}
+
+@Composable
+fun DeleteFriendshipBottomSheet(onClose: () -> Unit, onDelete: () -> Unit, user: User?) {
+    Box(
+        modifier = Modifier
+            .background(Color(0xFFEAF2FF))
+            .fillMaxWidth()
+            .padding(16.dp)
+
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            Text(
+                "Freundschaft beenden",
+                style = MaterialTheme.typography.titleLarge
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+
+            Text(
+                "Möchtest du die Freundschaft mit ${user?.userFullname} wirklich beenden?",
+                style = MaterialTheme.typography.bodySmall
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+
+                Button(
+                    onClick = { onClose() },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.weight(1f)
+
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceAround
+
+                    ) {
+                        Text(
+                            "Abbrechen",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                            color = Color.Black
+                        )
+
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close",
+                            tint = Color(0xFFFF3B30)
+                        )
+                    }
+
+                }
+
+                Spacer(modifier = Modifier.size(8.dp))
+
+                Button(
+                    onClick = { onDelete() },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.weight(1f)
+
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceAround
+
+                    ) {
+                        Text(
+                            "Freund entfernen",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                            color = Color.Black
+                        )
+
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Check",
+                            tint = Color(0xFF007AFF)
+                        )
+                    }
+
+                }
+
+
+            }
+        }
+
+    }
+
 }
 
 
@@ -469,7 +607,7 @@ fun DoneChallengeCard(challenge: DoneChallenges) {
                 )
 
                 Text(
-                    text = "${(challenge.score?.resultScore?.toInt() ?: 0)}%",
+                    text = "${(challenge.score?.resultScore?.roundToInt() ?: 0)}%",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Black,
                     modifier = Modifier.align(Alignment.Center)
@@ -503,7 +641,7 @@ fun DoneChallengeCard(challenge: DoneChallenges) {
                 )
 
                 Text(
-                    text = "${(challenge.friendScore?.resultScore?.toInt() ?: 0)}%",
+                    text = "${(challenge.friendScore?.resultScore?.roundToInt() ?: 0)}%",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Black,
                     modifier = Modifier.align(Alignment.Center)

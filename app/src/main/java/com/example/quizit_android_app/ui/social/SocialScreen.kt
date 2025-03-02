@@ -696,7 +696,7 @@ fun StatisticsSection(modifier: Modifier, results: List<com.example.quizit_andro
    LazyColumn(
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, top = 32.dp, bottom = 16.dp)
+            .padding(start = 16.dp, top = 32.dp)
     ) {
        item {
 
@@ -751,6 +751,7 @@ fun StatisticsSection(modifier: Modifier, results: List<com.example.quizit_andro
                        Spacer(modifier = Modifier.size(16.dp))
                    }
                }
+               Spacer(modifier = Modifier.size(16.dp))
 
            }
 
@@ -768,7 +769,7 @@ fun StatisticsBottomSheet(onClose: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight(0.5f)
+            .wrapContentHeight()
             .background(color = Color(0xFFF8F9FE), shape = RoundedCornerShape(16.dp))
             .padding(16.dp)
     ) {
@@ -868,7 +869,6 @@ fun StatisticsCard(onClick: () -> Unit,  stats: UserStatsResponse?) {
         modifier = Modifier
             .fillMaxWidth()
             .height(110.dp)
-            .padding()
             .clickable { onClick() }
     ) {
         Row(
@@ -1051,7 +1051,7 @@ fun ResultCard(result: Result) {
                                 .background(Color(0xFF006FFD), shape = RoundedCornerShape(8.dp))
                         )
                         Text(
-                            text = result.resultScore.toString()+"%",
+                            text = Math.round(result.resultScore?.times(100.0) ?: 0.0).div(100.0).toString()+"%",
                             color = Color.Black,
                             modifier = Modifier.align(Alignment.Center),
                             style = MaterialTheme.typography.labelLarge

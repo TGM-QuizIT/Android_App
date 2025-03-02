@@ -58,13 +58,13 @@ data class FocusRoute(val subject: Subject) {
 @Serializable
 data class QuizRoute(
     val focus: Focus?,
-    val subject: Subject,
+    val subject: Subject?,
     val challenge: OpenChallenges? = null
 ) {
     companion object {
         val typeMap = mapOf(
             typeOf<Focus?>() to CustomNavType.FocusType,
-            typeOf<Subject>() to CustomNavType.SubjectType,
+            typeOf<Subject?>() to CustomNavType.SubjectType,
             typeOf<OpenChallenges?>() to CustomNavType.OpenChallengeType
         )
 
@@ -146,6 +146,9 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
                 navigateToStatistics = {
                     navController.navigate(SocialRoute(true))
                 },
+                navigateToPlayChallenge = {
+                    navController.navigate(QuizRoute(focus = null, subject = null, challenge = it))
+                }
 
             )
         }
@@ -236,6 +239,9 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
                 onGoBack = {
                     navController.navigate(SocialRoute(showStatistics = false))
                 },
+                navigateToPlayChallenge = {
+                    navController.navigate(QuizRoute(focus = null, subject = null, challenge = it))
+                }
 
             )
 

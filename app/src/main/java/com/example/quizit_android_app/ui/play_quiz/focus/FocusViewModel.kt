@@ -11,6 +11,7 @@ import com.example.quizit_android_app.model.retrofit.Focus
 import com.example.quizit_android_app.model.retrofit.Subject
 import com.example.quizit_android_app.navigation.FocusRoute
 import com.example.quizit_android_app.usecases.focus.GetFocusForSubjectUseCase
+import com.example.quizit_android_app.usecases.localdata.focus.SyncLocalFocusUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -18,7 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class FocusViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val getFocusForSubjectUseCase: GetFocusForSubjectUseCase
+    private val getFocusForSubjectUseCase: GetFocusForSubjectUseCase,
+    private val syncLocalFocusUseCase: SyncLocalFocusUseCase
 ): ViewModel() {
     private var _focusList by mutableStateOf(listOf<Focus>())
     val focusList: List<Focus> get() = _focusList
@@ -66,6 +68,23 @@ class FocusViewModel @Inject constructor(
 
         Log.d("",count.toString())
         return count
+    }
+
+    fun refreshData(onComplete: () -> Unit) {
+
+        viewModelScope.launch {
+            try {
+                syncLocalFocusUseCase()
+
+                _focusList = getFocusForSubjectUseCase(_subject.value!!.subjectId)
+                _overallQuestionCount.value = getQuestionCount()
+            } catch (e: Exception) {
+                Log.e("FocusViewModel", "Error fetching focus: "+e)
+            } finally {
+                onComplete()
+            }
+        }
+
     }
 
 

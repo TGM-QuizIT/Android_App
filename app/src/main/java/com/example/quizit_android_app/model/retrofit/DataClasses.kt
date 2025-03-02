@@ -308,23 +308,38 @@ data class OpenChallengesResponse (
 
 object CustomNavType {
 
-    val SubjectType = object : NavType<Subject>(
-        isNullableAllowed = false,
+    val SubjectType = object : NavType<Subject?>(
+        isNullableAllowed = true,
     )  {
         override fun get(bundle: Bundle, key: String): Subject? {
-            return Json.decodeFromString(bundle.getString(key)?: return  null)
+            val encoded = bundle.getString(key) ?: return null
+            if (encoded == "null") return null
+            return try {
+                Json.decodeFromString(decodeFromBase64UrlSafe(encoded))
+            } catch (e: Exception) {
+                null
+            }
         }
 
-        override fun parseValue(value: String): Subject {
-            return Json.decodeFromString(decodeFromBase64UrlSafe(value))
+        override fun parseValue(value: String): Subject? {
+            if (value == "null") return null
+            return try {
+                Json.decodeFromString(decodeFromBase64UrlSafe(value))
+            } catch (e: Exception) {
+                null
+            }
         }
 
-        override fun put(bundle: Bundle, key: String, value: Subject) {
-            bundle.putString(key, Json.encodeToString(value))
+        override fun put(bundle: Bundle, key: String, value: Subject?) {
+            if (value == null) {
+                bundle.putString(key, "null")
+            } else {
+                bundle.putString(key, encodeToBase64UrlSafe(Json.encodeToString(value)))
+            }
         }
 
-        override fun serializeAsValue(value: Subject): String {
-            return encodeToBase64UrlSafe(Json.encodeToString(value))
+        override fun serializeAsValue(value: Subject?): String {
+            return if (value == null) "null" else encodeToBase64UrlSafe(Json.encodeToString(value))
         }
     }
 

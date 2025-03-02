@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,6 +28,7 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.Button
@@ -54,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.quizit_android_app.model.retrofit.AcceptedFriendship
 import com.example.quizit_android_app.model.retrofit.Focus
+import com.example.quizit_android_app.model.retrofit.OpenChallenges
 import com.example.quizit_android_app.model.retrofit.Options
 import com.example.quizit_android_app.model.retrofit.Questions
 import com.example.quizit_android_app.model.retrofit.Subject
@@ -61,6 +64,7 @@ import com.example.quizit_android_app.ui.social.FriendshipCard
 import com.example.quizit_android_app.ui.social.UserCard
 import com.example.quizit_android_app.ui.theme.Typography
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -80,6 +84,8 @@ fun QuizScreen(
 
     val friendships = quizViewModel.friendships.value
     val isModalSheetLoading = quizViewModel.isBottomSheetLoading.value
+
+    val challenge = quizViewModel.challenge.value
 
 
     Scaffold(
@@ -127,7 +133,8 @@ fun QuizScreen(
                             onFriendClick = { quizViewModel.challengeFriend(it, focus = focus, subject = subject!!) },
                             friendships = friendships,
                             isModalSheetLoading = isModalSheetLoading,
-                            onChallengeClicked = { quizViewModel.getFriendships() }
+                            onChallengeClicked = { quizViewModel.getFriendships() },
+                            challenge = challenge
                         )
                     }
                 }
@@ -236,7 +243,7 @@ fun QuizQuestion(
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .height((LocalConfiguration.current.screenHeightDp * 0.2f).dp),
+                .fillMaxHeight(0.3f),
 
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.primary
@@ -419,6 +426,7 @@ fun FriendListBottomSheet(
 fun QuizResult(
     focus: String?,
     subject: String?,
+    challenge: OpenChallenges?,
     score: Float, results: List<ResultItem>,
     onCloseResult: () -> Unit,
     navigateToQuizDetail: () -> Unit,
@@ -473,9 +481,6 @@ fun QuizResult(
                                     style = Typography.titleMedium,
                                     modifier = Modifier.align(Alignment.Center)
                                 )
-
-
-
                             }
                             else {
                                 Spacer(modifier = Modifier
@@ -523,56 +528,214 @@ fun QuizResult(
             },
             content = { paddingValues ->
 
+                val correctAnswers = results.count { it.isCorrect }
+                val incorrectAnswers = results.count { !it.isCorrect }
+                val percentage = (score * 100).roundToInt()
+
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp)
                         .padding(paddingValues),
                 ) {
-                    val correctAnswers = results.count { it.isCorrect }
-                    val incorrectAnswers = results.count { !it.isCorrect }
-                    val percentage = (score * 100).toInt()
 
-                    Text(
-                        modifier = Modifier.padding(start=8.dp),
-                        text = "Dein Resultat",
-                        style = MaterialTheme.typography.titleMedium,
-                    )
+                    if (challenge == null) {
 
-                    Spacer(modifier = Modifier.size(12.dp))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(end = 16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Spacer(modifier = Modifier.size(40.dp))
-                        Box(
-                            contentAlignment = Alignment.Center,
+                        Text(
+                            modifier = Modifier.padding(start = 8.dp),
+                            text = "Dein Resultat",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+
+                        Spacer(modifier = Modifier.size(12.dp))
+                        Row(
                             modifier = Modifier
-                                .size(100.dp)
-                            //.padding(8.dp)
+                                .fillMaxWidth()
+                                .padding(end = 16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            CircularProgressIndicator(
-                                progress = { score },
-                                modifier = Modifier.fillMaxSize(),
-                                color = Color(0xFF006FFD),
-                                strokeWidth = 13.dp,
-                                trackColor = Color(0xFFF4F3F6)
+                            Spacer(modifier = Modifier.size(40.dp))
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .size(100.dp)
+                                //.padding(8.dp)
+                            ) {
+                                CircularProgressIndicator(
+                                    progress = { score },
+                                    modifier = Modifier.fillMaxSize(),
+                                    color = Color(0xFF006FFD),
+                                    strokeWidth = 13.dp,
+                                    trackColor = Color(0xFFF4F3F6)
 
-                            )
-                            Text(
-                                text = "$percentage%",
-                                style = MaterialTheme.typography.titleLarge,
-                                color = Color.Black
-                            )
+                                )
+                                Text(
+                                    text = "$percentage%",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = Color.Black
+                                )
+                            }
+
+
+                            Spacer(modifier = Modifier.size(32.dp))
+
+                            // Buttons
+                            Column {
+                                Button(
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            sheetState.show()
+                                            onChallengeClicked()
+                                        }
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        MaterialTheme.colorScheme.secondary
+                                    ),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(48.dp),
+
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        modifier = Modifier.fillMaxSize()
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.PersonAdd,
+                                            contentDescription = "Freund herausfordern",
+                                            tint = Color.Black,
+
+
+                                            )
+                                        Text(
+                                            text = "Herausfordern",
+                                            color = Color.Black,
+                                            style = MaterialTheme.typography.titleSmall
+                                        )
+
+                                        Spacer(modifier = Modifier)
+
+                                    }
+
+                                }
+
+                                Spacer(modifier = Modifier.size(8.dp))
+
+
+                                Button(
+                                    onClick = { navigateToQuizDetail() },
+                                    colors = ButtonDefaults.buttonColors(
+                                        MaterialTheme.colorScheme.secondary
+                                    ),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(48.dp),
+
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        modifier = Modifier.fillMaxSize()
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.History,
+                                            contentDescription = "Historie ansehen",
+                                            tint = Color.Black
+                                        )
+                                        Text(
+                                            text = "Historie",
+                                            color = Color.Black,
+                                            style = MaterialTheme.typography.titleSmall
+                                        )
+
+                                        Spacer(modifier = Modifier)
+
+                                    }
+
+                                }
+                            }
                         }
 
+                    } else {
 
-                        Spacer(modifier = Modifier.size(32.dp))
+                        Text(
+                            modifier = Modifier.padding(start = 8.dp),
+                            text = "Challenge von ${challenge.friendship?.friend?.userFullname!!.split(" ")[0]}",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        Spacer(modifier = Modifier.size(16.dp))
 
-                        // Buttons
-                        Column {
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal= 16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .size(100.dp)
+                                //.padding(8.dp)
+                            ) {
+                                CircularProgressIndicator(
+                                    progress = { score },
+                                    modifier = Modifier.fillMaxSize(),
+                                    color = Color(0xFF006FFD),
+                                    strokeWidth = 13.dp,
+                                    trackColor = Color(0xFFF4F3F6)
+
+                                )
+                                Text(
+                                    text = "$percentage%",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = Color.Black
+                                )
+                            }
+                            Icon(
+                                imageVector = Icons.Default.EmojiEvents,
+                                modifier = Modifier.align(Alignment.CenterVertically).size(50.dp),
+                                contentDescription = "Challenge",
+                                tint = if(percentage >= challenge.friendScore?.resultScore!!) Color(0xFFFF9913) else Color(0xFFC7C1BA)
+
+                            )
+
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .size(100.dp)
+                                //.padding(8.dp)
+                            ) {
+                                CircularProgressIndicator(
+                                    progress = { challenge.friendScore?.resultScore!!.toFloat()/100f  },
+                                    modifier = Modifier.fillMaxSize(),
+                                    color = Color(0xFF006FFD),
+                                    strokeWidth = 13.dp,
+                                    trackColor = Color(0xFFF4F3F6)
+
+                                )
+                                Text(
+                                    text = "${challenge.friendScore?.resultScore?.roundToInt()}%",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = Color.Black
+                                )
+                            }
+
+                        }
+
+                        Spacer(modifier = Modifier.size(16.dp))
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                        ) {
+
                             Button(
                                 onClick = {
                                     coroutineScope.launch {
@@ -584,7 +747,7 @@ fun QuizResult(
                                     MaterialTheme.colorScheme.secondary
                                 ),
                                 modifier = Modifier
-                                    .fillMaxWidth()
+                                    .weight(1f)
                                     .height(48.dp),
 
                                 shape = RoundedCornerShape(8.dp)
@@ -602,7 +765,11 @@ fun QuizResult(
 
 
                                         )
-                                    Text(text = "Herausfordern", color = Color.Black, style= MaterialTheme.typography.titleSmall)
+                                    Text(
+                                        text = "Herausfordern",
+                                        color = Color.Black,
+                                        style = MaterialTheme.typography.titleSmall
+                                    )
 
                                     Spacer(modifier = Modifier)
 
@@ -619,7 +786,7 @@ fun QuizResult(
                                     MaterialTheme.colorScheme.secondary
                                 ),
                                 modifier = Modifier
-                                    .fillMaxWidth()
+                                    .weight(1f)
                                     .height(48.dp),
 
                                 shape = RoundedCornerShape(8.dp)
@@ -634,30 +801,33 @@ fun QuizResult(
                                         contentDescription = "Historie ansehen",
                                         tint = Color.Black
                                     )
-                                    Text(text = "Historie", color = Color.Black, style = MaterialTheme.typography.titleSmall)
+                                    Text(
+                                        text = "Historie",
+                                        color = Color.Black,
+                                        style = MaterialTheme.typography.titleSmall
+                                    )
 
                                     Spacer(modifier = Modifier)
 
                                 }
 
                             }
+
                         }
 
+
                     }
+
+
 
                     Spacer(modifier = Modifier.size(16.dp))
 
                     LazyColumn {
-                        itemsIndexed(results) { index,result ->
-                            ResultCard(result = result, questionIndex=index)
+                        itemsIndexed(results) { index, result ->
+                            ResultCard(result = result, questionIndex = index)
                         }
                     }
-
-
-
                 }
-
-
             }
         )
 

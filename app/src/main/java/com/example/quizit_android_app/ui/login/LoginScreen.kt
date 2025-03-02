@@ -51,7 +51,7 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit
 ) {
 
-    var isLogInSuccess = viewModel.isLogInSuccess.value
+    val isLogInSuccess = viewModel.isLogInSuccess.value
 
     if(isLogInSuccess){
         onLoginSuccess()
@@ -130,6 +130,16 @@ fun LoginScreen(
                         modifier = Modifier.fillMaxWidth(),
                         colors = TextFieldDefaults.colors(unfocusedContainerColor = Color(0xFFf2f2f2), focusedContainerColor = Color(0xFFf2f2f2))
                     )
+
+                    if (viewModel.errorMessage.value.isNotEmpty()) {
+                        Text(
+                            text = viewModel.errorMessage.value,
+                            color = Color.Red,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
+
 
                     Spacer(modifier = Modifier.height(32.dp))
                     HorizontalDivider(thickness = 1.dp, color = Color(0xFFE5E5E5))

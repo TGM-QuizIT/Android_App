@@ -8,12 +8,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.quizit_android_app.model.retrofit.AcceptedFriendship
 import com.example.quizit_android_app.model.retrofit.Focus
+import com.example.quizit_android_app.model.retrofit.OpenChallenges
 import com.example.quizit_android_app.model.retrofit.Questions
 import com.example.quizit_android_app.model.retrofit.Subject
 import com.example.quizit_android_app.navigation.QuizRoute
+import com.example.quizit_android_app.usecases.challenge.AddChallengeForFocusUseCase
+import com.example.quizit_android_app.usecases.challenge.AddChallengeForSubjectUseCase
+import com.example.quizit_android_app.usecases.challenge.AssignResultToChallengeUseCase
 import com.example.quizit_android_app.usecases.friendship.GetAcceptedFriendshipsUseCase
 import com.example.quizit_android_app.usecases.quiz.GetQuizOfFocusUseCase
 import com.example.quizit_android_app.usecases.quiz.GetQuizOfSubjectUseCase
+import com.example.quizit_android_app.usecases.result.AddResultFocusUseCase
+import com.example.quizit_android_app.usecases.result.AddResultSubjectUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -23,7 +29,12 @@ class QuizViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getQuizOfSubjectUseCase: GetQuizOfSubjectUseCase,
     private val getQuizOfFocusUseCase: GetQuizOfFocusUseCase,
-    private val getAcceptedFriendshipsUseCase: GetAcceptedFriendshipsUseCase
+    private val getAcceptedFriendshipsUseCase: GetAcceptedFriendshipsUseCase,
+    private val addResultSubjectUseCase: AddResultSubjectUseCase,
+    private val addResultFocusUseCase: AddResultFocusUseCase,
+    private val assignResultToChallengeUseCase: AssignResultToChallengeUseCase,
+    private val addChallengeForSubjectUseCase: AddChallengeForSubjectUseCase,
+    private val addChallengeForFocusUseCase: AddChallengeForFocusUseCase
 ): ViewModel() {
     private val _currentQuestionIndex = mutableStateOf(0)
     val currentQuestionIndex: State<Int> = _currentQuestionIndex
@@ -53,28 +64,39 @@ class QuizViewModel @Inject constructor(
     private val _friendships = mutableStateOf(listOf<AcceptedFriendship>())
     val friendships: State<List<AcceptedFriendship>> = _friendships
 
+    private val _challenge = mutableStateOf<OpenChallenges?>(null)
+    val challenge: State<OpenChallenges?> = _challenge
+
 
 
 
 
 
     init {
-        _focus.value = QuizRoute.from(savedStateHandle).focus
-        _subject.value = QuizRoute.from(savedStateHandle).subject
+        _challenge.value = QuizRoute.from(savedStateHandle).challenge
+        Log.d("QuizViewModel", "Challenge: ${_challenge.value}")
 
-
-        val id = _focus.value?.focusId ?: _subject.value?.subjectId
-        var isQuizOfSubject = false
-        if(_focus.value == null) {
-            isQuizOfSubject = true
+        if(_challenge.value == null) {
+            _focus.value = QuizRoute.from(savedStateHandle).focus
+            _subject.value = QuizRoute.from(savedStateHandle).subject
         }
-
-
-        setQuestions(id, isQuizOfSubject)
+        else {
+            if(_challenge.value?.focus != null) {
+                _focus.value = _challenge.value!!.focus
+                setQuestions(_subject.value!!.subjectId, false)
+                Log.d("QuizViewModel", "Focus: ${_focus.value}")
+            }
+            else {
+                _subject.value = _challenge?.value?.subject
+                setQuestions(_subject.value!!.subjectId, true)
+                Log.d("QuizViewModel", "Subject: ${_subject.value}")
+            }
+        }
     }
 
 
     private fun setQuestions(id: Int?, isQuizOfSubject: Boolean) {
+        Log.d("QuizViewModel", "Setting questions for $id with isQuizOfSubject: $isQuizOfSubject")
         viewModelScope.launch {
             _isLoading.value = true // Ladezustand aktivieren
             try {
@@ -123,7 +145,9 @@ class QuizViewModel @Inject constructor(
         _currentQuestionIndex.value += 1
         _selectedAnswers.value = emptyList()
 
-        calculateScore()
+        if(currentQuestionIndex.value >= questions.value.size) {
+            setResult()
+        }
     }
 
     fun calculateScore(): Float {
@@ -205,13 +229,83 @@ class QuizViewModel @Inject constructor(
 
     }
 
-    fun challengeFriend(friendshipId: Int, focus: Focus?, subject: Subject) {
+    fun challengeFriend(friendshipId: Int, focus: Focus?, subject: Subject?) {
+        viewModelScope.launch {
+            _isBottomSheetLoading.value = true
+            try {
+                if(focus == null) {
+                    addChallengeForSubjectUseCase(friendshipId, subject!!.subjectId)
+                }
+                else {
+                    addChallengeForFocusUseCase(friendshipId, focus.focusId!!)
+                }
+
+            } catch (e: Exception) {
+                Log.e("QuizViewModel", "Error challenging friend", e)
+            } finally {
+                _isBottomSheetLoading.value = false
+            }
+        }
+
 
     }
 
+    fun setResult() {
+
+        val score = calculateScore()
+
+        viewModelScope.launch {
+            _isLoading.value = true
+            if (_challenge.value == null) {
+                try {
+                    if (_focus.value == null) {
+                        addResultSubjectUseCase(_subject.value!!.subjectId, score.toDouble())
+                    } else {
+                        addResultFocusUseCase(_focus.value!!.focusId!!, score.toDouble())
+                    }
+                } catch (e: Exception) {
+                    Log.e("QuizViewModel", "Error adding result", e)
+                } finally {
+                    _isLoading.value = false
+                }
 
 
+            } else {
+                try {
+                    if (_focus.value == null) {
+                        val response =
+                            addResultSubjectUseCase(_subject.value!!.subjectId, score.toDouble())
 
+                        if (response.status == "Success") {
+                            assignResultToChallengeUseCase(
+                                challengeId = _challenge.value!!.challengeId!!,
+                                result = response.result?.resultId!!
+                            )
+                        }
+
+                    } else {
+                        val response =
+                            addResultFocusUseCase(_focus.value!!.focusId!!, score.toDouble())
+
+                        if (response.status == "Success") {
+                            assignResultToChallengeUseCase(
+                                challengeId = _challenge.value!!.challengeId!!,
+                                result = response.result?.resultId!!
+                            )
+
+                        }
+
+                    }
+                } catch (e: Exception) {
+                    Log.e("QuizViewModel", "Error assigning result to challenge", e)
+                } finally {
+                    _isLoading.value = false
+
+                }
+            }
+
+        }
+    }
 }
 
 

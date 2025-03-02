@@ -73,6 +73,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.rememberAsyncImagePainter
+import com.example.quizit_android_app.model.retrofit.Challenge
+import com.example.quizit_android_app.model.retrofit.Focus
 import com.example.quizit_android_app.ui.play_quiz.quiz.ChallengeBottomSheet
 import kotlinx.coroutines.launch
 
@@ -82,6 +84,7 @@ fun HomeScreen(
     navigateToSubject: () -> Unit,
     navigateToFocus: (Subject) -> Unit,
     navigateToChallenge: () -> Unit,
+    navigateToPlayChallenge: (OpenChallenges?) -> Unit,
     navigateToStatistics: () -> Unit,
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -116,7 +119,18 @@ fun HomeScreen(
             selectedChallenge.let { challenge ->
                 ChallengeBottomSheet(
                     onClose = { coroutineScope.launch { challengeSheetState.hide() } },
-                    challenge = challenge
+                    challenge = challenge,
+                    onChallengeAccept = {
+                        coroutineScope.launch {
+                            navigateToPlayChallenge(challenge)
+                            challengeSheetState.hide()
+                        }
+                    },
+                    onChallengeDecline = {
+                        coroutineScope.launch {
+                            challengeSheetState.hide()
+                        }
+                    }
                 )
             } ?: Box(modifier = Modifier.size(1.dp))
         }
@@ -158,9 +172,8 @@ fun HomeScreen(
                         LazyColumn(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(vertical = 16.dp)
+                                .padding(top = 16.dp)
                                 .padding(start = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             item {
                                 SubjectSection(
@@ -168,6 +181,7 @@ fun HomeScreen(
                                     navigateToSubjects = { navigateToSubject() },
                                     navigateToFocus = { subject -> navigateToFocus(subject) }
                                 )
+                                Spacer(modifier = Modifier.size(32.dp))
                             }
                             item {
                                 ChallengeSection(
@@ -178,12 +192,14 @@ fun HomeScreen(
                                         coroutineScope.launch { challengeSheetState.show() }
                                     }
                                 )
+                                Spacer(modifier = Modifier.size(32.dp))
                             }
                             item {
                                 StatisticsSection(
                                     navigateToStatistics = { navigateToStatistics() },
                                     stats = stats
                                 )
+                                Spacer(modifier = Modifier.size(16.dp))
                             }
                         }
                     }

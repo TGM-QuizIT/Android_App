@@ -14,6 +14,7 @@ import com.example.quizit_android_app.model.retrofit.OpenChallenges
 import com.example.quizit_android_app.model.retrofit.User
 import com.example.quizit_android_app.model.retrofit.UserStatsResponse
 import com.example.quizit_android_app.navigation.UserDetailRoute
+import com.example.quizit_android_app.usecases.challenge.DeleteChallengeUseCase
 import com.example.quizit_android_app.usecases.challenge.GetChallengesOfFriendshipUseCase
 import com.example.quizit_android_app.usecases.challenge.GetDoneChallengesUseCase
 import com.example.quizit_android_app.usecases.friendship.AcceptFriendshipUseCase
@@ -37,7 +38,8 @@ class UserDetailViewModel @Inject constructor(
     private val getFriendshipStatusUseCase: GetFriendshipStatusUseCase,
     private val addFriendshipUseCase: AddFriendshipUseCase,
     private val deleteDeclineFriendshipUseCase: DeleteDeclineFriendshipUseCase,
-    private val acceptFriendshipUseCase: AcceptFriendshipUseCase
+    private val acceptFriendshipUseCase: AcceptFriendshipUseCase,
+    private val deleteChallengeUseCase: DeleteChallengeUseCase
 
 ): ViewModel() {
 
@@ -205,6 +207,21 @@ class UserDetailViewModel @Inject constructor(
             }
         }
 
+    }
+
+    fun declineChallenge(id: Int) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                deleteChallengeUseCase(id)
+
+                _openChallenges.value = _openChallenges.value.filter { it.challengeId != id }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                _isLoading.value = false
+            }
+        }
     }
 
 }
