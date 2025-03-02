@@ -79,6 +79,13 @@ class QuizViewModel @Inject constructor(
         if(_challenge.value == null) {
             _focus.value = QuizRoute.from(savedStateHandle).focus
             _subject.value = QuizRoute.from(savedStateHandle).subject
+
+            if(_focus.value != null) {
+                setQuestions(_focus.value!!.focusId, false)
+            }
+            else {
+                setQuestions(_subject.value!!.subjectId, true)
+            }
         }
         else {
             if(_challenge.value?.focus != null) {
