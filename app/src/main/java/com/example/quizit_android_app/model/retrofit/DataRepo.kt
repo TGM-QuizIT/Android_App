@@ -398,7 +398,7 @@ class DataRepo @Inject constructor(private val context: Context) {
 
     // ------------------- Challenge Calls -------------------
 
-    suspend fun addChallengeForFocus(friendshipId: Int, focusId: Int) {
+    suspend fun addChallengeForFocus(friendshipId: Int, focusId: Int): AssignResultToChallengeResponse {
         return withContext(Dispatchers.IO) {
             try {
                 val id = sessionManager.getUserId()
@@ -406,13 +406,15 @@ class DataRepo @Inject constructor(private val context: Context) {
                 withContext(Dispatchers.Main) {
                     Log.d("addChallengeForFocus", "Challenge added")
                 }
+                response
             } catch (e: Exception) {
                 Log.e("addChallengeForFocus", "Failed to add challenge", e)
+                AssignResultToChallengeResponse()
             }
         }
     }
 
-    suspend fun addChallengeForSubject(friendshipId: Int, subjectId: Int) {
+    suspend fun addChallengeForSubject(friendshipId: Int, subjectId: Int): AssignResultToChallengeResponse {
         return withContext(Dispatchers.IO) {
             try {
                 val id = sessionManager.getUserId()
@@ -420,8 +422,10 @@ class DataRepo @Inject constructor(private val context: Context) {
                 withContext(Dispatchers.Main) {
                     Log.d("addChallengeForSubject", "Challenge added")
                 }
+                response
             } catch (e: Exception) {
                 Log.e("addChallengeForSubject", "Failed to add challenge", e)
+                AssignResultToChallengeResponse()
             }
         }
     }

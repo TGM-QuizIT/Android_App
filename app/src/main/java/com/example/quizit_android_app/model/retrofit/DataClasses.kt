@@ -238,9 +238,10 @@ data class AssignResultToChallengeRequestBody (
     @SerializedName("resultId") val resultId: Int
 )
 
+// also for response add challenge for focus and subject
 data class AssignResultToChallengeResponse (
     @SerializedName("status"    ) var status    : String?    = null,
-    @SerializedName("challenge" ) var challenge : Challenge? = Challenge()
+    @SerializedName("challenge" ) var challenge : Challenge? = null
 )
 
 @Serializable

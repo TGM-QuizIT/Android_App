@@ -100,10 +100,10 @@ interface Requests {
     // ------------------- Challenge Calls -------------------
 
     @POST("challenge")
-    suspend fun addChallengeForFocus(@Body adChallengeForFocusRequestBody: AdChallengeForFocusRequestBody)
+    suspend fun addChallengeForFocus(@Body adChallengeForFocusRequestBody: AdChallengeForFocusRequestBody): AssignResultToChallengeResponse
 
     @POST("challenge/subject")
-    suspend fun addChallengeForSubject(@Body adChallengeForSubjectRequestBody: AdChallengeForSubjectRequestBody)
+    suspend fun addChallengeForSubject(@Body adChallengeForSubjectRequestBody: AdChallengeForSubjectRequestBody): AssignResultToChallengeResponse
 
     @DELETE("challenge")
     suspend fun deleteChallenge(@Query("id") challengeId: Int?): StatusResponse
