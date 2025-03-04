@@ -76,7 +76,7 @@ data class QuizRoute(
 @Serializable
 data class QuizDetailRoute(
     val focus: Focus?,
-    val subject: Subject
+    val subject: Subject?
 ) {
     companion object {
         val typeMap = mapOf(

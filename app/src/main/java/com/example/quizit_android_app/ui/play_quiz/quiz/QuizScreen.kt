@@ -71,7 +71,7 @@ import kotlin.math.roundToInt
 fun QuizScreen(
     navigateBack: () -> Unit,
     quizViewModel: QuizViewModel = hiltViewModel(),
-    navigateToQuizDetail: (Subject, Focus?)  -> Unit
+    navigateToQuizDetail: (Subject?, Focus?)  -> Unit
 ) {
 
     val currentQuestionIndex = quizViewModel.currentQuestionIndex.value
@@ -128,9 +128,9 @@ fun QuizScreen(
                             results = userResults,
                             onCloseResult = { navigateBack() },
                             navigateToQuizDetail = {
-                                navigateToQuizDetail(subject!!, focus)
+                                navigateToQuizDetail(subject, focus)
                             },
-                            onFriendClick = { quizViewModel.challengeFriend(it, focus = focus, subject = subject!!) },
+                            onFriendClick = { quizViewModel.challengeFriend(it, focus = focus, subject = subject) },
                             friendships = friendships,
                             isModalSheetLoading = isModalSheetLoading,
                             onChallengeClicked = { quizViewModel.getFriendships() },
