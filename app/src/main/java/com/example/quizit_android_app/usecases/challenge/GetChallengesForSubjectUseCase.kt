@@ -11,11 +11,17 @@ class GetChallengesForSubjectUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(subjectId: Int? = null, focusId: Int? = null): ChallengeResponse {
         return if (subjectId != null) {
-            dataRepo.getChallengesForSubject(subjectId)
+            val response = dataRepo.getChallengesForSubject(subjectId)
+            val sortedOpen = response.openChallenges.sortedByDescending { it.challengeDateTime }
+            val sortedDone = response.doneChallenges.sortedByDescending { it.challengeDateTime }
+            ChallengeResponse("Success", ArrayList(sortedOpen), ArrayList(sortedDone))
         } else if (focusId != null) {
             val focuses = dataRepo.fetchAllFocusOfUser()
             val subject = focuses.focus.find { it.focusId == focusId }?.subjectId
-            dataRepo.getChallengesForSubject(subject!!)
+            val response = dataRepo.getChallengesForSubject(subject!!)
+            val sortedOpen = response.openChallenges.sortedByDescending { it.challengeDateTime }
+            val sortedDone = response.doneChallenges.sortedByDescending { it.challengeDateTime }
+            ChallengeResponse("Success", ArrayList(sortedOpen), ArrayList(sortedDone))
         } else {
             ChallengeResponse()
         }

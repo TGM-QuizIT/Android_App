@@ -10,18 +10,19 @@ class GetChallengesOfUserUseCase @Inject constructor(
     val dataRepo: DataRepo,
     val contentDataStore: ContentDataStore
 ) {
-    suspend operator fun invoke(): OpenChallengesResponse{
+    suspend operator fun invoke(): OpenChallengesResponse {
         val localData = contentDataStore.getOpenChallenges()
         return if (localData.isNotEmpty()) {
             Log.d("GetChallengesOfUser", "Local data")
 
             Log.d("GetChallengesOfUser - local data", localData.toString())
-            OpenChallengesResponse("success", ArrayList(localData))
+            OpenChallengesResponse("success", ArrayList(localData.sortedByDescending { it.challengeDateTime }))
         } else {
             val remoteData = dataRepo.fetchAllOpenChallenges()
-            contentDataStore.saveOpenChallenges(remoteData.openChallenges)
+            val sortedRemoteData = remoteData.openChallenges.sortedByDescending { it.challengeDateTime }
+            contentDataStore.saveOpenChallenges(sortedRemoteData)
             Log.d("GetChallengesOfUser", "Remote data")
-            remoteData
+            OpenChallengesResponse("Success", ArrayList(sortedRemoteData))
         }
     }
 }
