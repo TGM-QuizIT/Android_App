@@ -2,6 +2,7 @@ package com.example.quizit_android_app.ui.social
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -70,6 +71,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -483,7 +485,7 @@ fun FriendsSection(
 
         if(friendships.isEmpty()) {
             item {
-                NoContentPlaceholder(id = R.drawable.no_friends_placeholder)
+                NoFriendsPlaceholder(id = R.drawable.no_friends_placeholder)
             }
 
         }
@@ -531,6 +533,19 @@ fun FriendsSection(
 }
 
 @Composable
+fun NoFriendsPlaceholder(id: Int) {
+    Image(
+        painter = painterResource(id = id),
+        contentDescription = "No Content Placeholder",
+        contentScale = ContentScale.FillBounds,
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(2000f / 3200f)
+    )
+
+}
+
+@Composable
 fun FriendshipCard(friendship: AcceptedFriendship, navigateToUserDetail: (Int?, User) -> Unit) {
     val user = User(
         userId = friendship.friend?.userId,
@@ -575,7 +590,7 @@ fun FriendshipCard(friendship: AcceptedFriendship, navigateToUserDetail: (Int?, 
                 )
                 Spacer(modifier = Modifier.size(4.dp))
                 Text(
-                    text = friendship.friend?.userYear!!.toString()+"xHIT",
+                    text = friendship.friend?.userClass ?: "",
                     style = MaterialTheme.typography.labelLarge,
                     color = Color(0xFF71727A)
                 )

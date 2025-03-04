@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.toRoute
 import com.example.quizit_android_app.model.retrofit.DoneChallenges
 import com.example.quizit_android_app.model.retrofit.Focus
@@ -14,6 +15,7 @@ import com.example.quizit_android_app.model.retrofit.OpenChallenges
 import com.example.quizit_android_app.model.retrofit.Result
 import com.example.quizit_android_app.model.retrofit.Subject
 import com.example.quizit_android_app.navigation.QuizDetailRoute
+import com.example.quizit_android_app.usecases.challenge.DeleteChallengeUseCase
 import com.example.quizit_android_app.usecases.challenge.GetChallengesForSubjectUseCase
 import com.example.quizit_android_app.usecases.quiz.GetQuizOfSubjectUseCase
 import com.example.quizit_android_app.usecases.result.GetResultsFocusUseCase
@@ -27,7 +29,8 @@ class QuizDetailViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     val getChallengesForSubjectUseCase: GetChallengesForSubjectUseCase,
     val getResultsSubjectUseCase: GetResultsSubjectUseCase,
-    val getResultsFocusUseCase: GetResultsFocusUseCase
+    val getResultsFocusUseCase: GetResultsFocusUseCase,
+    val deleteChallengeUseCase: DeleteChallengeUseCase
 ): ViewModel() {
 
     private var _subject by mutableStateOf<Subject?>(null)
@@ -61,6 +64,19 @@ class QuizDetailViewModel @Inject constructor(
 
     }
 
+    fun declineChallenge(id: Int) {
+        viewModelScope.launch {
+            try {
+                _openChallenges = _openChallenges.filter { it.challengeId != id }
+                deleteChallengeUseCase(id)
+
+            } catch(e: Exception) {
+                Log.d("QuizDetailViewModel", "Error declining challenge: " + e)
+            }
+
+        }
+    }
+
     private fun setContent(subject: Subject?, focus: Focus?) {
 
         _subject = subject
@@ -71,14 +87,14 @@ class QuizDetailViewModel @Inject constructor(
 
             try {
 
-                if(_subject != null) {
-                    val challenges = getChallengesForSubjectUseCase(subjectId = subject?.subjectId!!)
+                if (_subject != null) {
+                    val challenges =
+                        getChallengesForSubjectUseCase(subjectId = subject?.subjectId!!)
                     _openChallenges = challenges.openChallenges
                     _doneChallenges = challenges.doneChallenges
 
                     _results = getResultsSubjectUseCase(subject.subjectId)
-                }
-                else {
+                } else {
                     val challenges = getChallengesForSubjectUseCase(focusId = focus?.focusId!!)
                     _openChallenges = challenges.openChallenges
                     _doneChallenges = challenges.doneChallenges
@@ -88,21 +104,15 @@ class QuizDetailViewModel @Inject constructor(
                 }
 
 
-
             } catch (e: Exception) {
-                Log.d("QuizDetailViewModel", "Error fetching quiz: "+e)
+                Log.d("QuizDetailViewModel", "Error fetching quiz: " + e)
 
             } finally {
                 _isLoading = false
             }
         }
 
-
-
-
-
     }
-
 
 
 

@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.quizit_android_app.model.retrofit.OpenChallenges
 import com.example.quizit_android_app.model.retrofit.Subject
 import com.example.quizit_android_app.model.retrofit.UserStatsResponse
+import com.example.quizit_android_app.usecases.challenge.DeleteChallengeUseCase
 import com.example.quizit_android_app.usecases.challenge.GetChallengesOfUserUseCase
 import com.example.quizit_android_app.usecases.localdata.challenge.SyncLocalDoneChallengesUseCase
 import com.example.quizit_android_app.usecases.localdata.challenge.SyncLocalOpenChallengesUseCase
@@ -35,7 +36,8 @@ class HomeViewModel @Inject constructor(
     private val syncLocalDoneChallengesUseCase: SyncLocalDoneChallengesUseCase,
     private val syncLocalAcceptedFriendsUseCase: SyncLocalAcceptedFriendsUseCase,
     private val syncLocalPendingFriendsUseCase: SyncLocalPendingFriendsUseCase,
-    private val syncUserStatsUseCase: SyncLocalUserStatsUseCase
+    private val syncUserStatsUseCase: SyncLocalUserStatsUseCase,
+    private val deleteChallengeUseCase: DeleteChallengeUseCase
 ): ViewModel() {
 
     private var _subjectList by mutableStateOf(listOf<Subject>())
@@ -78,6 +80,17 @@ class HomeViewModel @Inject constructor(
                 e.printStackTrace()
             } finally {
                 _isLoading = false
+            }
+        }
+    }
+
+    fun deleteChallenge(id: Int) {
+        viewModelScope.launch {
+            try {
+                _challenges = _challenges.filter { it.challengeId != id }
+                deleteChallengeUseCase(id)
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }

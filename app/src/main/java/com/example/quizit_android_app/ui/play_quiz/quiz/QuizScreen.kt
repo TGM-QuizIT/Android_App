@@ -342,7 +342,7 @@ fun OptionItem(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = option?.optionText!!,
+                text = option?.optionText?: "",
                 style = Typography.bodySmall,
                 modifier = Modifier.weight(1f)
             )

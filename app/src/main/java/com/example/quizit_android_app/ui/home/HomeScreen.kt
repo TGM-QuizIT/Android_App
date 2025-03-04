@@ -128,6 +128,7 @@ fun HomeScreen(
                     },
                     onChallengeDecline = {
                         coroutineScope.launch {
+                            homeViewModel.deleteChallenge(challenge?.challengeId!!)
                             challengeSheetState.hide()
                         }
                     }
@@ -527,7 +528,7 @@ fun OpenChallengeCard(type: ChallengeType, challenge: OpenChallenges, onClick : 
                         )
 
                         Text(
-                            text = "${challenge.friendScore?.resultScore}%",
+                            text = String.format("%.1f%%", challenge.friendScore?.resultScore ?: 0.0),
                             color = Color.Black,
                             modifier = Modifier.align(Alignment.Center),
                             style = MaterialTheme.typography.labelLarge

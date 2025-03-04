@@ -215,6 +215,9 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
                 navigateToQuiz = { subject, focus ->
                     navController.navigate(QuizRoute(focus, subject))
                 },
+                navigateToPlayChallenge = {
+                    navController.navigate(QuizRoute(focus = null, subject = null, challenge = it))
+                }
             )
         }
 

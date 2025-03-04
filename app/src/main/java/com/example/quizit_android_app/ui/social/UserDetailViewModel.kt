@@ -213,9 +213,10 @@ class UserDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             try {
+                _openChallenges.value = _openChallenges.value.filter { it.challengeId != id }
                 deleteChallengeUseCase(id)
 
-                _openChallenges.value = _openChallenges.value.filter { it.challengeId != id }
+
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {

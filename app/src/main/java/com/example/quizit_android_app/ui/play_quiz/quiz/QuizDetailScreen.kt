@@ -69,7 +69,8 @@ import kotlin.math.roundToInt
 fun QuizDetailScreen(
     viewModel: QuizDetailViewModel = hiltViewModel(),
     navigateBack: () -> Unit,
-    navigateToQuiz: (Subject, Focus?) -> Unit
+    navigateToQuiz: (Subject?, Focus?) -> Unit,
+    navigateToPlayChallenge: (OpenChallenges?) -> Unit
 ) {
 
     val subject = viewModel.subject
@@ -95,13 +96,13 @@ fun QuizDetailScreen(
                     challenge = challenge,
                     onChallengeDecline = {
                         coroutineScope.launch {
-                            //viewModel.declineChallenge(challenge!!)
+                            viewModel.declineChallenge(challenge?.challengeId!!)
                             challengeSheetState.hide()
                         }
                     },
                     onChallengeAccept = {
                         coroutineScope.launch {
-                            //viewModel.acceptChallenge(challenge!!)
+                            navigateToPlayChallenge(challenge)
                             challengeSheetState.hide()
                         }
                     }
