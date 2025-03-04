@@ -49,6 +49,7 @@ class LoginViewModel @Inject constructor(
                 val user  = loginUseCase(_username.value, _password.value)
                 if(user != null) {
                     _isLogInSuccess.value = true
+                    _errorMessage.value = ""
 
                 } else {
                     _errorMessage.value = "Login fehlgeschlagen. Überprüfe deine Eingaben"

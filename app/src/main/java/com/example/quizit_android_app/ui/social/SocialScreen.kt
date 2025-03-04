@@ -726,7 +726,7 @@ fun StatisticsSection(modifier: Modifier, results: List<com.example.quizit_andro
                LazyRow(
 
                ) {
-                   items(results) { result ->
+                   items(results.take(7)) { result ->
                        ResultCard(result = result)
                        Spacer(modifier = Modifier.size(8.dp))
                    }
@@ -1051,11 +1051,12 @@ fun ResultCard(result: Result) {
                                 .background(Color(0xFF006FFD), shape = RoundedCornerShape(8.dp))
                         )
                         Text(
-                            text = Math.round(result.resultScore?.times(100.0) ?: 0.0).div(100.0).toString()+"%",
+                            text = String.format("%.1f%%", result.resultScore ?: 0.0),
                             color = Color.Black,
                             modifier = Modifier.align(Alignment.Center),
                             style = MaterialTheme.typography.labelLarge
                         )
+
                     }
 
                     Spacer(modifier = Modifier.size(8.dp))

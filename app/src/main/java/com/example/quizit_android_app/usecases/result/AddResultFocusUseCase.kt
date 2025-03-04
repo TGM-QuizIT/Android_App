@@ -1,5 +1,6 @@
 package com.example.quizit_android_app.usecases.result
 
+import android.util.Log
 import com.example.quizit_android_app.model.retrofit.DataRepo
 import com.example.quizit_android_app.model.retrofit.GetResultsResponse
 import com.example.quizit_android_app.model.retrofit.GetSingleResultsResponse
@@ -12,6 +13,7 @@ class AddResultFocusUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(focusId: Int, score: Double): GetSingleResultsResponse {
         val response = dataRepo.postResultOfFocus(focusId, score)
+        Log.d("AddResultFocusUseCase", "Response: $response")
         if (response.status != null) {
             syncLocalResultsUseCase()
         }
