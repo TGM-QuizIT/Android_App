@@ -143,8 +143,8 @@ data class Result (
     @SerializedName("resultId"    ) var resultId    : Int?    = null,
     @SerializedName("resultScore" ) var resultScore : Double?    = null,
     @SerializedName("userId"      ) var userId      : Int?    = null,
-    @SerializedName("focus"     ) var focus     : Focus?    = null,
-    @SerializedName("subject"   ) var subject   : Subject? = null,
+    @SerializedName("focusId"     ) var focusId     : Int?    = null,
+    @SerializedName("subjectId"   ) var subjectId   : Int? = null,
     @SerializedName("resultDateTime"  ) var resultDateTime  : String? = null
 )
 
