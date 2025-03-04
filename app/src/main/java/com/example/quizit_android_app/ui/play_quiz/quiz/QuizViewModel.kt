@@ -97,7 +97,7 @@ class QuizViewModel @Inject constructor(
         else {
             if(_challenge.value?.focus != null) {
                 _focus.value = _challenge.value!!.focus
-                setQuestions(_subject.value!!.subjectId, false)
+                setQuestions(_focus.value!!.focusId, false)
                 Log.d("QuizViewModel", "Focus: ${_focus.value}")
             }
             else {
