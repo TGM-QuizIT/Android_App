@@ -81,7 +81,7 @@ data class QuizDetailRoute(
     companion object {
         val typeMap = mapOf(
             typeOf<Focus?>() to CustomNavType.FocusType,
-            typeOf<Subject>() to CustomNavType.SubjectType
+            typeOf<Subject?>() to CustomNavType.SubjectType
         )
 
         fun from(savedStateHandle: SavedStateHandle) =
