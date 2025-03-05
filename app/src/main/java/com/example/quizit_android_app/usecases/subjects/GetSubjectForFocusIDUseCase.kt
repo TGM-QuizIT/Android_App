@@ -5,7 +5,7 @@ import com.example.quizit_android_app.model.retrofit.Subject
 import com.example.quizit_android_app.usecases.focus.GetAllFocusOfUserUseCase
 import javax.inject.Inject
 
-class GetSubjectForFocusID @Inject constructor(
+class GetSubjectForFocusIDUseCase @Inject constructor(
     val dataRepo: DataRepo,
     val getAllFocusOfUserUseCase: GetAllFocusOfUserUseCase,
     val getAllSubjectsUseCase: GetAllSubjectsUseCase
