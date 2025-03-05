@@ -14,6 +14,7 @@ class SyncLocalSubjectsUseCase @Inject constructor(
         if (subjects.status == "Success") {
             contentDataStore.saveSubjects(subjects.subjects)
             Log.d("SyncLocalSubjectsUseCase", "Subjects synced")
-        }
+        } else
+            Log.d("SyncLocalSubjectsUseCase", "Subjects sync failed")
     }
 }

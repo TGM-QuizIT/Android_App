@@ -14,6 +14,8 @@ class SyncLocalFocusUseCase @Inject constructor(
         if (focus.status == "Success") {
             contentDataStore.saveFocus(focus.focus)
             Log.d("SyncLocalFocusUseCase", "Focus synced")
+        } else {
+            Log.d("SyncLocalFocusUseCase", "Focus sync failed")
         }
     }
 }
