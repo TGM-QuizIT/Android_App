@@ -16,7 +16,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.QuizIT_Android_App"
         tools:targetApi="31">
-
+        <provider
+            android:authorities="${applicationId}.androidx-startup"
+            android:name="androidx.startup.InitializationProvider"
+            tools:node="remove" />
 
 
         <activity

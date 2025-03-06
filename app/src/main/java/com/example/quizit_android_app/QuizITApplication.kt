@@ -1,12 +1,14 @@
 package com.example.quizit_android_app
 
 import android.app.Application
+import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.quizit_android_app.model.retrofit.OpenChallenges
+import com.example.quizit_android_app.ui.login.LoginScreen
 import com.example.quizit_android_app.usecases.localdata.challenge.SyncLocalDoneChallengesUseCase
 import com.example.quizit_android_app.usecases.localdata.challenge.SyncLocalOpenChallengesUseCase
 import com.example.quizit_android_app.usecases.localdata.focus.SyncLocalFocusUseCase
@@ -60,13 +62,14 @@ class QuizITApplication : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        //WorkManager.initialize(this, workManagerConfiguration)
+        WorkManager.initialize(this, workManagerConfiguration)
         callSyncMethods()
-        //setupPeriodicWork()
+        setupPeriodicWork()
     }
 
     private fun callSyncMethods() {
         CoroutineScope(Dispatchers.IO).launch {
+            Log.d("QuizITApplication", "on Create callSyncMethods()")
             syncLocalSubjectsUseCase()
             syncLocalOpenChallengesUseCase()
             syncLocalDoneChallengesUseCase()
@@ -80,6 +83,7 @@ class QuizITApplication : Application(), Configuration.Provider {
 
 
     private fun setupPeriodicWork() {
+        Log.d("QuizITApplication", "setupPeriodicWork()")
         val syncWorkRequest = PeriodicWorkRequestBuilder<DataSyncWorker>(15, TimeUnit.MINUTES).build()
         WorkManager.getInstance(this).enqueue(syncWorkRequest)
     }

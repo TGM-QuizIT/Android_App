@@ -19,8 +19,6 @@ import javax.inject.Inject
 
 @HiltWorker
 class DataSyncWorker @AssistedInject constructor(
-    @Assisted context: Context,
-    @Assisted workerParams: WorkerParameters,
     private val syncLocalSubjectsUseCase: SyncLocalSubjectsUseCase,
     private val syncLocalOpenChallengesUseCase: SyncLocalOpenChallengesUseCase,
     private val syncLocalDoneChallengesUseCase: SyncLocalDoneChallengesUseCase,
@@ -28,7 +26,9 @@ class DataSyncWorker @AssistedInject constructor(
     private val syncLocalAcceptedFriendsUseCase: SyncLocalAcceptedFriendsUseCase,
     private val syncLocalPendingFriendsUseCase: SyncLocalPendingFriendsUseCase,
     private val syncLocalResultsUseCase: SyncLocalResultsUseCase,
-    private val syncLocalUserStatsUseCase: SyncLocalUserStatsUseCase
+    private val syncLocalUserStatsUseCase: SyncLocalUserStatsUseCase,
+    @Assisted context: Context,
+    @Assisted workerParams: WorkerParameters,
 ) : CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result {
@@ -42,7 +42,7 @@ class DataSyncWorker @AssistedInject constructor(
             syncLocalResultsUseCase()
             syncLocalSubjectsUseCase()
             syncLocalUserStatsUseCase()
-
+            Log.d("DataSyncWorker", "Success sync")
             Result.success()
         } catch (e: Exception) {
             Log.e("DataSyncWorker", "Error: ${e.message}")
