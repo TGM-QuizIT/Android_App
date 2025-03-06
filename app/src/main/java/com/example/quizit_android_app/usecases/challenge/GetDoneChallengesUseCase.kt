@@ -13,11 +13,12 @@ class GetDoneChallengesUseCase @Inject constructor(
     suspend operator fun invoke(): DoneChallengesResponse {
         val localData = contentDataStore.getDoneChallenges()
         return if (localData.isNotEmpty()) {
-            DoneChallengesResponse("success", ArrayList(localData))
+            DoneChallengesResponse("success", ArrayList(localData.sortedByDescending { it.challengeDateTime }))
         } else {
             val remoteData = dataRepo.getDoneChallenges()
+            val sortedRemoteData = remoteData.doneChallenges.sortedByDescending { it.challengeDateTime }
             contentDataStore.saveDoneChallenges(remoteData.doneChallenges)
-            remoteData
+            DoneChallengesResponse("Success", ArrayList(sortedRemoteData))
         }
     }
 }
