@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.quizit_android_app.model.retrofit.AcceptedFriendship
 import com.example.quizit_android_app.model.retrofit.Focus
 import com.example.quizit_android_app.model.retrofit.OpenChallenges
@@ -21,6 +22,7 @@ import com.example.quizit_android_app.usecases.quiz.GetQuizOfFocusUseCase
 import com.example.quizit_android_app.usecases.quiz.GetQuizOfSubjectUseCase
 import com.example.quizit_android_app.usecases.result.AddResultFocusUseCase
 import com.example.quizit_android_app.usecases.result.AddResultSubjectUseCase
+import com.example.quizit_android_app.usecases.subjects.GetSubjectForFocusIDUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -35,7 +37,8 @@ class QuizViewModel @Inject constructor(
     private val addResultFocusUseCase: AddResultFocusUseCase,
     private val assignResultToChallengeUseCase: AssignResultToChallengeUseCase,
     private val addChallengeForSubjectUseCase: AddChallengeForSubjectUseCase,
-    private val addChallengeForFocusUseCase: AddChallengeForFocusUseCase
+    private val addChallengeForFocusUseCase: AddChallengeForFocusUseCase,
+    private val getSubjectForFocusIDUseCase: GetSubjectForFocusIDUseCase
 ): ViewModel() {
     private val _currentQuestionIndex = mutableStateOf(0)
     val currentQuestionIndex: State<Int> = _currentQuestionIndex
@@ -87,6 +90,12 @@ class QuizViewModel @Inject constructor(
             _focus.value = QuizRoute.from(savedStateHandle).focus
             _subject.value = QuizRoute.from(savedStateHandle).subject
 
+            if(_subject.value == null) {
+                viewModelScope.launch {
+                    _subject.value = getSubjectForFocusIDUseCase(_focus.value?.focusId!!)
+                }
+            }
+
             if(_focus.value != null) {
                 setQuestions(_focus.value!!.focusId, false)
             }
@@ -97,6 +106,11 @@ class QuizViewModel @Inject constructor(
         else {
             if(_challenge.value?.focus != null) {
                 _focus.value = _challenge.value!!.focus
+
+                viewModelScope.launch {
+                    _subject.value = getSubjectForFocusIDUseCase(_focus.value?.focusId!!)
+                }
+
                 setQuestions(_focus.value!!.focusId, false)
                 Log.d("QuizViewModel", "Focus: ${_focus.value}")
             }
@@ -114,15 +128,12 @@ class QuizViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true // Ladezustand aktivieren
             try {
-
-                if(_questions.value.isEmpty()) {
-                    _questions.value = if (isQuizOfSubject) {
-                        getQuizOfSubjectUseCase(id!!)
-                    } else {
-                        getQuizOfFocusUseCase(id!!)
-                    }
-
+                _questions.value = if (isQuizOfSubject) {
+                    getQuizOfSubjectUseCase(id!!)
+                } else {
+                    getQuizOfFocusUseCase(id!!)
                 }
+
 
             } catch (e: Exception) {
                 Log.e("QuizViewModel", "Error loading questions", e)

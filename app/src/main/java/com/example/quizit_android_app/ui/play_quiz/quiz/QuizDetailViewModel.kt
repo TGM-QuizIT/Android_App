@@ -20,6 +20,7 @@ import com.example.quizit_android_app.usecases.challenge.GetChallengesForSubject
 import com.example.quizit_android_app.usecases.quiz.GetQuizOfSubjectUseCase
 import com.example.quizit_android_app.usecases.result.GetResultsFocusUseCase
 import com.example.quizit_android_app.usecases.result.GetResultsSubjectUseCase
+import com.example.quizit_android_app.usecases.subjects.GetSubjectForFocusIDUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -30,7 +31,8 @@ class QuizDetailViewModel @Inject constructor(
     val getChallengesForSubjectUseCase: GetChallengesForSubjectUseCase,
     val getResultsSubjectUseCase: GetResultsSubjectUseCase,
     val getResultsFocusUseCase: GetResultsFocusUseCase,
-    val deleteChallengeUseCase: DeleteChallengeUseCase
+    val deleteChallengeUseCase: DeleteChallengeUseCase,
+    val getSubjectForFocusIDUseCase: GetSubjectForFocusIDUseCase
 ): ViewModel() {
 
     private var _subject by mutableStateOf<Subject?>(null)
@@ -95,6 +97,8 @@ class QuizDetailViewModel @Inject constructor(
 
                     _results = getResultsSubjectUseCase(subject.subjectId)
                 } else {
+
+                    _subject = getSubjectForFocusIDUseCase(focus?.focusId!!)
                     val challenges = getChallengesForSubjectUseCase(focusId = focus?.focusId!!)
                     _openChallenges = challenges.openChallenges
                     _doneChallenges = challenges.doneChallenges

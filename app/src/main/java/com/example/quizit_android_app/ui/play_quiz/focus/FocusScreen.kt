@@ -33,11 +33,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,17 +55,25 @@ import coil3.compose.AsyncImage
 import com.example.quizit_android_app.R
 import com.example.quizit_android_app.model.retrofit.Subject
 import com.example.quizit_android_app.model.retrofit.Focus
+import com.example.quizit_android_app.network.NetworkMonitor
 import com.example.quizit_android_app.ui.home.NoContentPlaceholder
 import com.example.quizit_android_app.ui.theme.Typography
+import kotlinx.coroutines.launch
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun FocusScreen(
     navigateToQuiz: (Subject, Focus?) -> Unit,
     navigateBack: () -> Unit,
     focusViewModel: FocusViewModel = hiltViewModel(),
+    networkMonitor: NetworkMonitor = hiltViewModel(),
     navigateToQuizDetail: (Subject, Focus?) -> Unit,
 ) {
 
+    val isConnected = networkMonitor.isConnected
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
 
     val focusList = focusViewModel.focusList
@@ -82,6 +94,7 @@ fun FocusScreen(
     )
 
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         contentWindowInsets = WindowInsets(0.dp),
         topBar = {
             Box(
@@ -121,7 +134,9 @@ fun FocusScreen(
         content = { paddingValues ->
 
             Box(
-                modifier = Modifier.fillMaxSize().pullRefresh(pullRefreshState)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pullRefresh(pullRefreshState)
             ) {
                 if(isLoading) {
                     CircularProgressIndicator( modifier = Modifier.align(Alignment.Center), trackColor = Color.Gray)
@@ -130,27 +145,13 @@ fun FocusScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(paddingValues)
-                            .padding(horizontal = 16.dp).padding(top = 16.dp)
+                            .padding(horizontal = 16.dp)
+                            .padding(top = 16.dp)
                     ) {
 
 
 
                         LazyColumn {
-
-                            item {
-                                FocusCard(
-                                    type = CardType.Subject,
-                                    subject = subject!!,
-                                    focus = null,
-                                    overallQuestionCount = overallQuestionCount,
-                                    onQuizStart = { subject, focus ->
-                                        navigateToQuiz(subject, focus)
-                                    },
-                                    navigateToQuizDetail = {  subject, focus ->
-                                        navigateToQuizDetail(subject, focus)
-                                    }
-                                )
-                            }
 
                             if(focusList.isEmpty()) {
                                 item {
@@ -158,6 +159,29 @@ fun FocusScreen(
 
                                 }
                             } else {
+
+                                item {
+                                    FocusCard(
+                                        type = CardType.Subject,
+                                        subject = subject!!,
+                                        focus = null,
+                                        overallQuestionCount = overallQuestionCount,
+                                        onQuizStart = { subject, focus ->
+
+                                            if(isConnected) {
+                                                navigateToQuiz(subject, focus)
+                                            } else {
+                                                coroutineScope.launch {
+                                                    snackbarHostState.showSnackbar("Keine Internetverbindung", "OK", duration = SnackbarDuration.Short)
+                                                }
+                                            }
+                                        },
+                                        navigateToQuizDetail = {  subject, focus ->
+                                            navigateToQuizDetail(subject, focus)
+                                        }
+                                    )
+                                }
+
                                 items(focusList) {
                                     FocusCard(
                                         type = CardType.Focus,
@@ -165,7 +189,13 @@ fun FocusScreen(
                                         subject = subject!!,
                                         overallQuestionCount = overallQuestionCount,
                                         onQuizStart = {subject, focus ->
-                                            navigateToQuiz(subject, focus)
+                                            if(isConnected) {
+                                                navigateToQuiz(subject, focus)
+                                            } else {
+                                                coroutineScope.launch {
+                                                    snackbarHostState.showSnackbar("Keine Internetverbindung", "OK", duration = SnackbarDuration.Short)
+                                                }
+                                            }
                                         },
                                         navigateToQuizDetail = {  subject, focus ->
                                             navigateToQuizDetail(subject, focus)

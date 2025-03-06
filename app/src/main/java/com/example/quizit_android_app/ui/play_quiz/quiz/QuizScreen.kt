@@ -54,12 +54,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.quizit_android_app.R
 import com.example.quizit_android_app.model.retrofit.AcceptedFriendship
 import com.example.quizit_android_app.model.retrofit.Focus
 import com.example.quizit_android_app.model.retrofit.OpenChallenges
 import com.example.quizit_android_app.model.retrofit.Options
 import com.example.quizit_android_app.model.retrofit.Questions
 import com.example.quizit_android_app.model.retrofit.Subject
+import com.example.quizit_android_app.ui.home.NoInternetPlaceholder
 import com.example.quizit_android_app.ui.social.FriendshipCard
 import com.example.quizit_android_app.ui.social.UserCard
 import com.example.quizit_android_app.ui.theme.Typography
@@ -99,14 +101,24 @@ fun QuizScreen(
             }
         },
         content = { paddingValues ->
+
+            if(isLoading) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        trackColor = Color.Gray
+                    )
+                }
+                return@Scaffold
+            }
             Box(modifier = Modifier.fillMaxSize()) {
+
+                if(questions.isEmpty()) {
+                    NoInternetPlaceholder(id = R.drawable.internet_error_placeholder)
+                    return@Box
+                }
+
                 when {
-                    isLoading -> {
-                        CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center),
-                            trackColor = Color.Gray
-                        )
-                    }
                     currentQuestionIndex < questions.size -> {
                         QuizQuestion(
                             question = questions[currentQuestionIndex],
@@ -673,7 +685,7 @@ fun QuizResult(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal= 16.dp),
+                                .padding(horizontal = 16.dp),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
 
@@ -699,7 +711,9 @@ fun QuizResult(
                             }
                             Icon(
                                 imageVector = Icons.Default.EmojiEvents,
-                                modifier = Modifier.align(Alignment.CenterVertically).size(50.dp),
+                                modifier = Modifier
+                                    .align(Alignment.CenterVertically)
+                                    .size(50.dp),
                                 contentDescription = "Challenge",
                                 tint = if(percentage >= challenge.friendScore?.resultScore!!) Color(0xFFFF9913) else Color(0xFFC7C1BA)
 
@@ -901,7 +915,7 @@ fun ResultCard(result: ResultItem, questionIndex: Int) {
             ) {
                 // Text der Option
                 Text(
-                    text = option?.optionText!!,
+                    text = option?.optionText?: "",
                     style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier.weight(1f)
                 )

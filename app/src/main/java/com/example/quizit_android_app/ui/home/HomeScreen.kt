@@ -65,6 +65,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -75,6 +76,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.rememberAsyncImagePainter
 import com.example.quizit_android_app.model.retrofit.Challenge
 import com.example.quizit_android_app.model.retrofit.Focus
+import com.example.quizit_android_app.network.NetworkMonitor
 import com.example.quizit_android_app.ui.play_quiz.quiz.ChallengeBottomSheet
 import kotlinx.coroutines.launch
 
@@ -86,7 +88,8 @@ fun HomeScreen(
     navigateToChallenge: () -> Unit,
     navigateToPlayChallenge: (OpenChallenges?) -> Unit,
     navigateToStatistics: () -> Unit,
-    homeViewModel: HomeViewModel = hiltViewModel()
+    homeViewModel: HomeViewModel = hiltViewModel(),
+    networkMonitor: NetworkMonitor = hiltViewModel()
 ) {
     val subjectList = homeViewModel.subjectList
     val stats = homeViewModel.stats
@@ -94,6 +97,9 @@ fun HomeScreen(
     val challenges = homeViewModel.challenges
 
     var isRefreshing by remember { mutableStateOf(false) }
+
+    val isConnected = networkMonitor.isConnected
+    val snackbarHostState = remember { SnackbarHostState() }
 
     // Pull to Refresh State
     val pullRefreshState = rememberPullRefreshState(
@@ -137,6 +143,7 @@ fun HomeScreen(
         }
     ) {
         Scaffold(
+            snackbarHost =  { SnackbarHost(snackbarHostState) },
             contentWindowInsets = WindowInsets(0.dp),
             topBar = {
                 Row(
@@ -155,6 +162,19 @@ fun HomeScreen(
                             .aspectRatio(975f / 337f),
                         contentScale = ContentScale.FillBounds
                     )
+
+                    if (!isConnected) {
+                        Icon(
+                            imageVector = Icons.Default.WifiOff,
+                            contentDescription = "No Internet",
+                            tint = Color.Red,
+
+                        )
+                    }
+
+
+
+
                 }
             },
             content = { paddingValues ->
@@ -189,8 +209,18 @@ fun HomeScreen(
                                     navigateToChallenge = { navigateToChallenge() },
                                     challenges = challenges,
                                     onChallengeCardClick = { challenge ->
-                                        selectedChallenge = challenge
-                                        coroutineScope.launch { challengeSheetState.show() }
+
+                                        if(!isConnected) {
+                                            coroutineScope.launch {
+                                                snackbarHostState.showSnackbar("Keine Internetverbindung", "OK", duration = SnackbarDuration.Short)
+                                            }
+
+
+                                        } else {
+                                            selectedChallenge = challenge
+                                            coroutineScope.launch { challengeSheetState.show() }
+                                        }
+
                                     }
                                 )
                                 Spacer(modifier = Modifier.size(32.dp))
@@ -262,7 +292,7 @@ fun SubjectSection(subjects: List<Subject>, navigateToSubjects: () -> Unit, navi
                     SubjectCard(subject = subject, 250.dp, navigateToFocus = { subject ->
                         navigateToFocus(subject)
                     })
-                    Spacer(modifier = Modifier.width(16.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
                 }
             }
 
@@ -591,7 +621,23 @@ fun StatisticsSection(navigateToStatistics: () -> Unit, stats: UserStatsResponse
 }
 
 @Composable
+fun NoInternetPlaceholder(id: Int) {
+    Image(
+        painter = painterResource(id = id),
+        contentDescription = "No Content Placeholder",
+        contentScale = ContentScale.FillBounds,
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(3200f/2400f)
+
+    )
+
+}
+
+
+@Composable
 fun NoContentPlaceholder(id: Int) {
+    // Zoom Picture Placeholder
     Image(
         painter = painterResource(id = id),
         contentDescription = "No Content Placeholder",
@@ -599,6 +645,8 @@ fun NoContentPlaceholder(id: Int) {
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(4800f/2000f)
+        //Zoom Picture Placeholder
+
     )
 
 }

@@ -78,6 +78,8 @@ class UserDetailViewModel @Inject constructor(
 
     private fun setFriendshipContent(friendshipId: Int, user: User) {
 
+        _user.value = user
+
         _friendshipId.value = friendshipId
 
         viewModelScope.launch {
@@ -92,8 +94,6 @@ class UserDetailViewModel @Inject constructor(
                 val openChallenges = challenges.openChallenges
                 val doneChallenges = challenges.doneChallenges
 
-
-                _user.value = user
                 _openChallenges.value = openChallenges
                 _doneChallenges.value = doneChallenges
                 _userStats.value = getUserStatsUseCase(user.userId)
@@ -109,8 +109,8 @@ class UserDetailViewModel @Inject constructor(
 
     }
 
-    private fun setUserContent(user: User?) {
-        _user.value = user!!
+    private fun setUserContent(user: User) {
+        _user.value = user
 
         viewModelScope.launch {
             _isLoading.value = true

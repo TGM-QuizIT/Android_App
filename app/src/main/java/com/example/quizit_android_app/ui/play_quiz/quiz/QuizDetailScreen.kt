@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.SnackbarDuration
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -38,6 +39,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -55,6 +58,8 @@ import com.example.quizit_android_app.model.retrofit.Focus
 import com.example.quizit_android_app.model.retrofit.OpenChallenges
 import com.example.quizit_android_app.model.retrofit.Result
 import com.example.quizit_android_app.model.retrofit.Subject
+import com.example.quizit_android_app.model.retrofit.User
+import com.example.quizit_android_app.network.NetworkMonitor
 import com.example.quizit_android_app.ui.home.ChallengeType
 import com.example.quizit_android_app.ui.home.NoContentPlaceholder
 import com.example.quizit_android_app.ui.home.OpenChallengeCard
@@ -68,10 +73,15 @@ import kotlin.math.roundToInt
 @Composable
 fun QuizDetailScreen(
     viewModel: QuizDetailViewModel = hiltViewModel(),
+    networkMonitor: NetworkMonitor = hiltViewModel(),
     navigateBack: () -> Unit,
     navigateToQuiz: (Subject?, Focus?) -> Unit,
-    navigateToPlayChallenge: (OpenChallenges?) -> Unit
+    navigateToPlayChallenge: (OpenChallenges?) -> Unit,
+    navigateToUserDetail: (Int?, User) -> Unit,
 ) {
+
+    val isConnected = networkMonitor.isConnected
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val subject = viewModel.subject
     val focus = viewModel.focus
@@ -111,13 +121,15 @@ fun QuizDetailScreen(
         }
     ) {
         Scaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             contentWindowInsets = WindowInsets(0.dp),
             topBar = {
 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 16.dp)
+                        .padding(top = 16.dp),
+                    contentAlignment = Alignment.Center
                 ) {
                     IconButton(
                         onClick = { navigateBack() },
@@ -177,8 +189,17 @@ fun QuizDetailScreen(
                                                     type = ChallengeType.SUBJECT,
                                                     challenge = openChallenge,
                                                     onClick = {
-                                                        selectedChallenge = openChallenge
-                                                        coroutineScope.launch { challengeSheetState.show() }
+
+                                                        if(!isConnected) {
+                                                            coroutineScope.launch {
+                                                                snackbarHostState.showSnackbar("Keine Internetverbindung", "OK", duration = androidx.compose.material3.SnackbarDuration.Short)
+                                                            }
+                                                        } else {
+
+                                                            selectedChallenge = openChallenge
+                                                            coroutineScope.launch { challengeSheetState.show() }
+
+                                                        }
                                                     },
                                                 )
                                                 Spacer(modifier = Modifier.width(16.dp))
@@ -201,7 +222,15 @@ fun QuizDetailScreen(
                                 } else {
                                     LazyRow {
                                         items(doneChallenges) { doneChallenge ->
-                                            DoneChallengeCard(challenge = doneChallenge)
+                                            DoneChallengeCard(
+                                                challenge = doneChallenge,
+                                                navigateToQuizDetail = { subject, focus ->
+
+                                                },
+                                                navigateToUserDetail = { id, user ->
+                                                    navigateToUserDetail(id, user)
+                                                }
+                                            )
                                             Spacer(modifier = Modifier.width(16.dp))
                                         }
                                     }
@@ -231,7 +260,15 @@ fun QuizDetailScreen(
                     }
                     Button(
                         onClick = {
-                            navigateToQuiz(subject!!, focus)
+
+                            if(!isConnected) {
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar("Keine Internetverbindung", "OK", duration = androidx.compose.material3.SnackbarDuration.Short)
+                                }
+                            } else {
+                                navigateToQuiz(subject, focus)
+
+                            }
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF009DE0)

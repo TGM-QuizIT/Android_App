@@ -217,6 +217,9 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
                 },
                 navigateToPlayChallenge = {
                     navController.navigate(QuizRoute(focus = null, subject = null, challenge = it))
+                },
+                navigateToUserDetail = { id, user ->
+                    navController.navigate(UserDetailRoute(friendshipId = id, user = user))
                 }
             )
         }
@@ -229,6 +232,9 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
                 navigateToUserDetail = { id, user ->
                     Log.d("AppNavGraph", UserDetailRoute(id, user).toString())
                     navController.navigate(UserDetailRoute(friendshipId = id, user= user))
+                },
+                navigateToQuizDetail = { subject, focus ->
+                    navController.navigate(QuizDetailRoute(subject = subject, focus = focus))
                 }
             )
         }
@@ -244,6 +250,9 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
                 },
                 navigateToPlayChallenge = {
                     navController.navigate(QuizRoute(focus = null, subject = null, challenge = it))
+                },
+                navigateToQuizDetail = { subject, focus ->
+                    navController.navigate(QuizDetailRoute(focus = focus, subject = subject))
                 }
 
             )

@@ -35,11 +35,15 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,13 +58,20 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.quizit_android_app.R
 import com.example.quizit_android_app.model.retrofit.User
+import com.example.quizit_android_app.network.NetworkMonitor
+import kotlinx.coroutines.launch
 
 
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
+    networkMonitor: NetworkMonitor = hiltViewModel(),
     onLogout: () -> Unit
 ) {
+    val isConnected = networkMonitor.isConnected
+    val coroutineScope = rememberCoroutineScope()
+
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val user: User? = viewModel.user
     val isLoading: Boolean = viewModel.isLoading
@@ -69,6 +80,7 @@ fun SettingsScreen(
 
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         contentWindowInsets = WindowInsets(0.dp),
         topBar = {
             Column(
@@ -130,7 +142,14 @@ fun SettingsScreen(
                     Spacer(modifier = Modifier.size(32.dp))
 
                     SelectYearItem(userYear = user?.userYear ?: 0, onYearSelected = {
-                        viewModel.updateUserYear(it)
+                        if(isConnected) {
+                            viewModel.updateUserYear(it)
+                        } else {
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar("Keine Internetverbindung", "OK", duration = SnackbarDuration.Short)
+                            }
+
+                        }
                     })
 
                     SettingsListItem(title = "Kontaktiere uns", imageVector = Icons.Default.Mail, onClick = {

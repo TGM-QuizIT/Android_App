@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -57,11 +58,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.quizit_android_app.R
 import com.example.quizit_android_app.model.retrofit.DoneChallenges
+import com.example.quizit_android_app.model.retrofit.Focus
 import com.example.quizit_android_app.model.retrofit.OpenChallenges
+import com.example.quizit_android_app.model.retrofit.Subject
 import com.example.quizit_android_app.model.retrofit.User
+import com.example.quizit_android_app.network.NetworkMonitor
 import com.example.quizit_android_app.ui.home.OpenChallengeCard
 import com.example.quizit_android_app.ui.home.ChallengeType
+import com.example.quizit_android_app.ui.home.NoContentPlaceholder
+import com.example.quizit_android_app.ui.home.NoInternetPlaceholder
 import com.example.quizit_android_app.ui.play_quiz.quiz.ChallengeBottomSheet
 import com.example.quizit_android_app.usecases.friendship.FriendshipStatus
 import kotlinx.coroutines.launch
@@ -72,12 +79,16 @@ import kotlin.math.roundToInt
 @Composable
 fun UserDetailScreen(
     viewModel: UserDetailViewModel = hiltViewModel(),
+    networkMonitor: NetworkMonitor = hiltViewModel(),
     onGoBack: () -> Unit,
-    navigateToPlayChallenge: (OpenChallenges?) -> Unit
+    navigateToPlayChallenge: (OpenChallenges?) -> Unit,
+    navigateToQuizDetail: (Subject?, Focus?) -> Unit
 ) {
 
     val user = viewModel.user.value
     val userStats = viewModel.userStats.value
+
+    val isConnected = networkMonitor.isConnected
 
     val openChallenges = viewModel.openChallenges.value
     val doneChallenges = viewModel.doneChallenges.value
@@ -173,82 +184,114 @@ fun UserDetailScreen(
                                     UserInfos(
                                         user = user,
                                         friendshipStatus = friendshipStatus,
-                                        addFriend = { userId -> viewModel.addFriend(userId) },
+                                        addFriend = { userId ->
+
+                                            if(isConnected && userStats != null) {
+                                                viewModel.addFriend(userId)
+
+                                            }
+                                                    },
                                         acceptFriendship = { viewModel.acceptFriendship() },
                                         removeFriendship = { coroutineScope.launch { deleteFriendshipSheetState.show() } }
                                     )
                                 }
 
-                                item {
-
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(end = 16.dp)
-                                    ) {
-                                        StatisticsCard(
-                                            onClick = { coroutineScope.launch { statisticsSheetState.show() } },
-                                            stats = userStats
-                                        )
-
+                                if(userStats == null) {
+                                    item {
+                                        NoInternetPlaceholder(id = R.drawable.internet_error_placeholder)
                                     }
 
-                                }
-
-                                if (openChallenges.isNotEmpty()) {
+                                } else {
                                     item {
-                                        Text(
-                                            "Herausforderungen von ${
-                                                user?.userFullname?.split(" ")?.first()
-                                            }",
-                                            style = MaterialTheme.typography.titleMedium
-                                        )
-                                    }
 
-                                    item {
-                                        LazyRow(
-                                            modifier = Modifier.fillMaxWidth()
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(end = 16.dp)
                                         ) {
-                                            items(openChallenges) { challenge ->
+                                            StatisticsCard(
+                                                onClick = { coroutineScope.launch { statisticsSheetState.show() } },
+                                                stats = userStats
+                                            )
 
-                                                if (challenge.friendScore?.resultScore != null) {
-                                                    OpenChallengeCard(
-                                                        challenge = challenge,
-                                                        type = ChallengeType.FRIEND,
-                                                        onClick = {
-                                                            selectedChallenge = challenge
-                                                            coroutineScope.launch { challengeSheetState.show() }
-                                                        },
+                                        }
 
-                                                        )
-                                                    Spacer(modifier = Modifier.size(16.dp))
+                                    }
+
+                                    if (openChallenges.isNotEmpty()) {
+                                        item {
+                                            Text(
+                                                "Herausforderungen von ${
+                                                    user?.userFullname?.split(" ")?.first()
+                                                }",
+                                                style = MaterialTheme.typography.titleMedium
+                                            )
+                                        }
+
+                                        item {
+                                            LazyRow(
+                                                modifier = Modifier.fillMaxWidth()
+                                            ) {
+                                                items(openChallenges) { challenge ->
+
+                                                    if (challenge.friendScore?.resultScore != null) {
+                                                        OpenChallengeCard(
+                                                            challenge = challenge,
+                                                            type = ChallengeType.FRIEND,
+                                                            onClick = {
+                                                                selectedChallenge = challenge
+                                                                coroutineScope.launch { challengeSheetState.show() }
+                                                            },
+
+                                                            )
+                                                        Spacer(modifier = Modifier.size(16.dp))
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
-                                }
-
-                                if (doneChallenges.isNotEmpty()) {
-                                    item {
-                                        Text(
-                                            "Herausforderungen Historie",
-                                            style = MaterialTheme.typography.titleMedium
-                                        )
+                                    } else {
+                                        item {
+                                            NoContentPlaceholder(id = R.drawable.no_open_challenges_placeholder)
+                                        }
                                     }
 
-                                    item {
-                                        LazyRow(
-                                            modifier = Modifier.fillMaxWidth()
-                                        ) {
-                                            items(doneChallenges) { challenge ->
-                                                DoneChallengeCard(challenge = challenge)
-                                                Spacer(modifier = Modifier.size(16.dp))
-                                            }
+                                    if (doneChallenges.isNotEmpty()) {
+                                        item {
+                                            Text(
+                                                "Herausforderungen Historie",
+                                                style = MaterialTheme.typography.titleMedium
+                                            )
                                         }
 
-                                        Spacer(modifier = Modifier.size(16.dp))
+                                        item {
+                                            LazyRow(
+                                                modifier = Modifier.fillMaxWidth()
+                                            ) {
+                                                items(doneChallenges) { challenge ->
+                                                    DoneChallengeCard(
+                                                        challenge = challenge,
+                                                        navigateToUserDetail = { id, user ->
+
+                                                        },
+                                                        navigateToQuizDetail = { subject, focus ->
+                                                            navigateToQuizDetail(subject, focus)
+                                                        }
+                                                    )
+                                                    Spacer(modifier = Modifier.size(16.dp))
+                                                }
+                                            }
+
+                                            Spacer(modifier = Modifier.size(16.dp))
+                                        }
+                                    } else {
+                                        item {
+                                            NoContentPlaceholder(id = R.drawable.no_done_challenges_placeholder)
+                                        }
                                     }
+
                                 }
+
+
                             }
                         }
                     }
@@ -582,11 +625,13 @@ fun UserInfos(user: User?, friendshipStatus: FriendshipStatus, addFriend: (Int) 
 }
 
 @Composable
-fun DoneChallengeCard(challenge: DoneChallenges) {
+fun DoneChallengeCard(challenge: DoneChallenges, navigateToUserDetail: (Int?, User) -> Unit, navigateToQuizDetail: (Subject?, Focus?) -> Unit) {
     Card(
         colors = CardDefaults.cardColors(containerColor = Color(0xFFEAF2FF)),
         shape = RoundedCornerShape(16.dp),
-        modifier = Modifier.width(300.dp)
+        modifier = Modifier
+            .width(300.dp)
+            .clickable { navigateToQuizDetail(challenge.subject, challenge.focus) }
 
     ) {
         Row(
@@ -663,10 +708,27 @@ fun DoneChallengeCard(challenge: DoneChallenges) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+
+                val friendship = challenge.friendship
+                val user = User(
+                    userId = friendship?.friend?.userId,
+                    userName = friendship?.friend?.userName,
+                    userYear = friendship?.friend?.userYear,
+                    userFullname = friendship?.friend?.userFullname,
+                    userClass = friendship?.friend?.userClass,
+                    userType = friendship?.friend?.userType,
+                    userMail = friendship?.friend?.userMail,
+                )
                 Box(
                     modifier = Modifier
                         .size(50.dp)
-                        .background(Color(0xFFEAF2FF), shape = CircleShape),
+                        .background(Color(0xFFEAF2FF), shape = CircleShape)
+                        .clickable {
+                            navigateToUserDetail(
+                                challenge.friendship?.friendshipId,
+                                user
+                            )
+                        },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(

@@ -53,6 +53,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -82,10 +85,13 @@ import coil3.compose.AsyncImage
 import com.example.quizit_android_app.R
 import com.example.quizit_android_app.model.retrofit.AcceptedFriendship
 import com.example.quizit_android_app.model.retrofit.DoneChallenges
+import com.example.quizit_android_app.model.retrofit.Focus
 import com.example.quizit_android_app.model.retrofit.PendingFriendship
 import com.example.quizit_android_app.model.retrofit.Result
+import com.example.quizit_android_app.model.retrofit.Subject
 import com.example.quizit_android_app.model.retrofit.User
 import com.example.quizit_android_app.model.retrofit.UserStatsResponse
+import com.example.quizit_android_app.network.NetworkMonitor
 import com.example.quizit_android_app.ui.home.NoContentPlaceholder
 import kotlinx.coroutines.launch
 
@@ -94,8 +100,15 @@ import kotlinx.coroutines.launch
 @Composable
 fun SocialScreen(
     viewModel: SocialViewModel = hiltViewModel(),
-    navigateToUserDetail: (Int?, User) -> Unit
+    navigateToUserDetail: (Int?, User) -> Unit,
+    navigateToQuizDetail: (Subject?, Focus?) -> Unit,
+    networkMonitor: NetworkMonitor = hiltViewModel()
+
 ) {
+
+    val isConnected = networkMonitor.isConnected
+
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         viewModel.setContent()
@@ -168,6 +181,7 @@ fun SocialScreen(
 
         ) {
             Scaffold(
+                snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
                 contentWindowInsets = WindowInsets(0.dp),
                 topBar = {
                     Column {
@@ -210,9 +224,19 @@ fun SocialScreen(
                                         friendships = friendships,
                                         pendingFriendships = pendingFriendships,
                                         navigateToUserDetail = { friendshipId, user ->
-                                            navigateToUserDetail(friendshipId, user) },
+                                            navigateToUserDetail(friendshipId, user)
+                                        },
                                         acceptFriendship = { isAccept, id ->
-                                            viewModel.acceptFriendship(isAccept, id)
+
+                                            if(!isConnected) {
+                                                coroutineScope.launch {
+                                                    snackbarHostState.showSnackbar("Keine Internetverbindung", "OK", duration = SnackbarDuration.Short)
+                                                }
+                                            } else {
+                                                viewModel.acceptFriendship(isAccept, id)
+
+                                            }
+
                                         }
                                     )
                                     1 -> StatisticsSection(
@@ -220,17 +244,32 @@ fun SocialScreen(
                                         results = results,
                                         stats = stats,
                                         doneChallenges = doneChallenges,
-                                        onStatisticsCardClick = { coroutineScope.launch { statisticsSheetState.show() } }
+                                        onStatisticsCardClick = { coroutineScope.launch { statisticsSheetState.show() } },
+                                        navigateToQuizDetail = { subject, focus ->
+                                            navigateToQuizDetail(subject, focus)
+                                        },
+                                        navigateToUserDetail = { id, user ->
+                                            navigateToUserDetail(id, user)
+                                        }
                                     )
                                 }
 
                                 if (selectedTabIndex == 0) {
                                     FloatingActionButton(
                                         onClick = {
-                                            coroutineScope.launch {
-                                                sheetState.show()
-                                                viewModel.setUsers()
+
+                                            if(!isConnected) {
+                                                coroutineScope.launch {
+                                                    snackbarHostState.showSnackbar("Keine Internetverbindung", "OK", duration = SnackbarDuration.Short)
+                                                }
+                                            } else {
+                                                coroutineScope.launch {
+                                                    sheetState.show()
+                                                    viewModel.setUsers()
+                                                }
+
                                             }
+
                                         },
                                         modifier = Modifier
                                             .align(Alignment.BottomEnd)
@@ -657,7 +696,7 @@ fun PendingFriendshipCard(pendingFriendship: PendingFriendship, navigateToUserDe
                 )
                 Spacer(modifier = Modifier.size(4.dp))
                 Text(
-                    text = pendingFriendship.friend?.userYear.toString()+"xHIT",
+                    text = pendingFriendship.friend?.userClass ?: "",
                     style = MaterialTheme.typography.labelLarge,
                     color = Color(0xFF71727A)
                 )
@@ -705,7 +744,7 @@ fun PendingFriendshipCard(pendingFriendship: PendingFriendship, navigateToUserDe
     }
 }
 @Composable
-fun StatisticsSection(modifier: Modifier, results: List<com.example.quizit_android_app.model.retrofit.Result>,  stats: UserStatsResponse?, doneChallenges: List<DoneChallenges>, onStatisticsCardClick: () -> Unit) {
+fun StatisticsSection(modifier: Modifier, results: List<com.example.quizit_android_app.model.retrofit.Result>, stats: UserStatsResponse?, doneChallenges: List<DoneChallenges>, onStatisticsCardClick: () -> Unit, navigateToQuizDetail: (Subject?, Focus?) -> Unit, navigateToUserDetail: (Int?, User) -> Unit) {
 
 
    LazyColumn(
@@ -742,7 +781,12 @@ fun StatisticsSection(modifier: Modifier, results: List<com.example.quizit_andro
 
                ) {
                    items(results.take(7)) { result ->
-                       ResultCard(result = result)
+                       ResultCard(
+                           result = result,
+                           navigateToQuizDetail = { subject, focus ->
+                               navigateToQuizDetail(subject, focus)
+                           }
+                       )
                        Spacer(modifier = Modifier.size(8.dp))
                    }
                }
@@ -762,7 +806,15 @@ fun StatisticsSection(modifier: Modifier, results: List<com.example.quizit_andro
            } else {
                LazyRow {
                    items(doneChallenges) { doneChallenge ->
-                       DoneChallengeCard(challenge = doneChallenge)
+                       DoneChallengeCard(
+                           challenge = doneChallenge,
+                            navigateToUserDetail = { friendshipId, user ->
+                                 navigateToUserDetail(friendshipId, user)
+                            },
+                            navigateToQuizDetail = { subject, focus ->
+                                navigateToQuizDetail(subject, focus)
+                            }
+                       )
                        Spacer(modifier = Modifier.size(16.dp))
                    }
                }
@@ -1005,11 +1057,12 @@ fun StatisticsCard(onClick: () -> Unit,  stats: UserStatsResponse?) {
 }
 
 @Composable
-fun ResultCard(result: Result) {
+fun ResultCard(result: Result, navigateToQuizDetail: (Subject?, Focus?) -> Unit) {
     Card(
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
-            .width(200.dp),
+            .width(200.dp)
+            .clickable { navigateToQuizDetail(result.subject, result.focus) },
         colors = if(result.subject != null && result.focus == null)  CardDefaults.cardColors(Color(0xFFF8F9FE)) else CardDefaults.cardColors(Color.White)
 
     ) {
