@@ -16,6 +16,7 @@ class GetFocusForSubjectUseCase @Inject constructor(
         return localData.ifEmpty {
             val remoteData = dataRepo.fetchFocusForSubject(subjectId, active)
             contentDataStore.saveFocus(remoteData.focus)
+            Log.d("GetFocusForSubjectUseCase", "remoteData: $remoteData")
             remoteData.focus
         }
     }

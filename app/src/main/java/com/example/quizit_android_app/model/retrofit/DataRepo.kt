@@ -189,7 +189,11 @@ class DataRepo @Inject constructor(private val context: Context) {
                         Log.d("fetchAllFocusOfUser", focus.focusName + " " + focus.focusId)
                     }
                 }
-                FocusResponse("Success", allFocuses)
+                if (allFocuses.isEmpty()) {
+                    FocusResponse()
+                } else {
+                    FocusResponse("Success", allFocuses)
+                }
             } catch (e: Exception) {
                 Log.e("fetchAllFocusOfUser", "Failed to fetch focus", e)
                 FocusResponse()
@@ -209,7 +213,11 @@ class DataRepo @Inject constructor(private val context: Context) {
                         Log.d("fetchFocusForSubject", focus.focusName + " " + focus.focusId)
                     }
                 }
-                response
+                if (response.focus.isNotEmpty()) {
+                    response
+                } else {
+                    FocusResponse("No Data", emptyList())
+                }
             } catch (e: Exception) {
                 Log.e("Retrofit Test FetchFocus", "Failed to fetch focus", e)
                 FocusResponse()
