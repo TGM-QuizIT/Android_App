@@ -10,10 +10,6 @@ import retrofit2.http.Query
 
 
 interface Requests {
-    // ------------------- User Calls -------------------
-    /*@Headers("Content-Type: application/json")
-    @POST("user/login")
-    suspend fun login(@Header("Authorization") authHeader: String, @Body params: RequestBody): LoginResponse*/
 
     @Headers("Content-Type: application/json")
     @POST("user/login")
@@ -27,6 +23,9 @@ interface Requests {
 
     @GET("user/stats")
     suspend fun getUserStats(@Query("id") userId: Int?): UserStatsResponse
+
+    @DELETE("user")
+    suspend fun deleteUser(@Query("id") userId: Int?): StatusResponse
 
 
     // ------------------- Subject Calls -------------------

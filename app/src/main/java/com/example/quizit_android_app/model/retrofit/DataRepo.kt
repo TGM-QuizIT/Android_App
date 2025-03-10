@@ -110,6 +110,22 @@ class DataRepo @Inject constructor(private val context: Context) {
         }
     }
 
+    suspend fun deleteUser(): StatusResponse {
+        return withContext(Dispatchers.IO) {
+            try {
+                val id = sessionManager.getUserId()
+                val response = service.deleteUser(id)
+                withContext(Dispatchers.Main) {
+                    Log.d("deleteUser", "User deleted")
+                }
+                response
+            } catch (e: Exception) {
+                Log.e("deleteUser", "Failed to delete user", e)
+                StatusResponse()
+            }
+        }
+    }
+
 
     // ------------------- Subject Calls -------------------
     suspend fun fetchSubjects(): SubjectsResponse {
