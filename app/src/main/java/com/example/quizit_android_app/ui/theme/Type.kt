@@ -14,6 +14,7 @@ val Roboto = FontFamily(
     Font(R.font.roboto_bold, FontWeight.Bold)
 )
 
+// Definition der Schriftart Poppins
 val Poppins = FontFamily(
     Font(R.font.poppins_semi_bold, FontWeight.SemiBold),
     Font(R.font.poppins_regular, FontWeight.Normal)

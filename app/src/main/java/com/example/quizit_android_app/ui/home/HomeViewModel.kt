@@ -60,7 +60,7 @@ class HomeViewModel @Inject constructor(
 
 
 
-    private fun setContent() {
+    fun setContent() {
         viewModelScope.launch {
             _isLoading = true
             try {
@@ -72,10 +72,8 @@ class HomeViewModel @Inject constructor(
                 }
                 if(_stats == null) _stats = getUserStatsUseCase()
 
-                if(_challenges.isEmpty()) {
-                    _challenges = getChallengesOfUserUseCase().openChallenges
+                _challenges = getChallengesOfUserUseCase().openChallenges
 
-                }
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {

@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.quizit_android_app.model.retrofit.User
 import com.example.quizit_android_app.usecases.user.ChangeUserYearUseCase
+import com.example.quizit_android_app.usecases.user.DeleteUserUseCase
 import com.example.quizit_android_app.usecases.user.GetUserUseCase
 import com.example.quizit_android_app.usecases.user.LogoutUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,6 +18,7 @@ class SettingsViewModel @Inject constructor(
     private val getUserUseCase: GetUserUseCase,
     private val logoutUseCase: LogoutUseCase,
     private val changeUserYearUseCase: ChangeUserYearUseCase,
+    private val deleteUserUseCase: DeleteUserUseCase,
 ): ViewModel() {
 
     private var _user = mutableStateOf<User?>(null)
@@ -70,6 +72,20 @@ class SettingsViewModel @Inject constructor(
             logoutUseCase()
         }
 
+    }
+
+    fun deleteUser() {
+        viewModelScope.launch {
+
+            _isLoading.value = true
+            try {
+                deleteUserUseCase()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                _isLoading.value = false
+            }
+        }
     }
 
 

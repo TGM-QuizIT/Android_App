@@ -176,8 +176,7 @@ fun UserDetailScreen(
                             LazyColumn(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(paddingValues)
-                                    .padding(start = 16.dp),
+                                    .padding(paddingValues),
                                 verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 item {
@@ -204,10 +203,11 @@ fun UserDetailScreen(
                                 } else {
                                     item {
 
+
                                         Box(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(end = 16.dp)
+                                                .padding(horizontal = 16.dp)
                                         ) {
                                             StatisticsCard(
                                                 onClick = { coroutineScope.launch { statisticsSheetState.show() } },
@@ -217,22 +217,27 @@ fun UserDetailScreen(
                                         }
 
                                     }
+                                    item {
+                                        Spacer(modifier = Modifier.size(16.dp))
+                                        Text(
+                                            "Herausforderungen von ${
+                                                user?.userFullname?.split(" ")?.first()
+                                            }",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            modifier = Modifier.padding(horizontal = 16.dp)
+                                        )
+                                    }
 
                                     if (openChallenges.isNotEmpty()) {
-                                        item {
-                                            Text(
-                                                "Herausforderungen von ${
-                                                    user?.userFullname?.split(" ")?.first()
-                                                }",
-                                                style = MaterialTheme.typography.titleMedium
-                                            )
-                                        }
-
                                         item {
                                             LazyRow(
                                                 modifier = Modifier.fillMaxWidth()
                                             ) {
+                                                item {
+                                                    Spacer(modifier = Modifier.size(16.dp))
+                                                }
                                                 items(openChallenges) { challenge ->
+
 
                                                     if (challenge.friendScore?.resultScore != null) {
                                                         OpenChallengeCard(
@@ -255,19 +260,24 @@ fun UserDetailScreen(
                                         }
                                     }
 
-                                    if (doneChallenges.isNotEmpty()) {
-                                        item {
-                                            Text(
-                                                "Herausforderungen Historie",
-                                                style = MaterialTheme.typography.titleMedium
-                                            )
-                                        }
+                                    item {
+                                        Spacer(modifier = Modifier.size(16.dp))
+                                        Text(
+                                            "Herausforderungen Historie",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            modifier = Modifier.padding(horizontal = 16.dp)
+                                        )
+                                    }
 
+                                    if (doneChallenges.isNotEmpty()) {
                                         item {
                                             LazyRow(
                                                 modifier = Modifier.fillMaxWidth()
                                             ) {
-                                                items(doneChallenges) { challenge ->
+                                                item {
+                                                    Spacer(modifier = Modifier.size(16.dp))
+                                                }
+                                                items(doneChallenges.take(7)) { challenge ->
                                                     DoneChallengeCard(
                                                         challenge = challenge,
                                                         navigateToUserDetail = { id, user ->
@@ -410,7 +420,7 @@ fun UserInfos(user: User?, friendshipStatus: FriendshipStatus, addFriend: (Int) 
     Column(
         Modifier
             .fillMaxSize()
-            .padding(end = 16.dp)
+            .padding(horizontal = 16.dp)
     ) {
         Column(
             modifier = Modifier

@@ -45,7 +45,9 @@ object SubjectRoute
 object SettingsRoute
 
 @Serializable
-data class FocusRoute(val subject: Subject) {
+data class FocusRoute(
+    val subject: Subject
+) {
     companion object {
         val typeMap = mapOf(typeOf<Subject>() to CustomNavType.SubjectType)
 

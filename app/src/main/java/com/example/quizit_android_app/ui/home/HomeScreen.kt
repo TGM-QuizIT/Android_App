@@ -1,5 +1,6 @@
 package com.example.quizit_android_app.ui.home
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -91,6 +92,11 @@ fun HomeScreen(
     homeViewModel: HomeViewModel = hiltViewModel(),
     networkMonitor: NetworkMonitor = hiltViewModel()
 ) {
+
+    LaunchedEffect(Unit) {
+        homeViewModel.setContent()
+    }
+
     val subjectList = homeViewModel.subjectList
     val stats = homeViewModel.stats
     val isLoading = homeViewModel.isLoading
@@ -194,7 +200,6 @@ fun HomeScreen(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(top = 16.dp)
-                                .padding(start = 16.dp),
                         ) {
                             item {
                                 SubjectSection(
@@ -265,7 +270,7 @@ fun SubjectSection(subjects: List<Subject>, navigateToSubjects: () -> Unit, navi
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(end = 16.dp)
+                .padding(end = 16.dp, start = 16.dp)
         ) {
             Text(
                 "Deine Fächer",
@@ -288,11 +293,14 @@ fun SubjectSection(subjects: List<Subject>, navigateToSubjects: () -> Unit, navi
             LazyRow(
                 modifier = Modifier.fillMaxWidth(),
             ) {
+                item {
+                    Spacer(modifier = Modifier.size(16.dp))
+                }
                 itemsIndexed(subjects) { index, subject ->
                     SubjectCard(subject = subject, 250.dp, navigateToFocus = { subject ->
                         navigateToFocus(subject)
                     })
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(16.dp))
                 }
             }
 
@@ -312,9 +320,13 @@ fun SubjectCard(subject: Subject, width: Dp, navigateToFocus: (Subject) -> Unit)
         modifier = Modifier
             .then(
                 if (width == 0.dp) {
-                    Modifier.fillMaxWidth().clickable { navigateToFocus(subject) }
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable { navigateToFocus(subject) }
                 } else {
-                    Modifier.width(width).clickable { navigateToFocus(subject) }
+                    Modifier
+                        .width(width)
+                        .clickable { navigateToFocus(subject) }
                 }
             ),
 
@@ -385,7 +397,7 @@ fun ChallengeSection(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(end = 16.dp)
+                .padding(start= 16.dp, end = 16.dp)
         ) {
             Text(
                 "Deine Herausforderungen",
@@ -402,10 +414,23 @@ fun ChallengeSection(
 
         Spacer(modifier = Modifier.size(16.dp))
 
-        if(challenges.isEmpty()) {
-            NoContentPlaceholder(id = R.drawable.no_open_challenges_placeholder)
+        Log.d("ChallengeSection", "Challenges: "+challenges)
+
+
+        if(challenges.filter { it.friendScore?.resultScore != null }.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                NoContentPlaceholder(id = R.drawable.no_open_challenges_placeholder)
+            }
         } else {
             LazyRow {
+                item {
+                    Spacer(modifier = Modifier.width(16.dp))
+                }
                 items(challenges) { challenge ->
 
                     if(challenge.friendScore?.resultScore != null) {
@@ -561,7 +586,8 @@ fun OpenChallengeCard(type: ChallengeType, challenge: OpenChallenges, onClick : 
                             text = String.format("%.1f%%", challenge.friendScore?.resultScore ?: 0.0),
                             color = Color.Black,
                             modifier = Modifier.align(Alignment.Center),
-                            style = MaterialTheme.typography.labelLarge
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold
                         )
 
                     }
@@ -581,7 +607,7 @@ fun StatisticsSection(navigateToStatistics: () -> Unit, stats: UserStatsResponse
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(end = 16.dp)
+            .padding(start = 16.dp, end = 16.dp)
     ) {
 
         if(stats!=null) {
@@ -628,7 +654,7 @@ fun NoInternetPlaceholder(id: Int) {
         contentScale = ContentScale.FillBounds,
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(3200f/2400f)
+            .aspectRatio(3200f / 2400f)
 
     )
 
@@ -644,7 +670,7 @@ fun NoContentPlaceholder(id: Int) {
         contentScale = ContentScale.FillBounds,
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(4800f/2000f)
+            .aspectRatio(4800f / 2000f)
         //Zoom Picture Placeholder
 
     )

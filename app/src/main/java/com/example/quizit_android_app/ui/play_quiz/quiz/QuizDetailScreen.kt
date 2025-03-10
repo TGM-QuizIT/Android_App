@@ -170,11 +170,11 @@ fun QuizDetailScreen(
                         LazyColumn(
                             modifier = Modifier
                                 .padding(paddingValues)
-                                .padding(start = 16.dp, top = 16.dp)
+                                .padding(top = 16.dp)
                         ) {
 
                             item {
-                                Text("Herausforderungen in ${subject?.subjectName}", style = MaterialTheme.typography.titleMedium)
+                                Text("Herausforderungen in ${subject?.subjectName}", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(start = 16.dp))
                                 Spacer(modifier = Modifier.height(16.dp))
 
                                 if(openChallenges.isEmpty()) {
@@ -182,6 +182,10 @@ fun QuizDetailScreen(
 
                                 } else {
                                     LazyRow {
+
+                                        item {
+                                            Spacer(modifier = Modifier.width(16.dp))
+                                        }
                                         items(openChallenges) { openChallenge ->
 
                                             if(openChallenge.friendScore?.resultScore != null)  {
@@ -213,7 +217,7 @@ fun QuizDetailScreen(
 
                             item {
                                 Spacer(modifier = Modifier.height(16.dp))
-                                Text("Herausforderungen Historie", style = MaterialTheme.typography.titleMedium)
+                                Text("Herausforderungen Historie", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(start = 16.dp))
                                 Spacer(modifier = Modifier.height(16.dp))
 
                                 if(doneChallenges.isEmpty()) {
@@ -221,6 +225,9 @@ fun QuizDetailScreen(
 
                                 } else {
                                     LazyRow {
+                                        item {
+                                            Spacer(modifier = Modifier.width(16.dp))
+                                        }
                                         items(doneChallenges) { doneChallenge ->
                                             DoneChallengeCard(
                                                 challenge = doneChallenge,
@@ -241,7 +248,7 @@ fun QuizDetailScreen(
 
                             item {
                                 Spacer(modifier = Modifier.height(16.dp))
-                                Text("Deine Resultate", style = MaterialTheme.typography.titleMedium)
+                                Text("Deine Resultate", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(start = 16.dp))
                                 Spacer(modifier = Modifier.height(16.dp))
                             }
 

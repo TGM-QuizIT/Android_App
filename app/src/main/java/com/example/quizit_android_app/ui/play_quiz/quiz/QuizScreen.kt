@@ -93,7 +93,7 @@ fun QuizScreen(
     Scaffold(
         contentWindowInsets = WindowInsets(0.dp),
         topBar = {
-            if (currentQuestionIndex < questions.size) {
+            if (questions.isEmpty() ||  currentQuestionIndex < questions.size) {
                 QuizTopBar(currentQuestionIndex + 1, questions.size, focus?.focusName, subject?.subjectName, onClick = {
                     quizViewModel.resetQuiz()
                     navigateBack()
@@ -114,40 +114,45 @@ fun QuizScreen(
             Box(modifier = Modifier.fillMaxSize()) {
 
                 if(questions.isEmpty()) {
-                    NoInternetPlaceholder(id = R.drawable.internet_error_placeholder)
-                    return@Box
-                }
 
-                when {
-                    currentQuestionIndex < questions.size -> {
-                        QuizQuestion(
-                            question = questions[currentQuestionIndex],
-                            selectedAnswers = selectedAnswers,
-                            onSelected = { optionId ->
-                                quizViewModel.toggleAnswer(optionId)
-                            },
-                            onNext = { quizViewModel.nextQuestion() },
-                            modifier = Modifier.padding(paddingValues)
-                        )
+                    Box(
+                        modifier = Modifier.align(Alignment.Center)
+                    ) {
+                        NoInternetPlaceholder(id = R.drawable.internet_error_placeholder)
                     }
-                    else -> {
-                        val userScore = quizViewModel.calculateScore()
-                        val userResults = quizViewModel.getResult()
-                        QuizResult(
-                            focus = focus?.focusName,
-                            subject = subject?.subjectName,
-                            score = userScore,
-                            results = userResults,
-                            onCloseResult = { navigateBack() },
-                            navigateToQuizDetail = {
-                                navigateToQuizDetail(subject, focus)
-                            },
-                            onFriendClick = { quizViewModel.challengeFriend(it, focus = focus, subject = subject) },
-                            friendships = friendships,
-                            isModalSheetLoading = isModalSheetLoading,
-                            onChallengeClicked = { quizViewModel.getFriendships() },
-                            challenge = challenge
-                        )
+
+                } else {
+                    when {
+                        currentQuestionIndex < questions.size -> {
+                            QuizQuestion(
+                                question = questions[currentQuestionIndex],
+                                selectedAnswers = selectedAnswers,
+                                onSelected = { optionId ->
+                                    quizViewModel.toggleAnswer(optionId)
+                                },
+                                onNext = { quizViewModel.nextQuestion() },
+                                modifier = Modifier.padding(paddingValues)
+                            )
+                        }
+                        else -> {
+                            val userScore = quizViewModel.calculateScore()
+                            val userResults = quizViewModel.getResult()
+                            QuizResult(
+                                focus = focus?.focusName,
+                                subject = subject?.subjectName,
+                                score = userScore,
+                                results = userResults,
+                                onCloseResult = { navigateBack() },
+                                navigateToQuizDetail = {
+                                    navigateToQuizDetail(subject, focus)
+                                },
+                                onFriendClick = { quizViewModel.challengeFriend(it, focus = focus, subject = subject) },
+                                friendships = friendships,
+                                isModalSheetLoading = isModalSheetLoading,
+                                onChallengeClicked = { quizViewModel.getFriendships() },
+                                challenge = challenge
+                            )
+                        }
                     }
                 }
             }

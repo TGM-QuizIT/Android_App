@@ -524,7 +524,13 @@ fun FriendsSection(
 
         if(friendships.isEmpty()) {
             item {
-                NoFriendsPlaceholder(id = R.drawable.no_friends_placeholder)
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.offset(y= -75.dp)
+
+                ) {
+                    NoFriendsPlaceholder(id = R.drawable.no_friends_placeholder)
+                }
             }
 
         }
@@ -750,7 +756,7 @@ fun StatisticsSection(modifier: Modifier, results: List<com.example.quizit_andro
    LazyColumn(
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, top = 32.dp)
+            .padding(top = 32.dp)
     ) {
        item {
 
@@ -758,7 +764,7 @@ fun StatisticsSection(modifier: Modifier, results: List<com.example.quizit_andro
            Box(
                modifier = Modifier
                    .fillMaxWidth()
-                   .padding(end = 16.dp),
+                   .padding(horizontal = 16.dp),
            ) {
                StatisticsCard(onClick = { onStatisticsCardClick() }, stats = stats)
 
@@ -767,7 +773,7 @@ fun StatisticsSection(modifier: Modifier, results: List<com.example.quizit_andro
 
        }
        item {
-           Text("Quiz Historie", style = MaterialTheme.typography.titleMedium)
+           Text("Quiz Historie", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 16.dp))
            Spacer(modifier = Modifier.size(16.dp))
 
        }
@@ -780,6 +786,9 @@ fun StatisticsSection(modifier: Modifier, results: List<com.example.quizit_andro
                LazyRow(
 
                ) {
+                   item {
+                       Spacer(modifier = Modifier.size(16.dp))
+                   }
                    items(results.take(7)) { result ->
                        ResultCard(
                            result = result,
@@ -798,14 +807,17 @@ fun StatisticsSection(modifier: Modifier, results: List<com.example.quizit_andro
        }
 
        item {
-           Text("Herausforderungen Historie", style = MaterialTheme.typography.titleMedium)
+           Text("Herausforderungen Historie", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 16.dp))
            Spacer(modifier = Modifier.size(16.dp))
 
            if(doneChallenges.isEmpty()) {
                NoContentPlaceholder(id = R.drawable.no_done_challenges_placeholder)
            } else {
                LazyRow {
-                   items(doneChallenges) { doneChallenge ->
+                   item {
+                       Spacer(modifier = Modifier.size(16.dp))
+                   }
+                   items(doneChallenges.take(7)) { doneChallenge ->
                        DoneChallengeCard(
                            challenge = doneChallenge,
                             navigateToUserDetail = { friendshipId, user ->
