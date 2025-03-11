@@ -525,9 +525,6 @@ fun FriendsSection(
         if(friendships.isEmpty()) {
             item {
                 Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.offset(y= -75.dp)
-
                 ) {
                     NoFriendsPlaceholder(id = R.drawable.no_friends_placeholder)
                 }
@@ -582,10 +579,10 @@ fun NoFriendsPlaceholder(id: Int) {
     Image(
         painter = painterResource(id = id),
         contentDescription = "No Content Placeholder",
-        contentScale = ContentScale.FillBounds,
+        contentScale = ContentScale.Crop,
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(2000f / 3200f)
+            .aspectRatio(2000f / 2330f)
     )
 
 }

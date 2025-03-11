@@ -115,6 +115,8 @@ class UserDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             try {
+
+                Log.d("UserDetailViewModel", "User: "+user)
                 _userStats.value = getUserStatsUseCase(user.userId)
             } catch (e: Exception) {
                 e.printStackTrace()

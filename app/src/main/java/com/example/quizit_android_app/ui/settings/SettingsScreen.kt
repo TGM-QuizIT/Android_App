@@ -107,6 +107,7 @@ fun SettingsScreen(
                     } else {
                         coroutineScope.launch {
                             snackbarHostState.showSnackbar("Keine Internetverbindung", "OK", duration = SnackbarDuration.Short)
+                            sheetState.hide()
                         }
                     }
                 }

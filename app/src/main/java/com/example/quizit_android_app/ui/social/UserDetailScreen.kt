@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -452,8 +454,8 @@ fun UserInfos(user: User?, friendshipStatus: FriendshipStatus, addFriend: (Int) 
                     Button(
                         onClick = { addFriend(user?.userId!!) },
                         modifier = Modifier
-                            .padding(8.dp)
-                            .width(170.dp),
+                            .width(200.dp)
+                            .padding(8.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.White,
                             contentColor = Color.Black
@@ -491,8 +493,8 @@ fun UserInfos(user: User?, friendshipStatus: FriendshipStatus, addFriend: (Int) 
                             contentColor = Color.White
                         ),
                         modifier = Modifier
-                            .padding(8.dp)
-                            .width(170.dp),
+                            .width(200.dp)
+                            .padding(8.dp),
                         shape = RoundedCornerShape(16.dp)
 
                     ) {
@@ -523,8 +525,8 @@ fun UserInfos(user: User?, friendshipStatus: FriendshipStatus, addFriend: (Int) 
                     Button(
                         onClick = {  },
                         modifier = Modifier
-                            .padding(8.dp)
-                            .width(170.dp),
+                            .width(200.dp)
+                            .padding(8.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFFEAF2FF),
                             contentColor = Color.Black
@@ -560,8 +562,8 @@ fun UserInfos(user: User?, friendshipStatus: FriendshipStatus, addFriend: (Int) 
                     Button(
                         onClick = { acceptFriendship() },
                         modifier = Modifier
-                            .padding(8.dp)
-                            .width(170.dp),
+                            .width(200.dp)
+                            .padding(8.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF0DE334),
                             contentColor = Color.White
@@ -594,13 +596,11 @@ fun UserInfos(user: User?, friendshipStatus: FriendshipStatus, addFriend: (Int) 
 
                     Button(
                         onClick = { removeFriendship() },
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .width(170.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFFFF3B30),
                             contentColor = Color.White
                         ),
+                        modifier = Modifier.size(200.dp),
                         shape = RoundedCornerShape(16.dp),
                         border = BorderStroke(1.5.dp, Color.Black)
 

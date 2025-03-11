@@ -2,8 +2,11 @@ package com.example.quizit_android_app.ui.login
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
+import com.example.quizit_android_app.navigation.LoginRoute
 import com.example.quizit_android_app.usecases.user.LoginUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -11,6 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val loginUseCase: LoginUseCase,
 
     ): ViewModel() {
@@ -29,6 +33,15 @@ class LoginViewModel @Inject constructor(
 
     private var _errorMessage = mutableStateOf("")
     val errorMessage: State<String> = _errorMessage
+
+    init {
+        val isUserBlocked = savedStateHandle.toRoute<LoginRoute>().isUserBlocked
+
+        if(isUserBlocked) {
+            _errorMessage.value = "Dein Account ist blockiert, wende dich an deinen KV!"
+        }
+
+    }
 
 
     public fun setPasswordVisibility() {

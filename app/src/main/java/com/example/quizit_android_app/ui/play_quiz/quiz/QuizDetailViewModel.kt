@@ -91,19 +91,19 @@ class QuizDetailViewModel @Inject constructor(
 
                 if (_subject != null) {
                     val challenges =
-                        getChallengesForSubjectUseCase(subjectId = subject?.subjectId!!)
+                        getChallengesForSubjectUseCase(subjectId = subject?.subjectId)
                     _openChallenges = challenges.openChallenges
                     _doneChallenges = challenges.doneChallenges
 
-                    _results = getResultsSubjectUseCase(subject.subjectId)
+                    _results = getResultsSubjectUseCase(subject?.subjectId!!)
                 } else {
 
                     _subject = getSubjectForFocusIDUseCase(focus?.focusId!!)
-                    val challenges = getChallengesForSubjectUseCase(focusId = focus?.focusId!!)
+                    val challenges = getChallengesForSubjectUseCase(focusId = focus.focusId)
                     _openChallenges = challenges.openChallenges
                     _doneChallenges = challenges.doneChallenges
 
-                    _results = getResultsFocusUseCase(focus.focusId!!)
+                    _results = getResultsFocusUseCase(focus?.focusId!!)
 
                 }
 

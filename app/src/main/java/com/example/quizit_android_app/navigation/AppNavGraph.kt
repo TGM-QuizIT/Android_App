@@ -28,6 +28,7 @@ import com.example.quizit_android_app.ui.quiz.QuizScreen
 import com.example.quizit_android_app.ui.settings.SettingsScreen
 import com.example.quizit_android_app.ui.social.SocialScreen
 import com.example.quizit_android_app.ui.social.UserDetailScreen
+import com.example.quizit_android_app.usecases.user.IsUserBlockedUseCase
 import kotlinx.serialization.Serializable
 import kotlin.reflect.typeOf
 
@@ -36,7 +37,9 @@ import kotlin.reflect.typeOf
 object HomeRoute
 
 @Serializable
-object LoginRoute
+data class LoginRoute(
+    val isUserBlocked: Boolean = false
+)
 
 @Serializable
 object SubjectRoute
@@ -120,19 +123,21 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
 
     val isLoggedIn = viewModel.isLoggedIn.value
 
+    val isUserBlocked = viewModel.isUserBlocked.value
+
     LaunchedEffect(isLoggedIn) {
-        if (isLoggedIn) {
+        if (isLoggedIn && !isUserBlocked) {
             navController.navigate(HomeRoute) {
                 popUpTo(HomeRoute) { inclusive = true }
             }
         } else {
-            navController.navigate(LoginRoute) {
-                popUpTo(LoginRoute) { inclusive = true }
+            navController.navigate(LoginRoute(isUserBlocked = isUserBlocked)) {
+                popUpTo(LoginRoute(isUserBlocked=isUserBlocked)) { inclusive = true }
             }
         }
     }
 
-    NavHost(navController = navController, startDestination = if (isLoggedIn) HomeRoute else LoginRoute) {
+    NavHost(navController = navController, startDestination = if (isLoggedIn && !isUserBlocked) HomeRoute else LoginRoute(isUserBlocked)) {
         composable<HomeRoute> {
             HomeScreen(
                 navigateToSubject ={
@@ -188,8 +193,6 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
                     Log.d("AppNavGraph", QuizDetailRoute(focus, subject).toString())
                     navController.navigate(QuizDetailRoute(focus, subject))
                 },
-
-
             )
         }
 

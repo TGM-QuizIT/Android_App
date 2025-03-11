@@ -6,9 +6,11 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.example.quizit_android_app.model.retrofit.OpenChallenges
 import com.example.quizit_android_app.model.retrofit.Subject
 import com.example.quizit_android_app.model.retrofit.UserStatsResponse
+import com.example.quizit_android_app.navigation.HomeRoute
 import com.example.quizit_android_app.usecases.challenge.DeleteChallengeUseCase
 import com.example.quizit_android_app.usecases.challenge.GetChallengesOfUserUseCase
 import com.example.quizit_android_app.usecases.localdata.challenge.SyncLocalDoneChallengesUseCase
@@ -51,7 +53,6 @@ class HomeViewModel @Inject constructor(
 
     private var _challenges by mutableStateOf(listOf<OpenChallenges>())
     val challenges: List<OpenChallenges> get() = _challenges
-
 
     init {
         setContent()

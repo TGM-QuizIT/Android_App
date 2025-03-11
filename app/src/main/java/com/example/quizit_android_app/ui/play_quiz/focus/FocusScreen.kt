@@ -233,7 +233,7 @@ fun FocusCard(
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 16.dp)
+            .padding(vertical = 8.dp,)
             .clickable { navigateToQuizDetail(subject, focus) },
         colors = CardDefaults.cardColors(
             containerColor = if (type == CardType.Subject) Color(0xFFEAF2FF) else Color(0xFFF8F9FE),
@@ -244,7 +244,7 @@ fun FocusCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
+                .padding(start = 20.dp, top = 16.dp, bottom = 8.dp, end = 16.dp)
                 .wrapContentHeight(Alignment.CenterVertically),
         ) {
             Text(
@@ -260,7 +260,8 @@ fun FocusCard(
             )
 
             Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround,
             ) {
 
 
