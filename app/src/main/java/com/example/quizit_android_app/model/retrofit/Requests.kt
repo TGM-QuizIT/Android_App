@@ -27,6 +27,9 @@ interface Requests {
     @DELETE("user")
     suspend fun deleteUser(@Query("id") userId: Int?): StatusResponse
 
+    @GET("user/blocked")
+    suspend fun isUserBlocked(@Query("id") userId: Int?): UserBlockedResponse
+
 
     // ------------------- Subject Calls -------------------
     @GET("subject")

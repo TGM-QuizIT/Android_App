@@ -27,7 +27,7 @@ class GetFriendshipStatusUseCase @Inject constructor(
                 FriendshipStatus.PENDING
             }
         }
-        throw IllegalArgumentException("Friendship ID not found")
+        return FriendshipStatus.NONE
     }
 }
 

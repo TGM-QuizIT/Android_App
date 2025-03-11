@@ -58,6 +58,11 @@ data class Stats (
     @SerializedName("winRate"   ) var winRate   : Double?    = null
 )
 
+data class UserBlockedResponse (
+    @SerializedName("status"  ) var status  : String?  = null,
+    @SerializedName("blocked" ) var blocked : Boolean? = null
+)
+
 
 // ------------------- Subject Dataclasses -------------------
 @kotlinx.serialization.Serializable

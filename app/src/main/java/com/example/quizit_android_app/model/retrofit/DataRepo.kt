@@ -126,6 +126,22 @@ class DataRepo @Inject constructor(private val context: Context) {
         }
     }
 
+    suspend fun isUserBlocked(): UserBlockedResponse {
+        return withContext(Dispatchers.IO) {
+            try {
+                val id = sessionManager.getUserId()
+                val response = service.isUserBlocked(id)
+                withContext(Dispatchers.Main) {
+                    Log.d("isUserBlocked", "User blocked: ${response.blocked}")
+                }
+                response
+            } catch (e: Exception) {
+                Log.e("isUserBlocked", "Failed to check if user is blocked", e)
+                UserBlockedResponse()
+            }
+        }
+    }
+
 
     // ------------------- Subject Calls -------------------
     suspend fun fetchSubjects(): SubjectsResponse {
