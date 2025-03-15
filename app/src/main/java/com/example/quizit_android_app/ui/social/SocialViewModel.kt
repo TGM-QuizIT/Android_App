@@ -122,6 +122,7 @@ class SocialViewModel @Inject constructor(
                     _doneChallenges.value = getDoneChallengesUseCase().doneChallenges
                 }
             } catch (e: Exception) {
+                Log.e("SocialViewModel", "setContent: Error", e)
                 //TODO Error handling
             } finally {
                 _isLoading.value = false
