@@ -106,12 +106,14 @@ class ContentDataStore @Inject constructor(private val context: Context)  {
     }
 
     suspend fun getDoneChallenges(): List<DoneChallenges> {
-        return dataStore.data
+        val resp = dataStore.data
             .map { preferences ->
                 preferences[DONE_CHALLENGES_KEY]?.let {
                     gson.fromJson(it, Array<DoneChallenges>::class.java)?.toList() ?: emptyList()
                 } ?: emptyList()
             }.first()
+        Log.d("ContentDataStore", "getDoneChallenges: $resp")
+        return resp
     }
 
     suspend fun saveStats(stats: Stats?) {
