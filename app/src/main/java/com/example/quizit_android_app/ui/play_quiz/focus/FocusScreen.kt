@@ -51,13 +51,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.SavedStateHandle
 import coil3.compose.AsyncImage
 import com.example.quizit_android_app.R
+import com.example.quizit_android_app.model.retrofit.DataRepo
 import com.example.quizit_android_app.model.retrofit.Subject
 import com.example.quizit_android_app.model.retrofit.Focus
 import com.example.quizit_android_app.network.NetworkMonitor
 import com.example.quizit_android_app.ui.home.NoContentPlaceholder
 import com.example.quizit_android_app.ui.theme.Typography
+import com.example.quizit_android_app.usecases.focus.GetFocusForSubjectUseCase
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)

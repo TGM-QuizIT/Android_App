@@ -10,7 +10,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.example.quizit_android_app.model.retrofit.DoneChallenges
+import com.example.quizit_android_app.model.retrofit.Focus
+import com.example.quizit_android_app.model.retrofit.Friend
+import com.example.quizit_android_app.model.retrofit.FriendScore
+import com.example.quizit_android_app.model.retrofit.Friendship
 import com.example.quizit_android_app.model.retrofit.OpenChallenges
+import com.example.quizit_android_app.model.retrofit.Score
+import com.example.quizit_android_app.model.retrofit.Stats
+import com.example.quizit_android_app.model.retrofit.Subject
 import com.example.quizit_android_app.model.retrofit.User
 import com.example.quizit_android_app.model.retrofit.UserStatsResponse
 import com.example.quizit_android_app.navigation.UserDetailRoute
@@ -88,6 +95,7 @@ class UserDetailViewModel @Inject constructor(
             try {
 
                 _friendshipStatus.value = getFriendshipStatusUseCase(friendshipId)
+                _friendshipStatus.value = FriendshipStatus.FRIENDS
                 Log.d("UserDetailViewModel", "FriendshisaddasadsadspId: "+friendshipId)
                 val challenges = getChallengesOfFriendshipUseCase(friendshipId)
                 Log.d("UserDetailViewModel", "Challenges: "+challenges)
@@ -97,6 +105,7 @@ class UserDetailViewModel @Inject constructor(
                 _openChallenges.value = openChallenges
                 _doneChallenges.value = doneChallenges
                 _userStats.value = getUserStatsUseCase(user.userId)
+
 
 
             } catch (e: Exception) {

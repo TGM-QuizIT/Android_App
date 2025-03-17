@@ -22,6 +22,7 @@ class FocusViewModel @Inject constructor(
     private val getFocusForSubjectUseCase: GetFocusForSubjectUseCase,
     private val syncLocalFocusUseCase: SyncLocalFocusUseCase
 ): ViewModel() {
+
     private var _focusList by mutableStateOf(listOf<Focus>())
     val focusList: List<Focus> get() = _focusList
 
@@ -48,6 +49,7 @@ class FocusViewModel @Inject constructor(
             try {
                 if(_focusList.isEmpty()) {
                     _focusList = getFocusForSubjectUseCase(id)
+                    Log.d("FocusViewModel", "FocusList: "+_focusList)
                 }
                 _overallQuestionCount.value = getQuestionCount()
 

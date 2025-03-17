@@ -20,16 +20,13 @@ import com.example.quizit_android_app.navigation.QuizRoute
 import com.example.quizit_android_app.ui.login.LoginScreen
 
 @Composable
-fun MainScreen(
-    viewModel: MainViewModel = hiltViewModel()
-) {
+fun MainScreen() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
     Scaffold(
         bottomBar = {
             val routes = listOf(LoginRoute::class, QuizRoute::class)
-
 
             if(
                 currentDestination != null &&
@@ -41,14 +38,10 @@ fun MainScreen(
 
             }
 
-
         }
     ) {
         Box(modifier = Modifier.padding(it)) {
             AppNavGraph(navController = navController)
         }
     }
-
-
-
 }

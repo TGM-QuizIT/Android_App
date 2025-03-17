@@ -139,6 +139,7 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
 
     NavHost(navController = navController, startDestination = if (isLoggedIn && !isUserBlocked) HomeRoute else LoginRoute(isUserBlocked)) {
         composable<HomeRoute> {
+
             HomeScreen(
                 navigateToSubject ={
                     navController.navigate(com.example.quizit_android_app.navigation.SubjectRoute)

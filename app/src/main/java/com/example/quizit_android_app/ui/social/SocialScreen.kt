@@ -127,7 +127,7 @@ fun SocialScreen(
     val isLoading = viewModel.isLoading
     val isModalSheetLoading = viewModel.isModalSheetLoading
 
-    val stats = viewModel.userStats.value
+    val stats = viewModel.userStats
 
     val sheetState = androidx.compose.material.rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
     val statisticsSheetState = androidx.compose.material.rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)

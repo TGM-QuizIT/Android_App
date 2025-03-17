@@ -4,7 +4,9 @@ import  android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,7 +14,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.toRoute
 import com.example.quizit_android_app.model.retrofit.AcceptedFriendship
 import com.example.quizit_android_app.model.retrofit.DoneChallenges
+import com.example.quizit_android_app.model.retrofit.Focus
+import com.example.quizit_android_app.model.retrofit.Friend
+import com.example.quizit_android_app.model.retrofit.FriendScore
+import com.example.quizit_android_app.model.retrofit.Friendship
 import com.example.quizit_android_app.model.retrofit.PendingFriendship
+import com.example.quizit_android_app.model.retrofit.Result
+import com.example.quizit_android_app.model.retrofit.Score
+import com.example.quizit_android_app.model.retrofit.Stats
+import com.example.quizit_android_app.model.retrofit.Subject
 import com.example.quizit_android_app.model.retrofit.User
 import com.example.quizit_android_app.model.retrofit.UserStatsResponse
 import com.example.quizit_android_app.navigation.SocialRoute
@@ -71,8 +81,8 @@ class SocialViewModel @Inject constructor(
     private var _isModalSheetLoading = mutableStateOf(false)
     val isModalSheetLoading: Boolean get() = _isModalSheetLoading.value
 
-    private var _userStats = mutableStateOf<UserStatsResponse?>(null)
-    val userStats: State<UserStatsResponse?> = _userStats
+    private var _userStats by mutableStateOf<UserStatsResponse?>(null)
+    val userStats: UserStatsResponse? get() = _userStats
 
     //TODO States & Abfrage für Punkte,Level,Score
 
@@ -112,12 +122,12 @@ class SocialViewModel @Inject constructor(
 
                 _pendingFriendship.value = getPendingFriendshipsUseCase()
 
-                if(_userStats.value == null) {
-                    _userStats.value = getUserStatsUseCase()
-                }
+                if(_userStats == null) _userStats = getUserStatsUseCase()
+
                 if(_userResults.value.isEmpty()) {
                     _userResults.value = getResultsUserUseCase()
                 }
+
                 if(_doneChallenges.value.isEmpty()) {
                     _doneChallenges.value = getDoneChallengesUseCase().doneChallenges
                 }
@@ -240,7 +250,7 @@ class SocialViewModel @Inject constructor(
 
                     _userResults.value = getResultsUserUseCase()
                     _doneChallenges.value = getDoneChallengesUseCase().doneChallenges
-                    _userStats.value = getUserStatsUseCase()
+                    _userStats = getUserStatsUseCase()
 
 
                 }

@@ -1,5 +1,6 @@
 package com.example.quizit_android_app.ui.home
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -7,6 +8,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.example.quizit_android_app.model.retrofit.Focus
+import com.example.quizit_android_app.model.retrofit.Friend
+import com.example.quizit_android_app.model.retrofit.FriendScore
+import com.example.quizit_android_app.model.retrofit.Friendship
 import com.example.quizit_android_app.model.retrofit.OpenChallenges
 import com.example.quizit_android_app.model.retrofit.Subject
 import com.example.quizit_android_app.model.retrofit.UserStatsResponse
@@ -73,6 +78,7 @@ class HomeViewModel @Inject constructor(
                 }
                 if(_stats == null) _stats = getUserStatsUseCase()
 
+                Log.d("HomeViewModel", "stats: $_stats")
                 _challenges = getChallengesOfUserUseCase().openChallenges
 
             } catch (e: Exception) {

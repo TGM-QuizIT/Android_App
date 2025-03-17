@@ -10,6 +10,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.quizit_android_app.model.retrofit.AcceptedFriendship
 import com.example.quizit_android_app.model.retrofit.Focus
 import com.example.quizit_android_app.model.retrofit.OpenChallenges
+import com.example.quizit_android_app.model.retrofit.Options
 import com.example.quizit_android_app.model.retrofit.Questions
 import com.example.quizit_android_app.model.retrofit.Result
 import com.example.quizit_android_app.model.retrofit.Subject
@@ -128,6 +129,8 @@ class QuizViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true // Ladezustand aktivieren
             try {
+
+
                 _questions.value = if (isQuizOfSubject) {
                     getQuizOfSubjectUseCase(id!!)
                 } else {
@@ -182,7 +185,7 @@ class QuizViewModel @Inject constructor(
 
         var score = 0f
         val maxScore = questions.value.sumOf { it.options.size } * 0.25f
-        Log.d("", "Max Score: $maxScore")
+
 
         questions.value.forEach { question ->
             val userAnswer = userAnswers.value[question.questionId] ?: emptyList()
@@ -213,8 +216,6 @@ class QuizViewModel @Inject constructor(
         }
 
 
-        // Score als Prozentsatz (0 bis 1)
-        //return (score / maxScore).coerceIn(0f, 1f)
         return score/totalQuestions;
     }
 

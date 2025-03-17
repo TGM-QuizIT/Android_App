@@ -38,7 +38,7 @@ class MainViewModel @Inject constructor(
             if(response.status == "Success") {
 
                 Log.d("MainViewModel", ""+response.blocked)
-                _isUserBlocked.value = response.blocked == true
+                _isUserBlocked.value = response.blocked ?: false
             }
         }
     }

@@ -454,7 +454,7 @@ fun ChallengeSection(
 @Composable
 fun OpenChallengeCard(type: ChallengeType, challenge: OpenChallenges, onClick : () -> Unit) {
 
-
+    Log.d("OpenChallengeCard", "Challenge: "+challenge)
     Card(
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier

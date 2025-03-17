@@ -37,8 +37,6 @@ fun BottomBar(navController: NavHostController) {
         modifier = Modifier
             .border(BorderStroke(1.dp, Color.LightGray)),
         containerColor = Color.White
-
-
     ) {
         screens.forEach { screen ->
             NavigationBarItem(
@@ -47,7 +45,22 @@ fun BottomBar(navController: NavHostController) {
                     it.hasRoute(route = screen.route::class)
                 }==true,
                 onClick = { navController.navigate(screen.route) },
-                icon =  { Icon(imageVector = screen.icon, contentDescription = "Navigation icon") },
+                icon =  {
+                    Icon(
+                        imageVector = if (currentDestination?.hierarchy?.any {
+                            it.hasRoute(route = screen.route::class)
+                        }==true) screen.filledIcon else screen.icon,
+                        contentDescription = screen.title,
+                    )
+                },
+
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = Color.Black,
+                    unselectedIconColor = Color.Gray,
+                    selectedTextColor = Color.Black,
+                    unselectedTextColor = Color.Gray,
+                    indicatorColor = Color.Transparent
+                )
             )
         }
     }

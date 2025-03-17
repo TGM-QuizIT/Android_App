@@ -11,8 +11,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.toRoute
 import com.example.quizit_android_app.model.retrofit.DoneChallenges
 import com.example.quizit_android_app.model.retrofit.Focus
+import com.example.quizit_android_app.model.retrofit.Friend
+import com.example.quizit_android_app.model.retrofit.FriendScore
+import com.example.quizit_android_app.model.retrofit.Friendship
 import com.example.quizit_android_app.model.retrofit.OpenChallenges
 import com.example.quizit_android_app.model.retrofit.Result
+import com.example.quizit_android_app.model.retrofit.Score
 import com.example.quizit_android_app.model.retrofit.Subject
 import com.example.quizit_android_app.navigation.QuizDetailRoute
 import com.example.quizit_android_app.usecases.challenge.DeleteChallengeUseCase
@@ -90,12 +94,15 @@ class QuizDetailViewModel @Inject constructor(
             try {
 
                 if (_subject != null) {
-                    val challenges =
-                        getChallengesForSubjectUseCase(subjectId = subject?.subjectId)
+                    val challenges = getChallengesForSubjectUseCase(subjectId = subject?.subjectId)
+
+
+
+
                     _openChallenges = challenges.openChallenges
                     _doneChallenges = challenges.doneChallenges
-
                     _results = getResultsSubjectUseCase(subject?.subjectId!!)
+
                 } else {
 
                     _subject = getSubjectForFocusIDUseCase(focus?.focusId!!)

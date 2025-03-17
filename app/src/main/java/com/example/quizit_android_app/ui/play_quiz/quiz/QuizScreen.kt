@@ -733,7 +733,7 @@ fun QuizResult(
                                 CircularProgressIndicator(
                                     progress = { challenge.friendScore?.resultScore!!.toFloat()/100f  },
                                     modifier = Modifier.fillMaxSize(),
-                                    color = Color(0xFF006FFD),
+                                    color = Color(0xFFFB6E5C),
                                     strokeWidth = 13.dp,
                                     trackColor = Color(0xFFF4F3F6)
 

@@ -301,7 +301,7 @@ fun SubjectResultCard(result: Result, index: Int) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(end = 16.dp)
+            .padding(start= 16.dp, end = 16.dp)
             .background(Color(0xFFEAF2FF), RoundedCornerShape(8.dp))
             .height(70.dp)
 
