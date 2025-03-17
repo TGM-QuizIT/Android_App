@@ -12,7 +12,7 @@ class GetAcceptedFriendshipsUseCase @Inject constructor(
 ) {
     suspend operator fun invoke() : List<AcceptedFriendship> {
         val localData = contentDataStore.getAcceptedFriends()
-        Log.d("GetAcceptedFriendshipsUseCase", "using localData")
+        Log.d("GetAcceptedFriendshipsUseCase", "using localData $localData")
         return localData.ifEmpty {
             val remoteData = dataRepo.fetchAllFriends()
             if (remoteData?.status == "Success") {

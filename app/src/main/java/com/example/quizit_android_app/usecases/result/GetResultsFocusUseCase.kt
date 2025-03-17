@@ -14,7 +14,10 @@ class GetResultsFocusUseCase @Inject constructor(
             .sortedWith(compareByDescending<Result> { it.resultScore }.thenByDescending { it.resultDateTime })
         return localData.ifEmpty {
             val remoteData = dataRepo.fetchResultsOfUser()
-            contentDataStore.saveResults(remoteData)
+            // Save the results to the local storage only when remoteData is not empty
+            if (remoteData.isNotEmpty()) {
+                contentDataStore.saveResults(remoteData)
+            }
             remoteData.filter { it.focus?.focusId == focusId }
                 .sortedWith(compareByDescending<Result> { it.resultScore }.thenByDescending { it.resultDateTime })
         }

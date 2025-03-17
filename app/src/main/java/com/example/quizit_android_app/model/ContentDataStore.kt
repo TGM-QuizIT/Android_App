@@ -1,6 +1,7 @@
 package com.example.quizit_android_app.model
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -47,7 +48,9 @@ class ContentDataStore @Inject constructor(private val context: Context)  {
     suspend fun getSubjects(): List<Subject> {
         return dataStore.data
             .map { preferences ->
-                preferences[SUBJECTS_KEY]?.let { gson.fromJson(it, Array<Subject>::class.java).toList() } ?: emptyList()
+                preferences[SUBJECTS_KEY]?.let {
+                    gson.fromJson(it, Array<Subject>::class.java)?.toList() ?: emptyList()
+                } ?: emptyList()
             }.first()
     }
 
@@ -60,7 +63,9 @@ class ContentDataStore @Inject constructor(private val context: Context)  {
     suspend fun getFocus(): List<Focus> {
         return dataStore.data
             .map { preferences ->
-                preferences[FOCUS_KEY]?.let { gson.fromJson(it, Array<Focus>::class.java).toList() } ?: emptyList()
+                preferences[FOCUS_KEY]?.let {
+                    gson.fromJson(it, Array<Focus>::class.java)?.toList() ?: emptyList()
+                } ?: emptyList()
             }.first()
     }
 
@@ -73,7 +78,9 @@ class ContentDataStore @Inject constructor(private val context: Context)  {
     suspend fun getResults(): List<Result> {
         return dataStore.data
             .map { preferences ->
-                preferences[RESULT_KEY]?.let { gson.fromJson(it, Array<Result>::class.java).toList() } ?: emptyList()
+                preferences[RESULT_KEY]?.let {
+                    gson.fromJson(it, Array<Result>::class.java)?.toList() ?: emptyList()
+                } ?: emptyList()
             }.first()
     }
 
@@ -86,7 +93,9 @@ class ContentDataStore @Inject constructor(private val context: Context)  {
     suspend fun getOpenChallenges(): List<OpenChallenges> {
         return dataStore.data
             .map { preferences ->
-                preferences[OPEN_CHALLENGES_KEY]?.let { gson.fromJson(it, Array<OpenChallenges>::class.java).toList() } ?: emptyList()
+                preferences[OPEN_CHALLENGES_KEY]?.let {
+                    gson.fromJson(it, Array<OpenChallenges>::class.java)?.toList() ?: emptyList()
+                } ?: emptyList()
             }.first()
     }
 
@@ -97,10 +106,14 @@ class ContentDataStore @Inject constructor(private val context: Context)  {
     }
 
     suspend fun getDoneChallenges(): List<DoneChallenges> {
-        return dataStore.data
+        val resp = dataStore.data
             .map { preferences ->
-                preferences[DONE_CHALLENGES_KEY]?.let { gson.fromJson(it, Array<DoneChallenges>::class.java).toList() } ?: emptyList()
+                preferences[DONE_CHALLENGES_KEY]?.let {
+                    gson.fromJson(it, Array<DoneChallenges>::class.java)?.toList() ?: emptyList()
+                } ?: emptyList()
             }.first()
+        Log.d("ContentDataStore", "getDoneChallenges: $resp")
+        return resp
     }
 
     suspend fun saveStats(stats: Stats?) {
@@ -112,7 +125,9 @@ class ContentDataStore @Inject constructor(private val context: Context)  {
     suspend fun getStats(): Stats {
         return dataStore.data
             .map { preferences ->
-                preferences[STATS_KEY]?.let { gson.fromJson(it, Stats::class.java) } ?: Stats()
+                preferences[STATS_KEY]?.let {
+                    gson.fromJson(it, Stats::class.java) ?: Stats()
+                } ?: Stats()
             }.first()
     }
 
@@ -125,7 +140,9 @@ class ContentDataStore @Inject constructor(private val context: Context)  {
     suspend fun getAcceptedFriends(): List<AcceptedFriendship> {
         return dataStore.data
             .map { preferences ->
-                preferences[ACCEPTED_FRIENDS_KEY]?.let { gson.fromJson(it, Array<AcceptedFriendship>::class.java).toList() } ?: emptyList()
+                preferences[ACCEPTED_FRIENDS_KEY]?.let {
+                    gson.fromJson(it, Array<AcceptedFriendship>::class.java)?.toList() ?: emptyList()
+                } ?: emptyList()
             }.first()
     }
 
@@ -138,7 +155,9 @@ class ContentDataStore @Inject constructor(private val context: Context)  {
     suspend fun getPendingFriends(): List<PendingFriendship> {
         return dataStore.data
             .map { preferences ->
-                preferences[PENDING_FRIENDS_KEY]?.let { gson.fromJson(it, Array<PendingFriendship>::class.java).toList() } ?: emptyList()
+                preferences[PENDING_FRIENDS_KEY]?.let {
+                    gson.fromJson(it, Array<PendingFriendship>::class.java)?.toList() ?: emptyList()
+                } ?: emptyList()
             }.first()
     }
 

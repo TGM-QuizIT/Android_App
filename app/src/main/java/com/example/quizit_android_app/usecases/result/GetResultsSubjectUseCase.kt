@@ -14,7 +14,9 @@ class GetResultsSubjectUseCase @Inject constructor(
             .sortedWith(compareByDescending<Result> { it.resultScore }.thenByDescending { it.resultDateTime })
         return localData.ifEmpty {
             val remoteData = dataRepo.fetchResultsOfUser()
-            contentDataStore.saveResults(remoteData)
+            if (remoteData.isNotEmpty()) {
+                contentDataStore.saveResults(remoteData)
+            }
             remoteData.filter { it.subject?.subjectId == subjectId }
                 .sortedWith(compareByDescending<Result> { it.resultScore }.thenByDescending { it.resultDateTime })
         }
