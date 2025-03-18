@@ -27,7 +27,7 @@ class NetworkMonitor @Inject constructor(
         viewModelScope.launch {
             while (true) {
                 _isConnected = isInternetAvailable(application)
-                kotlinx.coroutines.delay(1000)
+                kotlinx.coroutines.delay(3000)
             }
         }
 

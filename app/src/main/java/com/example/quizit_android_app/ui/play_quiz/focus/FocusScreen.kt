@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -129,6 +130,21 @@ fun FocusScreen(
                             text = subject?.subjectName ?: "",
                             style = Typography.titleLarge
                         )
+                    }
+                }
+
+                Box(
+                    Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.CenterEnd,
+                ) {
+                    if (!isConnected) {
+                        Icon(
+                            imageVector = Icons.Default.WifiOff,
+                            contentDescription = "No Internet",
+                            tint = Color.Red,
+                            modifier = Modifier.padding(end = 32.dp)
+
+                            )
                     }
                 }
             }

@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -150,6 +151,21 @@ fun QuizDetailScreen(
                             text = focus?.focusName ?: subject?.subjectName ?: "",
                             style = Typography.titleLarge,
                         )
+                    }
+
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.CenterEnd,
+                    ) {
+                        if (!isConnected) {
+                            Icon(
+                                imageVector = Icons.Default.WifiOff,
+                                contentDescription = "No Internet",
+                                tint = Color.Red,
+                                modifier = Modifier.padding(end = 32.dp)
+
+                                )
+                        }
                     }
                 }
 

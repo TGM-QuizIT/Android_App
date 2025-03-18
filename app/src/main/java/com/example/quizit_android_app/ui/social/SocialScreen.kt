@@ -40,6 +40,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SportsScore
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.outlined.SportsScore
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -185,13 +186,34 @@ fun SocialScreen(
                 contentWindowInsets = WindowInsets(0.dp),
                 topBar = {
                     Column {
-                        Row(
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 16.dp),
-                            horizontalArrangement = Arrangement.Center
+
                         ) {
-                            Text("Social", textAlign = TextAlign.Center, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+                            Box(
+                                Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text("Social", textAlign = TextAlign.Center, style = MaterialTheme.typography.titleLarge)
+                            }
+
+                            Box(
+                                Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.CenterEnd,
+                            ) {
+                                if (!isConnected) {
+                                    Icon(
+                                        imageVector = Icons.Default.WifiOff,
+                                        contentDescription = "No Internet",
+                                        tint = Color.Red,
+                                        modifier = Modifier.padding(end = 32.dp)
+
+                                        )
+
+                                }
+                            }
                         }
 
                         Spacer(modifier = Modifier.size(16.dp))
@@ -224,7 +246,13 @@ fun SocialScreen(
                                         friendships = friendships,
                                         pendingFriendships = pendingFriendships,
                                         navigateToUserDetail = { friendshipId, user ->
-                                            navigateToUserDetail(friendshipId, user)
+                                            if(!isConnected) {
+                                                coroutineScope.launch {
+                                                    snackbarHostState.showSnackbar("Keine Internetverbindung", "OK", duration = SnackbarDuration.Short)
+                                                }
+                                            } else {
+                                                navigateToUserDetail(friendshipId, user)
+                                            }
                                         },
                                         acceptFriendship = { isAccept, id ->
 
