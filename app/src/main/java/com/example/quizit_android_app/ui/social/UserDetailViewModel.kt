@@ -95,8 +95,6 @@ class UserDetailViewModel @Inject constructor(
             try {
 
                 _friendshipStatus.value = getFriendshipStatusUseCase(friendshipId)
-                _friendshipStatus.value = FriendshipStatus.FRIENDS
-                Log.d("UserDetailViewModel", "FriendshisaddasadsadspId: "+friendshipId)
                 val challenges = getChallengesOfFriendshipUseCase(friendshipId)
                 Log.d("UserDetailViewModel", "Challenges: "+challenges)
                 val openChallenges = challenges.openChallenges

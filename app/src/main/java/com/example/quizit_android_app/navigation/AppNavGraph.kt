@@ -125,7 +125,9 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
 
     val isUserBlocked = viewModel.isUserBlocked.value
 
-    LaunchedEffect(isLoggedIn) {
+
+
+    LaunchedEffect(Unit) {
         if (isLoggedIn && !isUserBlocked) {
             navController.navigate(HomeRoute) {
                 popUpTo(HomeRoute) { inclusive = true }
@@ -266,7 +268,10 @@ fun AppNavGraph(navController: NavHostController = rememberNavController(), view
         }
 
         composable<LoginRoute> {
-            LoginScreen(onLoginSuccess = { viewModel.setLoggedIn(true) })
+            LoginScreen(onLoginSuccess = {
+                Log.d("AppNavGraph", "Login Success")
+                viewModel.setLoggedIn(true)
+            })
         }
 
     }
