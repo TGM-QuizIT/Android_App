@@ -568,6 +568,10 @@ fun FriendsSection(
 
         }
 
+        item {
+            Spacer(modifier = Modifier.size(48.dp))
+        }
+
 
 
 

@@ -22,7 +22,7 @@ class DataRepo @Inject constructor(private val context: Context) {
         .build()
 
     private val retrofit = Retrofit.Builder()
-        .baseUrl("http://10.0.104.68:63000/")
+        .baseUrl("http://10.0.105.50:63000/")
         .addConverterFactory(GsonConverterFactory.create())
         .client(client)
         .build()

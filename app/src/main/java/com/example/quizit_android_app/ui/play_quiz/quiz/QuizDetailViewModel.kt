@@ -93,7 +93,9 @@ class QuizDetailViewModel @Inject constructor(
 
             try {
 
-                if (_subject != null) {
+                if (_subject != null && _focus == null) {
+
+                    Log.d("QuizDetailViewModel", "Subject: "+subject)
                     val challenges = getChallengesForSubjectUseCase(subjectId = subject?.subjectId)
 
 

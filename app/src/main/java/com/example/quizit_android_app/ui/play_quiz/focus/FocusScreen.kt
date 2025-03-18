@@ -287,8 +287,18 @@ fun FocusCard(
                     Button(
                         onClick = { ->
                             when (type) {
-                                CardType.Subject -> subject?.subjectId?.let { onQuizStart(subject, null) }
-                                CardType.Focus -> focus?.focusId?.let { onQuizStart(subject, focus) }
+                                CardType.Subject -> {
+                                    if(overallQuestionCount > 0) {
+                                        subject.subjectId.let { onQuizStart(subject, null) }
+                                    }
+                                }
+
+                                CardType.Focus -> {
+                                    if((focus?.questionCount ?: 0) > 0) {
+                                        focus?.focusId?.let { onQuizStart(subject, focus) }
+                                    }
+
+                                }
                             }
                         },
                         shape = RoundedCornerShape(8.dp),
