@@ -181,42 +181,38 @@ class QuizViewModel @Inject constructor(
     fun calculateScore(): Float {
         val totalQuestions = questions.value.size
         if (totalQuestions == 0) return 0f
-
-
         var score = 0f
-        val maxScore = questions.value.sumOf { it.options.size } * 0.25f
-
 
         questions.value.forEach { question ->
             val userAnswer = userAnswers.value[question.questionId] ?: emptyList()
+            val correctOptions = question.options.filter { it.optionCorrect == true }.map { it.optionId }
+            val totalOptions = question.options.size.toFloat()
 
             if (userAnswer.isEmpty()) {
+                // Falls der User nichts auswählt, bleibt der Score für diese Frage bei 0
                 return@forEach
             }
 
-            question.options.forEach { option ->
-
-                Log.d("Score", "Score: $score")
-                if (option.optionCorrect == true) {
-                    score += if (userAnswer.contains(option.optionId)) {
-                        0.25f
-                    } else {
-                        -0.25f
-                    }
-                } else {
-                    score += if (userAnswer.contains(option.optionId)) {
-                        -0.25f
-                    } else {
-                        0.25f
+            if (question.mChoice == true) {
+                // Multiple-Choice-Logik
+                question.options.forEach { option ->
+                    val scoreFactor = 1f/totalOptions
+                    score += when {
+                        option.optionCorrect == true && userAnswer.contains(option.optionId) -> scoreFactor
+                        option.optionCorrect != true && !userAnswer.contains(option.optionId) -> scoreFactor
+                        option.optionCorrect != true && userAnswer.contains(option.optionId) -> -scoreFactor
+                        option.optionCorrect == true && !userAnswer.contains(option.optionId) -> -scoreFactor
+                        else -> 0f
                     }
                 }
-
-
+            } else {
+                // Single-Choice-Logik (genau eine Antwort muss korrekt sein)
+                val selectedOption = userAnswer.firstOrNull()
+                score += if (selectedOption in correctOptions) 1f else 0f
             }
         }
 
-
-        return score/totalQuestions;
+        return maxOf(score/totalQuestions, 0f)
     }
 
 
