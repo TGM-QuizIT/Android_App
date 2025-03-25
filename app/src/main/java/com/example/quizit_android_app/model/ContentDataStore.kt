@@ -33,9 +33,7 @@ class ContentDataStore @Inject constructor(private val context: Context)  {
         val STATS_KEY = stringPreferencesKey("stats")
         val ACCEPTED_FRIENDS_KEY = stringPreferencesKey("accepted_friends")
         val PENDING_FRIENDS_KEY = stringPreferencesKey("pending_friends")
-
         val PENDING_RESULT_KEY = stringPreferencesKey("pending_result")
-
     }
 
     // ------------------- Local UI Elements -------------------

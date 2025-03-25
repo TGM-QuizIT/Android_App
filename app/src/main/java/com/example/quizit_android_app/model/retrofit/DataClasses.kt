@@ -65,7 +65,7 @@ data class UserBlockedResponse (
 
 
 // ------------------- Subject Dataclasses -------------------
-@kotlinx.serialization.Serializable
+@Serializable
 @Parcelize
 data class Subject (
     @SerializedName("subjectId"           ) var subjectId           : Int   = 0,
