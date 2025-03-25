@@ -600,7 +600,7 @@ fun UserInfos(user: User?, friendshipStatus: FriendshipStatus, addFriend: (Int) 
                             containerColor = Color(0xFFFF3B30),
                             contentColor = Color.White
                         ),
-                        modifier = Modifier.size(200.dp),
+                        modifier = Modifier.width(200.dp),
                         shape = RoundedCornerShape(16.dp),
                         border = BorderStroke(1.5.dp, Color.Black)
 
