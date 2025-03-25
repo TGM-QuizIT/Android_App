@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">QuizIT_Android_App</string>
+    <string name="app_name">QuizIT</string>
+    <string name="api_key">2e5c9ed5-c5f5-458a-a1cb-40b6235b052a</string>
 </resources>
